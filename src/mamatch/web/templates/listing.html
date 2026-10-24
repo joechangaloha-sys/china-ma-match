@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
+{% block title %}{{ t.code_name }}{% endblock %}
+{% block body %}
+<p class="small"><a href="/">← 全部项目 All listings</a></p>
+<div class="cols">
+<section>
+  {{ listing_card(card) }}
+  <p class="small muted">详细资料（信息备忘录）在签署保密协议后提供。公司名称在双方同意后披露。<br>
+    The full information memo follows an NDA. The company's name is disclosed once both sides agree.</p>
+</section>
+
+<form class="panel grid" id="inquiry" method="post" action="/listings/{{ t.id }}/inquiry">
+  <h2 class="wide">咨询此项目 Ask about this company</h2>
+  <label>姓名 Your name <input id="name" name="name" required></label>
+  <label>公司或机构 Company or fund <input id="company" name="company"></label>
+  <label>类型 You are
+    <select id="kind" name="kind">{% for k, v in BUYER_KINDS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label>电话或邮箱 Phone or email <input id="contact" name="contact" required></label>
+  <label class="wide">留言 Message <textarea id="message" name="message" placeholder="收购意图、资金安排等 What you are looking for, how you would fund it"></textarea></label>
+  <label class="check wide"><input type="checkbox" name="consent" value="1" required> 同意顾问就此项目与我联系 · I agree to be contacted by the adviser about this listing</label>
+  <div class="wide"><button>提交 Send</button></div>
+</form>
+</div>
+{% endblock %}

@@ -75,6 +75,27 @@ SALE_REASONS = {
 }
 
 
+PAYMENT_TERMS = {
+    "cash": "交割时现金支付 Cash at closing",
+    "cash_earnout": "现金为主，可接受部分对赌/分期 Mostly cash, earn-out or instalments possible",
+    "flexible": "可协商 Open to discussion",
+}
+
+FOUNDER_TRANSITION = {
+    "none": "交割后即退出 Leaves at closing",
+    "6m": "留任约6个月协助交接 Stays about 6 months for handover",
+    "12m": "留任约12个月 Stays about 12 months",
+    "24m": "可留任2年以上 Can stay 2 years or more",
+}
+
+TIMING = {
+    "asap": "尽快 As soon as possible",
+    "6m": "6个月内 Within 6 months",
+    "12m": "12个月内 Within 12 months",
+    "flexible": "不急 No fixed timing",
+}
+
+
 def sector_label(code: str) -> str:
     zh, en, _ = SECTORS.get(code, (code, code, ""))
     return f"{zh} / {en}"

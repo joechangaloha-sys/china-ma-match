@@ -182,8 +182,8 @@ def _setup_prep(session: Session, t: Target, spec: dict) -> None:
     t.financials = {ys[int(k)]: v for k, v in spec["financials"].items()}
     t.disclosures = dict(spec["disclosures"])
     fees.record_prep_pack(t, "PILOT-EX-002")
-    datacheck.run(session, t)
-    infomemo.approve(infomemo.draft(session, t, "zh"))
+    datacheck.run(session, t, use_llm=False)
+    infomemo.approve(infomemo.draft(session, t, "zh", use_llm=False))
     session.flush()
     for m in t.matches:
         if m.stage == "interested":

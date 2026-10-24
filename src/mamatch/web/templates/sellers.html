@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}卖方项目{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ firm.name }}</h1>
+  <p class="sub">卖方项目、挂牌、咨询与交易进度 · Seller mandates, listings, inquiries and deals</p>
+</div>
+
+<section class="panel stats">
+  <div class="stat"><b>{{ counts.targets }}</b><span>卖方项目 Sellers</span></div>
+  <div class="stat"><b>{{ counts.listed }}</b><span>公开挂牌 Listed</span></div>
+  <div class="stat"><b>{{ counts.inquiries }}</b><span>待跟进咨询 New inquiries</span></div>
+  <div class="stat"><b>{{ counts.active }}</b><span>推进中 Active deals</span></div>
+</section>
+
+<section class="panel">
+  <h2>卖方项目 Sellers <a class="small" href="{{ I }}/targets/new">+ 新建 New</a></h2>
+  {% if targets %}
+  <div class="tbl"><table>
+    <tr><th>代号 Code name</th><th>行业 Sector</th><th>省份</th><th class="num">期望价格 Ask (RMB m)</th><th>股权 Stake</th><th>公开 Visibility</th><th class="num">进行中 Active</th></tr>
+    {% for t in targets %}
+    <tr>
+      <td><a href="{{ I }}/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}</td>
+      <td>{{ sector_label(t.sector) }}</td>
+      <td>{{ t.province }}</td>
+      <td class="num">{{ '%g'|format(t.asking_value) if t.asking_value is not none else '—' }}</td>
+      <td class="num">{{ '%g%%'|format(t.stake_pct) if t.stake_pct is not none else DEAL_TYPES.get(t.deal_type, '')[:6] }}</td>
+      <td>{% if t.visibility == 'listed' %}<a class="pill listed" href="/listings/{{ t.id }}" target="_blank" rel="noopener">公开挂牌 Listed ↗</a>{% else %}<span class="pill">私密 Private</span>{% endif %}</td>
+      <td class="num">{{ t.matches|rejectattr('stage', 'in', ['suggested', 'dropped', 'closed'])|list|length }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}
+  <p class="empty">还没有项目。<a href="{{ I }}/targets/new">录入第一个卖方项目</a>，或运行 <code>uv run mamatch init-db --seed</code> 加载示例。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>公开挂牌的新咨询 New inquiries from public listings</h2>
+  {% for m in inquiries %}
+  <div class="row"><a href="{{ I }}/targets/{{ m.target_id }}#matches">{{ m.target.code_name }}</a> ← <b>{{ m.buyer.name }}</b>
+    <span class="muted small">{{ BUYER_KINDS.get(m.buyer.kind, m.buyer.kind) }} · {{ m.buyer.contact_name }} {{ m.buyer.contact_email }}</span>
+    {% if m.events %}<div class="small muted">{{ m.events[-1].note }}</div>{% endif %}</div>
+  {% else %}
+  <p class="empty">暂无。None yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

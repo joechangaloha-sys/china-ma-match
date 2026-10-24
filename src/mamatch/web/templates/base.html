@@ -3,26 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}并购撮合工作台{% endblock %} · mamatch</title>
+<title>{% block title %}企业出售信息{% endblock %} · mamatch</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="{{ portal or 'internal' }}">
 <header class="bar"><div class="in">
   {% if portal == 'seller' %}
-  <span class="brand">mamatch 卖方页面 <span class="muted small">Seller page</span></span>
-  {% elif portal == 'buyer' %}
-  <span class="brand">mamatch 买方页面 <span class="muted small">Buyer page</span></span>
+  <span class="brand">mamatch 卖方页面 <span class="muted small">Your sale, private to you</span></span>
+  {% elif portal == 'public' %}
+  <a class="brand" href="/">mamatch 企业出售信息 <span class="muted small">Companies for sale</span></a>
   {% else %}
-  <a class="brand" href="/">mamatch 并购撮合工作台</a>
+  <a class="brand" href="{{ I }}">mamatch <span class="pill internal-pill">内部 INTERNAL</span></a>
   <nav>
-    <a href="/" class="{{ 'on' if request.url.path == '/' }}">项目 Targets</a>
-    <a href="/buyers" class="{{ 'on' if request.url.path.startswith('/buyers') }}">买方 Buyers</a>
-    <a href="/demand" class="{{ 'on' if request.url.path.startswith('/demand') }}">需求统计 Demand</a>
-    <a href="/pipeline" class="{{ 'on' if request.url.path.startswith('/pipeline') }}">进度 Pipeline</a>
+    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">卖方项目 Sellers</a>
+    <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">交易进度 Pipeline</a>
+    <a href="/" target="_blank" rel="noopener">公开网站 Public site ↗</a>
   </nav>
   {% endif %}
-  <span class="region" title="Production deal data must be hosted in mainland China">{{ region_flag }}</span>
 </div></header>
+{% if portal not in ('public', 'seller') %}
+<div class="internal-banner" role="note">内部页面：仅限顾问使用，不对买方或公众开放 · Internal page for the adviser only, not visible to buyers or the public</div>
+{% endif %}
 <main>
 {% if msg %}<p class="flash" role="status">{{ msg }}</p>{% endif %}
 {% block body %}{% endblock %}

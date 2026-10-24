@@ -80,6 +80,38 @@ def express_interest(session: Session, target: Target, buyer: Buyer) -> Match:
     return m
 
 
+def public_inquiry(session: Session, target: Target, *, name: str, company: str, kind: str, contact: str,
+                   message: str, consent: bool) -> Match:
+    """Someone responds to a public listing. Recorded for the adviser, who screens them before any NDA."""
+    if target.visibility != "listed":
+        raise ValueError("该项目已下架 This listing is no longer available.")
+    if not consent:
+        raise ValueError("请同意顾问就此项目与您联系 Please agree to be contacted about this listing.")
+    if not (name.strip() and contact.strip()):
+        raise ValueError("请填写姓名和电话或邮箱 Please give your name and a phone number or email.")
+    contact = contact.strip()
+    buyer = session.scalar(select(Buyer).where(Buyer.source == "inquiry", Buyer.contact_email == contact))
+    if buyer is None:
+        buyer = Buyer(name=company.strip() or name.strip(), kind=kind, source="inquiry", status="registered",
+                      contact_name=name.strip(), contact_email=contact, target_sectors=[target.sector])
+        session.add(buyer)
+        session.flush()
+    note = f"Inquiry: {message.strip()[:500]}" if message.strip() else "Inquiry"
+    m = session.scalar(select(Match).where(Match.target_id == target.id, Match.buyer_id == buyer.id))
+    if m is None:
+        m = Match(target=target, buyer=buyer, score=matching.score(target, buyer).score, reasons=["Public inquiry"],
+                  channel="listing", stage="interested")
+        session.add(m)
+        session.add(DealEvent(match=m, from_stage="listed", to_stage="interested", note=note))
+    elif m.stage == "dropped":
+        session.add(DealEvent(match=m, from_stage="dropped", to_stage="interested", note=note))
+        m.stage = "interested"
+    else:  # already in progress: keep the stage, log the message
+        session.add(DealEvent(match=m, from_stage=m.stage, to_stage=m.stage, note=note))
+    session.flush()
+    return m
+
+
 def disclose_names(match: Match) -> None:
     if match.stage not in AFTER_NDA:
         raise ValueError("Names are disclosed only after an NDA is signed.")

@@ -17,7 +17,6 @@ header.bar .brand { font-weight: 600; text-decoration: none; color: var(--fg); }
 header.bar nav { display: flex; gap: 18px; flex-wrap: wrap; }
 header.bar nav a { text-decoration: none; color: var(--muted); }
 header.bar nav a.on, header.bar nav a:hover { color: var(--accent); }
-.region { margin-left: auto; font: 12px var(--mono); color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 999px; }
 main { max-width: 1160px; margin: 0 auto; padding: 24px 16px 64px; display: grid; gap: 20px; }
 h1 { font-size: 24px; margin: 0; }
 h2 { font-size: 17px; margin: 0 0 10px; }
@@ -87,3 +86,12 @@ form.grid h2 { margin: 0; }
 .memo p { margin: 4px 0; }
 details summary { cursor: pointer; color: var(--accent); font-size: 14px; margin: 6px 0; }
 button[disabled] { opacity: .45; cursor: not-allowed; }
+.internal-banner { background: var(--warn-soft); color: var(--warn); font-size: 13px; text-align: center; padding: 6px 16px; border-bottom: 1px solid var(--line); }
+.pill.internal-pill { background: var(--warn); color: var(--surface); }
+body.internal header.bar { border-bottom: 2px solid var(--warn); }
+a.button { display: inline-block; background: var(--accent); color: var(--surface); text-decoration: none; border-radius: 4px; padding: 6px 12px; font-size: 14px; justify-self: start; }
+.card-head { display: grid; gap: 2px; }
+.card-head a { text-decoration: none; }
+.ask { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; background: var(--accent-soft); border-radius: 4px; padding: 8px 10px; }
+.ask div { display: grid; gap: 2px; }
+.ask b { font-size: 15px; font-variant-numeric: tabular-nums; }

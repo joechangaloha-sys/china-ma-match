@@ -106,9 +106,16 @@ class Target(Base):
     employees: Mapped[int | None] = mapped_column(Integer, nullable=True)
     revenue: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, last full year
     net_profit: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m
-    asking_value: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, enterprise value
+    asking_value: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, asking price for the stake
     deal_type: Mapped[str] = mapped_column(String(20), default="full_sale")
     sale_reason: Mapped[str] = mapped_column(String(20), default="succession")
+
+    # The seller's ask, shown on the listing in fixed vocabulary (taxonomy.py) so it cannot identify them.
+    stake_pct: Mapped[float | None] = mapped_column(Float, nullable=True)  # share of equity offered
+    payment_terms: Mapped[str] = mapped_column(String(20), default="")
+    founder_transition: Mapped[str] = mapped_column(String(20), default="")
+    keep_employees: Mapped[bool | None] = mapped_column(nullable=True)
+    timing: Mapped[str] = mapped_column(String(20), default="")
 
     # private: not listed; the seller sees demand statistics and approves outreach buyer by buyer.
     # listed: an anonymised card on the board that verified buyers browse.
@@ -121,7 +128,7 @@ class Target(Base):
     prep_pack_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Data the seller submits for the preparation pack. Exact figures: shown to the adviser and, in
-    # the info memo, to buyers after an NDA. Never sent abroad unless config.ALLOW_DATA_EXPORT.
+    # the info memo, to buyers after an NDA.
     financials: Mapped[dict] = mapped_column(JSON, default=dict)  # {"2025": {"revenue": 126.0, ...}, ...}
     disclosures: Mapped[dict] = mapped_column(JSON, default=dict)  # answers to the diligence checklist
     closing_value: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, final deal value

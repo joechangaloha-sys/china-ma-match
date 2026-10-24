@@ -27,12 +27,3 @@ SUCCESS_FEE_MIN_RMB = int(os.environ.get("MAMATCH_SUCCESS_MIN", "300000"))
 PLATFORM_SHARE = float(os.environ.get("MAMATCH_PLATFORM_SHARE", "0.25"))  # of fees the adviser collects
 BUYER_PRIORITY_FEE_RMB = int(os.environ.get("MAMATCH_BUYER_FEE", "30000"))  # per year
 PRIORITY_HEAD_START_DAYS = 7  # priority buyers see new listings this many days before everyone else
-
-# The data check and info memo use the seller's real financials. They go to Claude only when this
-# is "1" (e.g. after PRC counsel approves, or with a mainland-hosted model); otherwise rule-based
-# checks and a template memo are used. Teasers and announcement extraction are unaffected.
-ALLOW_DATA_EXPORT = os.environ.get("MAMATCH_ALLOW_DATA_EXPORT", "0") == "1"
-
-# Production deal data must stay on mainland-China hosting (PIPL / data-export rules).
-# This flag is shown in the UI so a Japan-hosted demo is never mistaken for production.
-DEPLOYMENT_REGION = os.environ.get("MAMATCH_REGION", "demo-local")

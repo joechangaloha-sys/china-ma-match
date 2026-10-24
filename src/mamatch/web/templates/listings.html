@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
+{% block body %}
+<div>
+  <h1>企业出售信息 Companies for sale</h1>
+  <p class="sub">经顾问审核的匿名出售项目，不显示公司名称、城市或准确数字 · Anonymised sale listings reviewed by an adviser. No names, cities or exact figures.</p>
+</div>
+
+<form class="panel inline" method="get">
+  <label>行业 Sector <select id="f_sector" name="sector"><option value="">全部 All</option>
+    {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ sector_label(code) }}</option>{% endfor %}</select></label>
+  <label>地区 Region <select id="f_macro" name="macro"><option value="">全部 All</option>
+    {% for m in MACRO_REGIONS %}<option {{ 'selected' if m == macro }}>{{ m }}</option>{% endfor %}</select></label>
+  <button>筛选 Filter</button>
+</form>
+
+<div class="cards">
+{% for t in rows %}
+  {% call listing_card(cards[t.id], '/listings/%s'|format(t.id)) %}
+    <a class="button" href="/listings/{{ t.id }}#inquiry">咨询此项目 Ask about this company</a>
+  {% endcall %}
+{% else %}
+  <p class="empty">暂无符合条件的项目。No listings match.</p>
+{% endfor %}
+</div>
+{% endblock %}

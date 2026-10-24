@@ -5,13 +5,13 @@ company's identity (names, brands, city, registry code) until the seller approve
 those are masked in the adviser's notes and checked again after drafting. Every IM is a draft until
 the adviser approves it, and states that it was prepared from seller-provided, unaudited data.
 
-Claude writes the narrative only when config.ALLOW_DATA_EXPORT is set; otherwise a template is used.
-The financial table and the disclaimer are always generated here, never by the model.
+Claude writes the narrative when available; otherwise a template is used. The financial table and
+the disclaimer are always generated here, never by the model.
 """
 
 from sqlalchemy.orm import Session
 
-from . import config, llm, reid
+from . import llm, reid
 from .datacheck import FIN_FIELDS, years
 from .models import InfoMemo, Target
 from .teaser import facts
@@ -88,7 +88,7 @@ def _offline(target: Target, f: dict, notes: str, language: str) -> dict:
     return {"overview": overview, "business": business, "operations": operations, "transaction": transaction}
 
 
-def draft(session: Session, target: Target, language: str = "zh") -> InfoMemo:
+def draft(session: Session, target: Target, language: str = "zh", use_llm: bool = True) -> InfoMemo:
     from . import fees
 
     if not fees.prep_pack_paid(target):
@@ -99,7 +99,7 @@ def draft(session: Session, target: Target, language: str = "zh") -> InfoMemo:
     notes = mask(target, target.description or "")
     parts = _offline(target, f, notes, language)
     generated_by = "offline"
-    if config.ALLOW_DATA_EXPORT:
+    if use_llm:
         prompt = (f"Write in {LANGUAGES[language]}.\nFacts: {f}\nFinancials (RMB m): {target.financials}\n"
                   f"Checklist answers: {target.disclosures}\nAdviser notes (masked): {notes}")
         narrative = llm.structured(NARRATIVE_SYSTEM, prompt, NARRATIVE_SCHEMA)

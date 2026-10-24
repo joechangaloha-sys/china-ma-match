@@ -1,73 +1,67 @@
 {% extends "base.html" %}
-{% from "_macros.html" import demand_panel, listing_card, fees_panel, data_form, findings_list, memo_view %}
+{% from "_macros.html" import listing_card, fees_panel, data_form, findings_list, memo_view %}
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
 <div>
+  <p class="small"><a href="{{ I }}">← 卖方项目 Sellers</a></p>
   <h1>{{ t.code_name }} {% if t.is_example %}<span class="pill example">示例 example</span>{% endif %}</h1>
   <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · {{ DEAL_TYPES.get(t.deal_type, t.deal_type) }}
-    · <b>{{ '公开挂牌 Listed' if t.visibility == 'listed' else '私密 Private' }}</b> · {{ SELLER_PLANS[t.seller_plan] }}</p>
+    · <b>{{ '公开挂牌 Listed' if t.visibility == 'listed' else '私密 Private' }}</b></p>
 </div>
 
 <div class="cols">
 <section class="panel private">
-  <h2>项目信息（内部）Target details, internal</h2>
+  <h2>项目信息（内部）Seller details, internal</h2>
   <table class="small">
     <tr><th>公司 Legal name</th><td>{{ t.legal_name }}</td></tr>
     <tr><th>实控人 Owner</th><td>{{ t.owner_name or '—' }}</td></tr>
     <tr><th>城市 City</th><td>{{ t.city or '—' }}</td></tr>
     <tr><th>收入 / 净利 RMB m</th><td class="num">{{ t.revenue if t.revenue is not none else '—' }} / {{ t.net_profit if t.net_profit is not none else '—' }}</td></tr>
-    <tr><th>期望估值 Asking EV</th><td class="num">{{ t.asking_value if t.asking_value is not none else '—' }}</td></tr>
     <tr><th>访谈记录 Notes</th><td>{{ t.description or '—' }}</td></tr>
-  </table>
-</section>
-
-<section class="panel">
-  <h2>可对外信息 Shareable facts</h2>
-  <table class="small">
-    {% for k in ['revenue_band','net_profit_band','valuation_band','employees_band','years_operating','sale_reason'] %}
-    <tr><th>{{ k }}</th><td>{{ facts[k] }}</td></tr>
-    {% endfor %}
   </table>
   <p class="small">卖方专属链接 Seller's private link: <a href="{{ link }}">{{ link }}</a></p>
 </section>
-</div>
 
-<div class="cols" id="listing">
-<section class="panel">
-  <h2>公开方式与方案 Visibility and plan</h2>
-  <p class="small">{% if t.visibility == 'listed' %}已挂牌，已认证买方可浏览（优先会员提前{{ cfg.PRIORITY_HEAD_START_DAYS }}天）。Listed since {{ t.listed_at.strftime('%Y-%m-%d') }}; priority buyers saw it {{ cfg.PRIORITY_HEAD_START_DAYS }} days early.
-    {% else %}私密：不挂牌，只向卖方批准的买方逐一推介。Private: not listed; offers go only to buyers the seller approves.{% endif %}</p>
-  <form class="inline" method="post" action="/targets/{{ t.id }}/visibility">
-    <input type="hidden" name="visibility" value="{{ 'private' if t.visibility == 'listed' else 'listed' }}">
-    <button class="ghost">{{ '撤下 Unlist' if t.visibility == 'listed' else '匿名挂牌 List anonymously' }}</button>
+<section class="panel" id="listing">
+  <h2>交易诉求与公开挂牌 The ask and public listing</h2>
+  <form class="grid" method="post" action="{{ I }}/targets/{{ t.id }}/ask">
+    <label>期望价格 Asking price (RMB m) <input name="asking_value" inputmode="decimal" value="{{ '%g'|format(t.asking_value) if t.asking_value is not none }}"></label>
+    <label>出让股权 Stake offered (%) <input name="stake_pct" inputmode="decimal" value="{{ '%g'|format(t.stake_pct) if t.stake_pct is not none }}" placeholder="100"></label>
+    <label>付款方式 Payment <select name="payment_terms"><option value="">—</option>{% for k, v in PAYMENT_TERMS.items() %}<option value="{{ k }}" {{ 'selected' if k == t.payment_terms }}>{{ v }}</option>{% endfor %}</select></label>
+    <label>创始人交接 Founder <select name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}" {{ 'selected' if k == t.founder_transition }}>{{ v }}</option>{% endfor %}</select></label>
+    <label>保留员工 Keep all staff <select name="keep_employees"><option value="">—</option><option value="yes" {{ 'selected' if t.keep_employees is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if t.keep_employees is sameas false }}>可协商 Negotiable</option></select></label>
+    <label>期望时间 Timing <select name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}" {{ 'selected' if k == t.timing }}>{{ v }}</option>{% endfor %}</select></label>
+    <div class="wide"><button class="ghost">保存诉求 Save the ask</button></div>
   </form>
-</section>
-<section class="panel">
-  <h2>挂牌卡片预览 Listing card</h2>
+  <p class="small">{% if t.visibility == 'listed' %}已公开挂牌（匿名）Listed publicly since {{ t.listed_at.strftime('%Y-%m-%d') }} · <a href="/listings/{{ t.id }}" target="_blank" rel="noopener">查看 View ↗</a>
+    {% else %}私密：不公开，只向卖方批准的买方发送简介 Private: not listed; the teaser goes only to buyers the seller approves.{% endif %}</p>
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/visibility">
+    <input type="hidden" name="visibility" value="{{ 'private' if t.visibility == 'listed' else 'listed' }}">
+    <button class="ghost">{{ '撤下 Unlist' if t.visibility == 'listed' else '匿名公开挂牌 List publicly (anonymised)' }}</button>
+  </form>
+  <h3 class="small">公开卡片预览 Public card preview</h3>
   {{ listing_card(card) }}
 </section>
 </div>
 
 <section class="panel" id="fees">
-  <h2>费用 Fees <span class="muted small">卖方页面显示同一价目表（不含平台分成）· The seller sees the same price list, without the platform share</span></h2>
+  <h2>费用 Fees <span class="muted small">内部 internal</span></h2>
   {{ fees_panel(t, operator=true, closable=t.matches|selectattr('stage', 'equalto', 'closing')|list) }}
 </section>
 
 <section class="panel" id="data">
   <h2>卖方资料与核查 Seller data and check <span class="muted small">出售准备包 preparation pack</span></h2>
   {% if not fees.prep_pack_paid(t) %}<p class="upsell small">资料核查和信息备忘录属于出售准备包。卖方可先提交资料。The data check and info memo come with the preparation pack; the seller can submit data before buying it.</p>{% endif %}
-  <p class="small muted">{{ '已允许将完整数据发送至 Claude' if cfg.ALLOW_DATA_EXPORT else '完整数据不出境：仅使用规则核查和模板备忘录（MAMATCH_ALLOW_DATA_EXPORT 未开启）' }} ·
-    {{ 'Full data may be sent to Claude.' if cfg.ALLOW_DATA_EXPORT else 'Full data stays here: rule-based check and template memo only (MAMATCH_ALLOW_DATA_EXPORT is off).' }}</p>
   <details {{ 'open' if not t.financials }}><summary>资料 Data ({{ t.financials|length }} 年 years)</summary>
-    {{ data_form(t, '/targets/%s/data'|format(t.id)) }}
+    {{ data_form(t, I + '/targets/%s/data'|format(t.id)) }}
   </details>
-  <form class="inline" method="post" action="/targets/{{ t.id }}/datacheck"><button {{ 'disabled' if not fees.prep_pack_paid(t) }}>运行核查 Run data check</button></form>
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/datacheck"><button {{ 'disabled' if not fees.prep_pack_paid(t) }}>运行核查 Run data check</button></form>
   {% if t.data_checks %}{{ findings_list(t.data_checks[0]) }}{% endif %}
 </section>
 
 <section class="panel" id="memo">
   <h2>信息备忘录 Info memo <span class="muted small">签署保密协议后才向买方提供 · goes to buyers only after an NDA</span></h2>
-  <form class="inline" method="post" action="/targets/{{ t.id }}/memo">
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/memo">
     <select name="language" aria-label="Memo language"><option value="zh">中文</option><option value="en">English</option></select>
     <button {{ 'disabled' if not fees.prep_pack_paid(t) }}>生成草稿 Draft info memo</button>
   </form>
@@ -78,7 +72,7 @@
     {% if m.name_findings %}<ul class="findings">{% for f in m.name_findings %}<li>{{ f.message }} <code>{{ f.matched }}</code></li>{% endfor %}</ul>{% endif %}
     <details {{ 'open' if loop.first }}><summary>查看 View</summary>{{ memo_view(m) }}</details>
     {% if m.status != 'approved' and not m.name_findings %}
-    <form class="inline" method="post" action="/memos/{{ m.id }}/approve"><button class="ghost">审核通过 Approve</button></form>
+    <form class="inline" method="post" action="{{ I }}/memos/{{ m.id }}/approve"><button class="ghost">审核通过 Approve</button></form>
     {% endif %}
   </div>
   {% else %}
@@ -86,14 +80,9 @@
   {% endfor %}
 </section>
 
-<section class="panel" id="demand">
-  <h2>买方需求 Buyer demand <span class="muted small">运营方可见全部细分；卖方仅在付费方案下可见 · Sellers see the breakdown only on the paid plan</span></h2>
-  {{ demand_panel(demand, true) }}
-</section>
-
 <section class="panel" id="teasers">
   <h2>匿名简介 Anonymised teasers</h2>
-  <form class="inline" method="post" action="/targets/{{ t.id }}/teaser">
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/teaser">
     <select id="language" name="language" aria-label="Language"><option value="zh">中文</option><option value="ja">日本語</option><option value="en">English</option></select>
     <button>生成草稿 Draft teaser</button>
   </form>
@@ -111,17 +100,17 @@
     <ul class="findings">{% for f in tz.reid_findings %}<li>{{ f.message }} <code>{{ f.matched }}</code></li>{% endfor %}</ul>
     {% endif %}
     {% if tz.status != 'approved' and risk == 'low' %}
-    <form class="inline" method="post" action="/teasers/{{ tz.id }}/approve"><button class="ghost">批准 Approve</button></form>
+    <form class="inline" method="post" action="{{ I }}/teasers/{{ tz.id }}/approve"><button class="ghost">批准 Approve</button></form>
     {% endif %}
   </div>
   {% else %}
-  <p class="empty">还没有简介。Draft one; an approved teaser is needed to list or to send offers.</p>
+  <p class="empty">还没有简介。Draft one; an approved teaser is needed to list publicly or to send it to buyers.</p>
   {% endfor %}
 </section>
 
 <section class="panel" id="matches">
-  <h2>已认证买方匹配 Matches among verified buyers</h2>
-  <form class="inline" method="post" action="/targets/{{ t.id }}/match"><button>重新匹配 Find buyers</button></form>
+  <h2>买方与咨询 Buyers and inquiries <span class="muted small">内部 internal</span></h2>
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/match"><button>匹配已认证买方 Find matching buyers</button></form>
   <p class="small muted">入围后由卖方在其页面逐一批准，批准即发送简介。Shortlisted buyers go to the seller, who approves each one; approval sends the teaser.</p>
   {% if t.matches %}
   <div class="tbl"><table>
@@ -129,41 +118,22 @@
     {% for m in t.matches %}
     <tr>
       <td class="num">{{ '%.2f'|format(m.score) }}</td>
-      <td><a href="/buyers/{{ m.buyer_id }}">{{ m.buyer.name }}</a> {% if m.buyer.is_example %}<span class="pill example">示例</span>{% endif %}
-        {% if m.buyer.plan == 'priority' %}<span class="pill">优先</span>{% endif %}</td>
-      <td><ul class="reasons">{% for r in m.reasons %}<li>{{ r }}</li>{% endfor %}</ul></td>
-      <td class="small">{{ '挂牌意向 board' if m.channel == 'listing' else '推介 offer' }}</td>
+      <td><b>{{ m.buyer.name }}</b> {% if m.buyer.is_example %}<span class="pill example">示例</span>{% endif %}
+        {% if m.buyer.contact_email %}<br><span class="small muted">{{ m.buyer.contact_name }} {{ m.buyer.contact_email }}</span>{% endif %}</td>
+      <td><ul class="reasons">{% for r in m.reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+        {% if m.channel == 'listing' and m.events %}<div class="small muted">{{ m.events[-1].note }}</div>{% endif %}</td>
+      <td class="small">{{ '公开咨询 inquiry' if m.channel == 'listing' else '推介 outreach' }}</td>
       <td>{{ STAGES[m.stage] }}{% if m.stage == 'shortlisted' %}<br><span class="small muted">等待卖方批准 waiting for seller</span>{% endif %}
         {% if m.name_disclosed_at %}<br><span class="pill">已互相披露名称 names disclosed</span>{% endif %}
         {% if m.stage == 'suggested' %}
-        <form class="inline" method="post" action="/matches/{{ m.id }}/move"><input type="hidden" name="to_stage" value="shortlisted"><button class="ghost">入围 Shortlist</button></form>
+        <form class="inline" method="post" action="{{ I }}/matches/{{ m.id }}/move"><input type="hidden" name="to_stage" value="shortlisted"><button class="ghost">入围 Shortlist</button></form>
         {% endif %}
       </td>
     </tr>
     {% endfor %}
   </table></div>
   {% else %}
-  <p class="empty">还没有匹配结果。Click "Find buyers" to rank verified buyers for this target.</p>
-  {% endif %}
-</section>
-
-<section class="panel">
-  <h2>值得邀请的买方 Buyers worth inviting <span class="muted small">尚未注册，来自巨潮资讯公告等 · not registered yet, mostly from CNINFO</span></h2>
-  {% if candidates %}
-  <div class="tbl"><table>
-    <tr><th>分数</th><th>买方 Buyer</th><th>理由 Why</th><th>状态</th></tr>
-    {% for x in candidates %}
-    <tr>
-      <td class="num">{{ '%.2f'|format(x.score) }}</td>
-      <td><a href="/buyers/{{ x.buyer.id }}">{{ x.buyer.name }}</a> <span class="muted small">{{ x.buyer.external_id if x.buyer.source == 'cninfo' }}</span></td>
-      <td><ul class="reasons">{% for r in x.reasons %}<li>{{ r }}</li>{% endfor %}</ul></td>
-      <td>{{ BUYER_STATUSES[x.buyer.status] }}
-        {% if x.buyer.status == 'suggested' %}<form class="inline" method="post" action="/buyers/{{ x.buyer.id }}/invite"><button class="ghost">邀请 Invite</button></form>{% endif %}</td>
-    </tr>
-    {% endfor %}
-  </table></div>
-  {% else %}
-  <p class="empty">没有候选。Run <code>uv run mamatch ingest-cninfo</code> to find listed acquirers.</p>
+  <p class="empty">还没有买方。No buyers yet.</p>
   {% endif %}
 </section>
 {% endblock %}

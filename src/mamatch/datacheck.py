@@ -5,15 +5,15 @@ invoiced revenue (tax exposure on transfer), staff without social insurance, per
 to the founder, customer concentration, related-party revenue, owner guarantees. Each finding
 carries a question the adviser can put to the seller.
 
-Claude reviews the same data only when config.ALLOW_DATA_EXPORT is set (the figures are exact and
-the notes may identify the company); otherwise the rule-based findings stand alone.
+Claude then reviews the same data for anything the rules missed; without Claude the rule-based
+findings stand alone.
 """
 
 from datetime import date
 
 from sqlalchemy.orm import Session
 
-from . import config, llm
+from . import llm
 from .models import DataCheck, Target
 
 FIN_FIELDS = {  # per year, RMB m
@@ -194,14 +194,14 @@ REVIEW_SYSTEM = (
 )
 
 
-def run(session: Session, target: Target) -> DataCheck:
+def run(session: Session, target: Target, use_llm: bool = True) -> DataCheck:
     from . import fees
 
     if not fees.prep_pack_paid(target):
         raise ValueError("The data check is part of the preparation pack.")
     findings = rules(target)
     generated_by = "rules"
-    if config.ALLOW_DATA_EXPORT:
+    if use_llm:
         prompt = (f"Sector: {target.sector}; province: {target.province}; employees: {target.employees}\n"
                   f"Financials (RMB m): {target.financials}\nChecklist: {target.disclosures}\n"
                   f"Adviser notes: {target.description}\nAlready found: {[f['message'] for f in findings]}")
