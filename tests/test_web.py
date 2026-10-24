@@ -353,3 +353,12 @@ def test_portals_in_english(app):
     assert "资料清单" not in seller and "补充问卷" not in seller
     buyer = client(app, BUYER, lang="en-US").get("/buyer").text
     assert "Acquisition thesis" in buyer and "收购方向" not in buyer
+
+
+def test_detailed_search_page(app):
+    c = client(app, lang="en-US")
+    page = c.get("/en/opportunities?q=coatings&revenue_min=20&profitable=yes&reasons=strategic").text
+    assert "Detailed search" in page and "Project Kiln" in page and "Project Delta" not in page
+    assert "1 of 2 listings" in page and "Net margin" in page and "Industrial anti-corrosion coatings" in page
+    zh = client(app).get("/zh/opportunities?margin_min=10").text
+    assert "详细搜索" in zh and "工业防腐涂料" in zh

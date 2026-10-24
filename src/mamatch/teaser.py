@@ -34,6 +34,15 @@ SYSTEM = (
 )
 
 
+# Band edges shared by teasers, listing cards and the public search, so a search can only ever
+# narrow a company to the same band its card already shows. Pilot deals are small (RMB 2–20m).
+REVENUE_EDGES = [5, 10, 20, 50, 100, 200, 500]  # RMB m
+PROFIT_EDGES = [1, 2, 5, 10, 20, 50]  # RMB m
+VALUATION_EDGES = [5, 10, 20, 50, 100]  # RMB m
+EMPLOYEE_EDGES = [10, 20, 50, 100, 300, 1000]
+YEARS_EDGES = [3, 5, 10, 20]
+
+
 def band(value: float | None, edges: list[float], unit: str) -> str:
     """Bucket a figure into a range label, e.g. band(127, [50,100,200], '百万元') -> '100–200百万元'."""
     if value is None:
@@ -56,11 +65,11 @@ def facts(target: Target) -> dict:
         "sector_en": en,
         "province": target.province,
         "region": macro_region(target.province),
-        "revenue_band": band(target.revenue, [20, 50, 100, 200, 500], "百万元"),
-        "net_profit_band": band(target.net_profit, [2, 5, 10, 20, 50], "百万元"),
-        "valuation_band": band(target.asking_value, [20, 50, 100], "百万元"),
-        "employees_band": band(target.employees, [20, 50, 100, 300, 1000], "人"),
-        "years_operating": band(years, [5, 10, 20], "年"),
+        "revenue_band": band(target.revenue, REVENUE_EDGES, "百万元"),
+        "net_profit_band": band(target.net_profit, PROFIT_EDGES, "百万元"),
+        "valuation_band": band(target.asking_value, VALUATION_EDGES, "百万元"),
+        "employees_band": band(target.employees, EMPLOYEE_EDGES, "人"),
+        "years_operating": band(years, YEARS_EDGES, "年"),
         "deal_type": DEAL_TYPES.get(target.deal_type, target.deal_type),
         "sale_reason": SALE_REASONS.get(target.sale_reason, target.sale_reason),
     }

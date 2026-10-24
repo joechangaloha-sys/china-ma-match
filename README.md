@@ -12,7 +12,7 @@ earlier decisions). Current status and next steps: [handoff.md](handoff.md).
 
 | Area | URL | Who | What |
 |---|---|---|---|
-| Public site | `/`, `/opportunities`, `/sell`, `/buy`, `/fees`, `/security` | anyone | How it works, anonymised seller listings (ranges, the seller's ask), seller intake form, anonymous inquiry form. Nothing about buyers is ever public. |
+| Public site | `/`, `/opportunities`, `/sell`, `/buy`, `/fees`, `/security` | anyone | How it works, anonymised seller listings (ranges, product line, the seller's ask) with keyword and detailed search (revenue, profitability, margin, employees, years in business, price, reason for sale, deal type), seller intake form, anonymous inquiry form. Nothing about buyers is ever public. |
 | Seller portal | `/seller` | seller (opened from a one-time invite link) | Progress, document checklist and upload, teaser approval, public listing on/off, approving each buyer, NDA-stage data-room grant and name disclosure, questionnaire, info memo. No plans or demand figures. |
 | Buyer portal | `/buyer` | buyer (self-registers at `/register`) | Acquisition thesis in their own words, AI-structured and confirmed; funding range and evidence; introductions; click-accept NDA; info memo; data-room downloads (logged). |
 | Internal | `/internal/...` | deal managers | Mandates and status, document extraction review, teasers, buyer verification queue, matching with accept/reject reasons, fees, referrals, pipeline, pilot dashboard, audit log. Marked internal on every page. |
@@ -29,6 +29,10 @@ strings are kept, and redirects inside an edition stay in it (`LanguageEditions`
 written bilingually in code and `i18n.tr` / `i18n.val` pick the reader's side; public pages and both portals show
 one language, internal pages stay bilingual for deal managers. The visual style (navy masthead over a brass rule,
 serif headlines, IBM Plex, light only) matches the Japan IR Index house theme.
+
+Detailed search filters only on the bands the cards already show, and on profit and margin only where the seller
+agreed to show earnings; values that are not published band edges are ignored, so searches cannot reveal exact
+figures (`listing.matches`).
 
 ## AI with human control
 

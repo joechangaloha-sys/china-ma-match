@@ -135,7 +135,11 @@ class Target(Base):
     contact_name: Mapped[str] = mapped_column(String(50), default="")  # from the public intake form
     contact_info: Mapped[str] = mapped_column(String(100), default="")
     normalized_earnings: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, adviser-approved
-    show_earnings: Mapped[bool] = mapped_column(default=False)  # seller approved showing the earnings band
+    show_earnings: Mapped[bool] = mapped_column(default=False)  # seller approved showing earnings and margin bands
+    # Seller-approved public description of products and services (no names, brands or customers),
+    # shown on the listing and searched by keyword. Checked for re-identification before publishing.
+    products_zh: Mapped[str] = mapped_column(String(300), default="")
+    products_en: Mapped[str] = mapped_column(String(300), default="")
     prep_pack_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Data the seller submits for the preparation pack. Exact figures: shown to the adviser and, in

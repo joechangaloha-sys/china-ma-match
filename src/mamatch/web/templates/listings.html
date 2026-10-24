@@ -1,18 +1,67 @@
 {% extends "base.html" %}
 {% from "_macros.html" import listing_card with context %}
 {% block title %}{{ T('出售项目', 'Opportunities') }}{% endblock %}
+{% macro money(e) %}{{ T('%g 百万元', 'RMB %gm')|format(e) }}{% endmacro %}
+{% macro edge_select(name, values, current, any_label, fmt) %}
+<select id="{{ name }}" name="{{ name }}"><option value="">{{ any_label }}</option>
+  {% for e in values %}<option value="{{ '%g'|format(e) }}" {{ 'selected' if current and current|float == e }}>{{ fmt(e) }}</option>{% endfor %}</select>
+{% endmacro %}
 {% block body %}
 <div>
   <h1>{{ T('出售项目', 'Opportunities') }}</h1>
   <p class="sub">{{ T('经交易经理审核的匿名出售项目，不显示公司名称、城市或准确数字', 'Anonymised sale listings reviewed by a deal manager. No names, cities or exact figures.') }}</p>
 </div>
-<form class="panel inline" method="get">
-  <label>{{ T('行业', 'Sector') }} <select id="f_sector" name="sector"><option value="">{{ T('全部', 'All') }}</option>
-    {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
-  <label>{{ T('地区', 'Region') }} <select id="f_macro" name="macro"><option value="">{{ T('全部', 'All') }}</option>
-    {% for m in MACRO_REGIONS %}<option value="{{ m }}" {{ 'selected' if m == macro }}>{{ V(m) }}</option>{% endfor %}</select></label>
-  <button>{{ T('筛选', 'Filter') }}</button>
+
+<form class="panel search" method="get" action="{{ P }}/opportunities">
+  <div class="search-row">
+    <label class="grow">{{ T('产品、服务或关键词', 'Products, services or keywords') }}
+      <input id="q" name="q" value="{{ f.q }}" placeholder="{{ T('例如：注塑、检测、冷链物流', 'e.g. injection moulding, testing lab, cold-chain logistics') }}"></label>
+    <label>{{ T('行业', 'Sector') }} <select id="f_sector" name="sector"><option value="">{{ T('全部', 'All') }}</option>
+      {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
+    <label>{{ T('地区', 'Region') }} <select id="f_macro" name="macro"><option value="">{{ T('全部', 'All') }}</option>
+      {% for m in MACRO_REGIONS %}<option value="{{ m }}" {{ 'selected' if m == macro }}>{{ V(m) }}</option>{% endfor %}</select></label>
+    <button>{{ T('搜索', 'Search') }}</button>
+  </div>
+
+  <details class="advanced" {{ 'open' if detailed }}>
+    <summary>{{ T('详细搜索', 'Detailed search') }}</summary>
+    <div class="adv-grid">
+      <fieldset><legend>{{ T('年营业收入', 'Annual revenue') }}</legend>
+        <label>{{ T('从', 'From') }} {{ edge_select('revenue_min', edges.revenue, f.revenue_min, T('不限', 'Any'), money) }}</label>
+        <label>{{ T('到', 'To') }} {{ edge_select('revenue_max', edges.revenue, f.revenue_max, T('不限', 'Any'), money) }}</label>
+      </fieldset>
+      <fieldset><legend>{{ T('盈利情况', 'Profitability') }}</legend>
+        <label class="check"><input type="checkbox" name="profitable" value="yes" {{ 'checked' if f.profitable == 'yes' }}> {{ T('仅显示盈利企业', 'Profitable only') }}</label>
+        <label>{{ T('净利率至少', 'Net margin at least') }}
+          <select id="margin_min" name="margin_min"><option value="">{{ T('不限', 'Any') }}</option>
+            {% for e in edges.margin %}<option value="{{ e }}" {{ 'selected' if f.margin_min and f.margin_min|float == e }}>{{ e }}%</option>{% endfor %}</select></label>
+        <p class="small muted">{{ T('仅包含卖方同意公开利润的项目。', 'Only listings whose sellers agreed to show earnings.') }}</p>
+      </fieldset>
+      <fieldset><legend>{{ T('员工人数', 'Employees') }}</legend>
+        <label>{{ T('从', 'From') }} <select id="employees_min" name="employees_min"><option value="">{{ T('不限', 'Any') }}</option>
+          {% for e in edges.employees %}<option value="{{ e }}" {{ 'selected' if f.employees_min and f.employees_min|float == e }}>{{ e }}</option>{% endfor %}</select></label>
+        <label>{{ T('到', 'To') }} <select id="employees_max" name="employees_max"><option value="">{{ T('不限', 'Any') }}</option>
+          {% for e in edges.employees %}<option value="{{ e }}" {{ 'selected' if f.employees_max and f.employees_max|float == e }}>{{ e }}</option>{% endfor %}</select></label>
+      </fieldset>
+      <fieldset><legend>{{ T('经营年限', 'Years in business') }}</legend>
+        <label>{{ T('至少', 'At least') }} <select id="years_min" name="years_min"><option value="">{{ T('不限', 'Any') }}</option>
+          {% for e in edges.years %}<option value="{{ e }}" {{ 'selected' if f.years_min and f.years_min|float == e }}>{{ T('%d 年', '%d years')|format(e) }}</option>{% endfor %}</select></label>
+      </fieldset>
+      <fieldset><legend>{{ T('期望价格', 'Asking price') }}</legend>
+        <label>{{ T('不超过', 'Up to') }} {{ edge_select('price_max', edges.price, f.price_max, T('不限', 'Any'), money) }}</label>
+      </fieldset>
+      <fieldset class="wide"><legend>{{ T('出售原因', 'Reason for sale') }}</legend>
+        {% for k, v in SALE_REASONS.items() %}<label class="check"><input type="checkbox" name="reasons" value="{{ k }}" {{ 'checked' if k in f.reasons }}> {{ L(v) }}</label>{% endfor %}
+      </fieldset>
+      <fieldset class="wide"><legend>{{ T('交易方式', 'Deal type') }}</legend>
+        {% for k, v in DEAL_TYPES.items() %}<label class="check"><input type="checkbox" name="deal_types" value="{{ k }}" {{ 'checked' if k in f.deal_types }}> {{ L(v) }}</label>{% endfor %}
+      </fieldset>
+    </div>
+    <div class="actions"><button>{{ T('搜索', 'Search') }}</button> <a class="small" href="{{ P }}/opportunities">{{ T('清除条件', 'Clear filters') }}</a></div>
+  </details>
 </form>
+
+<p class="small muted">{{ T('找到 %d 个项目（共 %d 个）', '%d of %d listings')|format(rows|length, total) }}</p>
 <div class="cards">
 {% for r in rows %}
   {% call listing_card(cards[r.id], P ~ '/opportunities/' ~ r.id) %}

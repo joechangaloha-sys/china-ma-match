@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, listing, offers
+from .. import auth, listing, offers, teaser
 from ..buyers import new_token
 from ..models import Buyer, Target, User
 from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
@@ -32,12 +32,24 @@ def home(request: Request, user: User | None = Depends(current_user), s: Session
     return render(request, "home.html", user, portal="public", rows=rows, cards={t.id: listing.card(t) for t in rows})
 
 
+SEARCH_KEYS = ("q", "revenue_min", "revenue_max", "employees_min", "employees_max", "years_min", "price_max",
+               "profitable", "margin_min")
+
+
 @router.get("/opportunities", response_class=HTMLResponse)
 def opportunities(request: Request, sector: str = "", macro: str = "", user: User | None = Depends(current_user),
                   s: Session = Depends(get_session)):
-    rows = listing.public_board(s, sector, macro)
+    qp = request.query_params
+    filters = {k: qp.get(k, "") for k in SEARCH_KEYS}
+    filters["reasons"] = [r for r in qp.getlist("reasons") if r in SALE_REASONS]
+    filters["deal_types"] = [d for d in qp.getlist("deal_types") if d in DEAL_TYPES]
+    rows = listing.public_board(s, sector, macro, **filters)
+    detailed = any(filters[k] for k in SEARCH_KEYS if k != "q") or filters["reasons"] or filters["deal_types"]
     return render(request, "listings.html", user, portal="public", rows=rows,
-                  cards={t.id: listing.card(t) for t in rows}, sector=sector, macro=macro)
+                  cards={t.id: listing.card(t) for t in rows}, sector=sector, macro=macro, f=filters,
+                  detailed=detailed, total=len(listing.public_board(s)),
+                  edges={"revenue": teaser.REVENUE_EDGES, "employees": teaser.EMPLOYEE_EDGES,
+                         "years": teaser.YEARS_EDGES, "price": listing.PRICE_EDGES, "margin": listing.MARGIN_EDGES})
 
 
 def _listed(s: Session, target_id: int) -> Target:

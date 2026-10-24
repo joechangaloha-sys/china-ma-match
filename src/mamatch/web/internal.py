@@ -89,6 +89,8 @@ def _apply_ask(t: Target, f) -> None:
     t.timing = f.get("timing") if f.get("timing") in TIMING else ""
     t.normalized_earnings = num(f.get("normalized_earnings"))
     t.show_earnings = bool(f.get("show_earnings"))
+    t.products_zh = str(f.get("products_zh", "")).strip()[:300]
+    t.products_en = str(f.get("products_en", "")).strip()[:300]
 
 
 @router.post("/targets")

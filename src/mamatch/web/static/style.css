@@ -148,3 +148,12 @@ footer.foot a { color: var(--on-dark); }
 .pill.status-in_market, .pill.status-closed { background: var(--accent); color: var(--surface); }
 .pill.status-matching_paused, .pill.status-withdrawn, .pill.status-rejected { background: var(--bad-soft); color: var(--bad); }
 .pill.status-draft, .pill.status-documents_requested, .pill.status-extraction_review, .pill.status-seller_approval { background: var(--warn-soft); color: var(--warn); }
+.search { display: grid; gap: 12px; }
+.search-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+.search-row .grow { flex: 1 1 260px; }
+.advanced summary { font-weight: 600; letter-spacing: .04em; color: var(--navy); }
+.adv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 10px 0; }
+.adv-grid fieldset { grid-template-columns: 1fr; gap: 8px; }
+.adv-grid fieldset.wide { grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.card-head .small { color: var(--ink-2); }
+.card th { border-bottom: 1px solid var(--rule-hair); color: var(--ink-soft); }

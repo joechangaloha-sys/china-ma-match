@@ -76,6 +76,18 @@ EXAMPLE_TARGETS = [
          description="非标自动化装配线集成商，客户以长三角家电与汽车零部件厂为主。创始人计划三年内退休。"),
 ]
 
+# Public product/service lines and seller-approved earnings for the examples (adviser-written, no names).
+EXAMPLE_PUBLIC = {
+    "Project Jade": dict(products_zh="汽车空调管路及热交换器支架，供应一级汽车零部件供应商",
+                         products_en="Air-conditioning pipes and heat-exchanger brackets for tier-one auto suppliers",
+                         normalized_earnings=11.0, show_earnings=True),
+    "Project Kiln": dict(products_zh="工业防腐涂料配方，用于钢结构和风电塔筒",
+                         products_en="Industrial anti-corrosion coatings for steel structures and wind towers",
+                         normalized_earnings=6.0, show_earnings=True),
+    "Project Delta": dict(products_zh="非标自动化装配线设计与集成，服务家电和汽车零部件工厂",
+                          products_en="Custom automated assembly lines for appliance and auto-parts plants"),
+}
+
 # How each example target is set up for the v2 demo: (visibility, seller plan, listed days ago)
 EXAMPLE_SETUP = {"Project Jade": ("private", "paid", None), "Project Kiln": ("listed", "free", 12),
                  "Project Delta": ("listed", "free", 2)}
@@ -179,6 +191,10 @@ def seed(session: Session) -> None:
                         teaser.seller_approve(tz)
                 t.status = "in_market"
     session.flush()
+    for code, t in have.items():
+        if code in EXAMPLE_PUBLIC and not t.products_zh:
+            for k, v in EXAMPLE_PUBLIC[code].items():
+                setattr(t, k, v)
     _seed_users(session, have)
     for code, t in have.items():
         if t.seller_plan == "paid" and not any(c.kind == "outreach" for c in t.charges):

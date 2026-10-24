@@ -1,7 +1,9 @@
 {% macro listing_card(c, link='') %}
 <div class="card listing">
   <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ c.code_name }}</a>{% else %}{{ c.code_name }}{% endif %}</b>
-    <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span></div>
+    <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span>
+    {% set prod = (c.products_zh if lang == 'zh' else c.products_en) or c.products_zh or c.products_en %}
+    {% if prod %}<span class="small">{{ prod }}</span>{% endif %}</div>
   <div class="ask">
     <div><span class="muted small">{{ T('期望价格', 'Asking price') }}</span><b>{{ V(c.price_band) }}</b></div>
     <div><span class="muted small">{{ T('出让股权', 'Stake') }}</span><b>{{ V(c.stake) }}</b></div>
@@ -9,7 +11,9 @@
   </div>
   <table class="small">
     <tr><th>{{ T('营业收入', 'Revenue') }}</th><td>{{ V(c.revenue_band) }}</td></tr>
+    {% if c.profitable is not none %}<tr><th>{{ T('盈利', 'Profitable') }}</th><td>{{ T('是', 'Yes') if c.profitable else T('否', 'No') }}</td></tr>{% endif %}
     {% if c.earnings_band %}<tr><th>{{ T('调整后利润', 'Normalised earnings') }}</th><td>{{ V(c.earnings_band) }}</td></tr>{% endif %}
+    {% if c.margin_band %}<tr><th>{{ T('净利率', 'Net margin') }}</th><td>{{ c.margin_band }}</td></tr>{% endif %}
     <tr><th>{{ T('员工', 'Staff') }}</th><td>{{ V(c.employees_band) }}</td></tr>
     <tr><th>{{ T('经营年限', 'Operating') }}</th><td>{{ V(c.years_operating) }}</td></tr>
     <tr><th>{{ T('交易范围', 'Perimeter') }}</th><td>{{ L(c.deal_type) }}</td></tr>

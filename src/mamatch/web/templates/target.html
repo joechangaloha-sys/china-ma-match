@@ -42,7 +42,9 @@
     <label>保留员工 Keep all staff <select name="keep_employees"><option value="">—</option><option value="yes" {{ 'selected' if t.keep_employees is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if t.keep_employees is sameas false }}>可协商 Negotiable</option></select></label>
     <label>期望时间 Timing <select name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}" {{ 'selected' if k == t.timing }}>{{ v }}</option>{% endfor %}</select></label>
     <label>调整后利润 Normalised earnings (RMB m) <input name="normalized_earnings" inputmode="decimal" value="{{ '%g'|format(t.normalized_earnings) if t.normalized_earnings is not none }}"></label>
-    <label class="check"><input type="checkbox" name="show_earnings" value="1" {{ 'checked' if t.show_earnings }}> 卖方同意公开利润区间 Seller approved showing the earnings range</label>
+    <label class="check"><input type="checkbox" name="show_earnings" value="1" {{ 'checked' if t.show_earnings }}> 卖方同意公开利润与利润率区间 Seller approved showing earnings and margin ranges</label>
+    <label class="wide">公开产品与服务（中文，不含名称、品牌、客户）Products and services, Chinese, no names, brands or customers <input name="products_zh" maxlength="300" value="{{ t.products_zh }}"></label>
+    <label class="wide">Products and services, English <input name="products_en" maxlength="300" value="{{ t.products_en }}"></label>
     <div class="wide"><button class="ghost">保存 Save</button></div>
   </form>
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/visibility">
