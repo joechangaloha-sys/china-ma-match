@@ -13,7 +13,8 @@
     {% for t in targets %}
     <tr>
       <td><a href="{{ I }}/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}
-        {% if t.contact_info and not t.seller_user_id %}<br><span class="small muted">网站登记 web intake · {{ t.contact_name }} {{ t.contact_info }}</span>{% endif %}</td>
+        {% if t.contact_info and not t.seller_user_id %}<br><span class="small muted">网站登记 web intake · {{ t.contact_name }} {{ t.contact_info }}</span>{% endif %}
+        {% if t.submitted_by == 'adviser' %}<br><span class="pill">顾问代登记 via adviser: {{ t.adviser_firm }}</span>{% endif %}</td>
       <td><span class="pill status-{{ t.status }}">{{ STATUSES[t.status] }}</span></td>
       <td class="small">{{ sector_label(t.sector) }}</td>
       <td>{{ t.province }}</td>

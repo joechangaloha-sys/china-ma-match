@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ T('常见问题', 'FAQ') }}{% endblock %}
+{% macro qa(q_zh, q_en, a_zh, a_en, open=false) %}
+<details {{ 'open' if open }}><summary>{{ T(q_zh, q_en) }}</summary><p>{{ T(a_zh, a_en) }}</p></details>
+{% endmacro %}
+{% block body %}
+<div>
+  <h1>{{ T('常见问题', 'Frequently asked questions') }}</h1>
+  <p class="sub">{{ T('我们为什么做这件事，以及它如何运作', 'Why we do this, and how it works') }}</p>
+</div>
+
+<section class="faq">
+  <h2>{{ T('为什么', 'Why') }}</h2>
+  {{ qa('你们为什么要做这个平台？', 'Why does this marketplace exist?',
+        '第一代企业家建立了大量优秀的中小企业，如今许多人正在考虑退出，而子女未必接班。他们需要一个值得信赖、保密、并能接触到最多合格买方的渠道，以获得更好的价格和更稳妥的交接。我们为此而来。',
+        'A generation of founders built a great many excellent small businesses, and many of them are now thinking about an exit, often without a family successor. They need a channel that is trustworthy, confidential and able to reach the widest field of qualified buyers, so they achieve a better price and a safer handover. That is what we are building.', true) }}
+  {{ qa('“更多买方、有序流程”为什么能带来更好的价值？', 'Why do more buyers and a controlled process lead to better value?',
+        '买方越多，竞争越充分，价格和条款通常越好。有序流程意味着所有买方获得同样准备充分的资料、在同一时间表内出价，卖方可以比较并谈判；提前准备的资料减少尽调中的意外和压价；只与经过核验的买方接触，节省时间并降低泄密风险；创始人还可以按员工安置、品牌延续和交接安排选择最合适的买方。',
+        'More buyers mean real competition, which usually improves price and terms. A controlled process gives every buyer the same well-prepared information on the same timetable, so offers can be compared and negotiated. Preparing documents up front reduces late surprises and price chipping in diligence. Meeting only verified buyers saves time and limits leaks. And founders can choose the buyer that fits best on employees, legacy and handover, not on price alone.') }}
+  {{ qa('“机构级的严谨”指什么？', 'What do you mean by institutional rigour?',
+        '创始人 Joe Chang 拥有国际大型投资银行（bulge bracket）及并购业务经验。大型交易遵循成熟的出售流程：充分准备、匿名简介、经过筛选的买方名单、保密协议、资料室和有序竞争。过去，这样的服务对中小企业来说太贵。我们用 AI 完成大量资料整理、核对、起草和匹配工作，并由专业人员把关，使中小企业也能以合理的价格获得同样受控的流程。',
+        'Our founder, Joe Chang, brings experience from bulge-bracket investment banking and M&A. Large transactions follow a well-tested sale process: thorough preparation, an anonymous teaser, a vetted buyer list, NDAs, a data room and managed competition. That service has always been too expensive for small companies. We use AI for much of the document work, checking, drafting and matching, with experienced people reviewing every step, so small companies get the same controlled process at a reasonable price.') }}
+  {{ qa('AI 会替我做决定吗？', 'Does AI make decisions for me?',
+        '不会。AI 负责读取资料、发现缺口、起草简介和推荐买方；每一个对外发布的内容、每一位被引荐的买方，都由交易经理审核，并经卖方本人同意。AI 不提供估值意见，也不提供法律、税务或投资建议。',
+        'No. AI reads documents, finds gaps, drafts teasers and suggests buyers; every published item and every introduced buyer is reviewed by a deal manager and approved by the seller. AI does not give valuation opinions or legal, tax or investment advice.') }}
+
+  <h2>{{ T('卖方', 'Sellers') }}</h2>
+  {{ qa('我的企业信息会被公开吗？', 'Will my company be identifiable?',
+        '不会。公开页面只显示行业、大区、收入和员工等区间，以及您确认过的产品描述；不显示公司名称、城市、客户或准确数字。买方签署保密协议后才能看到信息备忘录，公司名称在双方同意后才披露。',
+        'No. Public pages show only the sector, broad region, ranges for revenue and staff, and a product description you have approved, never your name, city, customers or exact figures. Buyers see the information memorandum only after signing an NDA, and names are disclosed only when both sides agree.') }}
+  {{ qa('必须公开挂牌吗？', 'Do I have to list publicly?',
+        '不必。您可以选择匿名公开以接触最多的买方，也可以保持不公开，只让您逐一批准的买方收到匿名简介。',
+        'No. You can list anonymously to reach the most buyers, or stay private so that only buyers you approve one by one receive the anonymous teaser.') }}
+  {{ qa('收费如何？', 'What does it cost?',
+        '匿名挂牌免费。出售准备和主动推介按固定价格收费，成交后的费用会抵扣之前已付的费用。详见费用页面。',
+        'Listing anonymously is free. Sale preparation and active outreach are fixed-price, and earlier fees are credited against any completion fee. See the fees page.') }}
+
+  <h2>{{ T('会计师、律师和顾问', 'Accountants, lawyers and advisers') }}</h2>
+  {{ qa('我可以代表客户登记出售信息吗？', 'Can I list a business on behalf of my client?',
+        '可以。在“出售企业”页面选择“我是客户的顾问”，填写您的机构即可。我们会与您和您的客户一起准备资料与简介。',
+        'Yes. On the "Sell" page, choose "I am an adviser to the owner" and give your firm. We prepare the documents and teaser together with you and your client.') }}
+  {{ qa('这会影响我的收费吗？', 'Does this affect my fees?',
+        '不会。您继续按自己的委托协议为客户服务和收费，平台的费用与您的收费分开。客户也会因为您带来了更广的买方渠道而受益。',
+        'No. You keep serving and billing your client under your own engagement; the platform\’s fees are separate from yours. Your client benefits from the wider buyer reach you bring them.') }}
+
+  <h2>{{ T('买方', 'Buyers') }}</h2>
+  {{ qa('海外买方可以参与吗？', 'Can international buyers take part?',
+        '可以。项目、简介和信息备忘录均提供中英文版本，国内与海外买方在同一受控流程中推进。跨境交易涉及的审批与结构安排，会由合作的专业机构协助。',
+        'Yes. Listings, teasers and information memoranda are available in Chinese and English, and domestic and international buyers follow the same controlled process. Approvals and structuring for cross-border deals are handled with partner professionals.') }}
+  {{ qa('买方如何获得项目？', 'How do buyers get access?',
+        '注册并描述您的收购方向和资金情况，经核验后即可申请引荐。签署保密协议后查看信息备忘录，卖方同意后开放资料室。',
+        'Register, describe your acquisition thesis and funding, and once verified you can request introductions. After signing the NDA you receive the information memorandum, and the data room opens with the seller\’s consent.') }}
+</section>
+{% endblock %}

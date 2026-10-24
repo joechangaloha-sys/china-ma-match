@@ -134,6 +134,9 @@ class Target(Base):
     status: Mapped[str] = mapped_column(String(30), default="draft")  # see dealstatus.STATUSES
     contact_name: Mapped[str] = mapped_column(String(50), default="")  # from the public intake form
     contact_info: Mapped[str] = mapped_column(String(100), default="")
+    # The owner's accountant, lawyer or adviser can submit for them and keeps their own engagement.
+    submitted_by: Mapped[str] = mapped_column(String(20), default="owner")  # owner | adviser
+    adviser_firm: Mapped[str] = mapped_column(String(200), default="")
     normalized_earnings: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, adviser-approved
     show_earnings: Mapped[bool] = mapped_column(default=False)  # seller approved showing earnings and margin bands
     # Seller-approved public description of products and services (no names, brands or customers),

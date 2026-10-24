@@ -157,3 +157,10 @@ footer.foot a { color: var(--on-dark); }
 .adv-grid fieldset.wide { grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .card-head .small { color: var(--ink-2); }
 .card th { border-bottom: 1px solid var(--rule-hair); color: var(--ink-soft); }
+.why h3 { font-size: 1.15rem; margin: 18px 0 6px; color: var(--ink); }
+.why p, .why li { color: var(--ink-2); }
+.why ul { padding-left: 20px; display: grid; gap: 4px; }
+.faq details { border-bottom: 1px solid var(--rule-hair); padding: 10px 0; }
+.faq summary { font: 600 1.05rem/1.4 var(--serif); color: var(--ink); cursor: pointer; }
+.faq details p { margin: 8px 0 0; color: var(--ink-2); max-width: 46rem; }
+.faq h2 { margin-top: 18px; }

@@ -15,7 +15,8 @@ from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
 from .common import COOKIE, I, back, current_user, firm, get_lang, get_session, not_found, num, render
 
 router = APIRouter()
-PAGES = {"sell": "page_sell.html", "buy": "page_buy.html", "fees": "page_fees.html", "security": "page_security.html"}
+PAGES = {"sell": "page_sell.html", "buy": "page_buy.html", "fees": "page_fees.html", "security": "page_security.html",
+         "faq": "page_faq.html"}
 
 
 def _home_for(user: User | None) -> str:
@@ -99,11 +100,15 @@ def opportunity_request(target_id: int, user: User | None = Depends(current_user
 def seller_intake(s: Session = Depends(get_session), company: str = Form(""), name: str = Form(""),
                   contact: str = Form(""), sector: str = Form(""), province: str = Form(""),
                   revenue: str = Form(""), net_profit: str = Form(""), deal_type: str = Form("full_sale"),
-                  sale_reason: str = Form("succession"), notes: str = Form(""), consent: str = Form("")):
+                  sale_reason: str = Form("succession"), notes: str = Form(""), consent: str = Form(""),
+                  submitted_by: str = Form("owner"), adviser_firm: str = Form("")):
     if not consent:
         return back("/sell#intake", "请同意顾问与您联系 Please agree to be contacted.")
     if not (company.strip() and name.strip() and contact.strip()):
         return back("/sell#intake", "请填写公司、姓名和联系方式 Company, name and contact are required.")
+    adviser = submitted_by == "adviser"
+    if adviser and not adviser_firm.strip():
+        return back("/sell#intake", "请填写您的机构名称 Please give your firm's name.")
     try:
         rev, np_ = num(revenue), num(net_profit)
     except ValueError:
@@ -113,7 +118,8 @@ def seller_intake(s: Session = Depends(get_session), company: str = Form(""), na
                province=province if province in REGIONS else "上海", revenue=rev, net_profit=np_,
                deal_type=deal_type if deal_type in DEAL_TYPES else "full_sale",
                sale_reason=sale_reason if sale_reason in SALE_REASONS else "other",
-               description=notes.strip()[:4000], seller_token=new_token(), status="draft")
+               description=notes.strip()[:4000], seller_token=new_token(), status="draft",
+               submitted_by="adviser" if adviser else "owner", adviser_firm=adviser_firm.strip()[:200] if adviser else "")
     s.add(t)
     s.flush()
     t.code_name = f"Project {t.id:03d}"

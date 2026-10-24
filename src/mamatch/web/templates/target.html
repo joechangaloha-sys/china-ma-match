@@ -26,6 +26,7 @@
     <tr><th>实控人 Owner</th><td>{{ t.owner_name or '—' }}</td></tr>
     <tr><th>城市 City</th><td>{{ t.city or '—' }}</td></tr>
     {% if t.contact_info %}<tr><th>网站登记 Web intake</th><td>{{ t.contact_name }} · {{ t.contact_info }}</td></tr>{% endif %}
+    {% if t.submitted_by == 'adviser' %}<tr><th>代登记顾问 Submitted by adviser</th><td>{{ t.adviser_firm }}</td></tr>{% endif %}
     <tr><th>收入 / 净利 RMB m</th><td class="num">{{ t.revenue if t.revenue is not none else '—' }} / {{ t.net_profit if t.net_profit is not none else '—' }}</td></tr>
     <tr><th>访谈记录 Notes</th><td>{{ t.description or '—' }}</td></tr>
     <tr><th>卖方账户 Seller account</th><td>{% if seller %}{{ seller.name }} · {{ seller.email }}{% elif invite %}邀请链接 Invite link: <a href="{{ invite }}">{{ invite }}</a>{% else %}—{% endif %}</td></tr>

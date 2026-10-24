@@ -362,3 +362,25 @@ def test_detailed_search_page(app):
     assert "1 of 2 listings" in page and "Net margin" in page and "Industrial anti-corrosion coatings" in page
     zh = client(app).get("/zh/opportunities?margin_min=10").text
     assert "详细搜索" in zh and "工业防腐涂料" in zh
+
+
+def test_faq_and_why_section_in_both_languages(app):
+    en = client(app, lang="en-US")
+    home = en.get("/en/").text
+    assert "Why we built this" in home and "Joe Chang" in home and "bulge-bracket" in home
+    faq = en.get("/en/faq").text
+    assert "Frequently asked questions" in faq and "Does this affect my fees?" in faq
+    zh = client(app).get("/zh/faq").text
+    assert "常见问题" in zh and "这会影响我的收费吗" in zh
+
+
+def test_adviser_can_submit_for_a_client(app, db_url):
+    c = client(app)
+    r = c.post("/sell", data={"company": "示例·客户公司", "name": "王会计", "contact": "138", "consent": "1",
+                              "submitted_by": "adviser"})
+    assert "请填写您的机构名称" in r.text
+    c.post("/sell", data={"company": "示例·客户公司", "name": "王会计", "contact": "138", "consent": "1",
+                          "submitted_by": "adviser", "adviser_firm": "示例·某会计师事务所"})
+    t = _get(db_url, Target, legal_name="示例·客户公司")
+    assert t.submitted_by == "adviser" and t.adviser_firm == "示例·某会计师事务所"
+    assert "示例·某会计师事务所" in client(app, DM).get(I).text
