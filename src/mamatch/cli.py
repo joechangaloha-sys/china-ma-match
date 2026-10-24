@@ -47,6 +47,15 @@ def cmd_create_user(args) -> None:
         print(f"Created {user.role} {user.email}")
 
 
+def cmd_export(args) -> None:
+    from pathlib import Path
+
+    from .export import export
+
+    files = export(Path(args.out))
+    print(f"Wrote {len(files)} pages to {args.out}")
+
+
 def cmd_serve(args) -> None:
     import uvicorn
 
@@ -74,6 +83,10 @@ def main() -> None:
     a.add_argument("--role", default="deal_manager", choices=["deal_manager", "seller", "buyer"])
     a.add_argument("--name", default="")
     a.set_defaults(func=cmd_create_user)
+
+    a = sub.add_parser("export-static", help="Write the demo as a static website (fictional data, no forms)")
+    a.add_argument("--out", default="static-demo")
+    a.set_defaults(func=cmd_export)
 
     a = sub.add_parser("serve", help="Run the website")
     a.add_argument("--host", default="127.0.0.1")

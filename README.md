@@ -67,6 +67,16 @@ uv run pytest
 Demo sign-ins for local testing are defined in `seed.py` (`DEMO_USERS`, `DEMO_PASSWORD`). Example records are
 fictional and labelled 示例.
 
+## Static demo (GitHub Pages)
+
+`uv run mamatch export-static --out static-demo` writes the whole demo as plain HTML: every page in both
+editions and as each example role (visitor, seller, buyer, adviser, deal manager), with relative links, a
+"static demo" banner, a demo guide (`/zh/demo/`, `/en/demo/`), the opportunities search running in the browser
+on band data only, and every other form disabled. It uses a throwaway database seeded with the fictional examples,
+and drops Google Fonts (blocked in mainland China). `.github/workflows/pages.yml` builds and publishes it on each
+push to `main` once Pages > Source is set to "GitHub Actions". Preview locally with the `static-demo` entry in
+`.claude/launch.json` (port 8601).
+
 ## Layout
 
 ```

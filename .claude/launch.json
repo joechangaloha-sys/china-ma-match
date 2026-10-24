@@ -4,8 +4,32 @@
     {
       "name": "mamatch",
       "runtimeExecutable": "uv",
-      "runtimeArgs": ["run", "--directory", "/Users/joechang/Documents/china-ma-match", "mamatch", "serve", "--port", "8600"],
+      "runtimeArgs": [
+        "run",
+        "--directory",
+        "/Users/joechang/Documents/china-ma-match",
+        "mamatch",
+        "serve",
+        "--port",
+        "8600"
+      ],
       "port": 8600
+    },
+    {
+      "name": "static-demo",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--directory",
+        "/Users/joechang/Documents/china-ma-match",
+        "python",
+        "-m",
+        "http.server",
+        "8601",
+        "--directory",
+        "static-demo"
+      ],
+      "port": 8601
     }
   ]
 }

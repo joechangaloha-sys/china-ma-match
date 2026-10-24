@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ T('演示指南', 'Demo guide') }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ T('演示指南', 'Demo guide') }}</h1>
+  <p class="sub">{{ T('这是一个静态演示：所有公司、人员和数字均为虚构示例；表单和按钮不会提交。可用右上角切换中文和英文。',
+                     'This is a static demo: every company, person and figure is a fictional example, and forms and buttons do not submit. Switch between Chinese and English at the top right.') }}</p>
+</div>
+<div class="cols">
+<section class="panel">
+  <h2>{{ T('公开网站', 'Public site') }}</h2>
+  <ul class="small">
+    <li><a href="{{ P }}/">{{ T('首页：为什么做这件事', 'Home: why we built this') }}</a></li>
+    <li><a href="{{ P }}/opportunities">{{ T('出售项目与详细搜索（可在浏览器中筛选）', 'Opportunities and detailed search (filters work in the browser)') }}</a></li>
+    <li><a href="{{ P }}/sell">{{ T('出售企业', 'Selling') }}</a> · <a href="{{ P }}/buy">{{ T('收购企业', 'Buying') }}</a> · <a href="{{ P }}/fees">{{ T('费用', 'Fees') }}</a> · <a href="{{ P }}/faq">{{ T('常见问题', 'FAQ') }}</a></li>
+    <li><a href="{{ P }}/register/adviser">{{ T('顾问注册', 'Adviser registration') }}</a></li>
+  </ul>
+</section>
+<section class="panel">
+  <h2>{{ T('登录后的页面（以示例用户身份）', 'Signed-in pages (as example users)') }}</h2>
+  <ul class="small">
+    <li><a href="{{ P }}/seller">{{ T('卖方：示例·王先生，Project Jade', 'Seller: Project Jade’s owner') }}</a></li>
+    <li><a href="{{ P }}/buyer">{{ T('买方：示例·华东精密（已签保密协议）', 'Buyer: a verified buyer at the NDA stage') }}</a></li>
+    <li><a href="{{ P }}/adviser">{{ T('顾问：示例·长三角会计师事务所', 'Adviser: an accounting firm acting for Project Delta') }}</a></li>
+    <li><a href="{{ P }}/internal">{{ T('交易经理（内部页面）', 'Deal manager (internal pages)') }}</a> ·
+      <a href="{{ P }}/internal/pipeline">{{ T('交易进度', 'Pipeline') }}</a> ·
+      <a href="{{ P }}/internal/dashboard">{{ T('试点数据', 'Pilot metrics') }}</a> ·
+      <a href="{{ P }}/internal/audit">{{ T('审计记录', 'Audit log') }}</a></li>
+  </ul>
+</section>
+</div>
+{% endblock %}

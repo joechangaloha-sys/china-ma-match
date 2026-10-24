@@ -48,6 +48,7 @@ def opportunities(request: Request, sector: str = "", macro: str = "", user: Use
     detailed = any(filters[k] for k in SEARCH_KEYS if k != "q") or filters["reasons"] or filters["deal_types"]
     return render(request, "listings.html", user, portal="public", rows=rows,
                   cards={t.id: listing.card(t) for t in rows}, sector=sector, macro=macro, f=filters,
+                  attrs={t.id: listing.search_attrs(t) for t in rows},
                   detailed=detailed, total=len(listing.public_board(s)),
                   edges={"revenue": teaser.REVENUE_EDGES, "employees": teaser.EMPLOYEE_EDGES,
                          "years": teaser.YEARS_EDGES, "price": listing.PRICE_EDGES, "margin": listing.MARGIN_EDGES})
@@ -248,6 +249,10 @@ def invite_accept(token: str, request: Request, s: Session = Depends(get_session
 # Last: a catch-all for the static information pages.
 @router.get("/{page}", response_class=HTMLResponse)
 def info_page(page: str, request: Request, user: User | None = Depends(current_user)):
+    from .. import config
+
+    if page == "demo" and config.DEMO_GUIDE:
+        return render(request, "page_demo.html", user, portal="public")
     if page not in PAGES:
         not_found()
     return render(request, PAGES[page], user, portal="public")

@@ -165,3 +165,5 @@ footer.foot a { color: var(--on-dark); }
 .faq details p { margin: 8px 0 0; color: var(--ink-2); max-width: 46rem; }
 .faq h2 { margin-top: 18px; }
 .tagline { font: 500 .8rem/1.4 var(--font); color: var(--brass); margin-left: .6rem; letter-spacing: .04em; }
+.demo-banner { background: var(--brass); color: var(--deep); font-size: 13px; font-weight: 600; text-align: center; padding: 7px 16px; }
+.demo-banner a { color: var(--deep); }

@@ -12,7 +12,7 @@
   <p class="sub">{{ T('经交易经理审核的匿名出售项目，不显示公司名称、城市或准确数字', 'Anonymised sale listings reviewed by a deal manager. No names, cities or exact figures.') }}</p>
 </div>
 
-<form class="panel search" method="get" action="{{ P }}/opportunities">
+<form class="panel search" id="search" method="get" action="{{ P }}/opportunities">
   <div class="search-row">
     <label class="grow">{{ T('产品、服务或关键词', 'Products, services or keywords') }}
       <input id="q" name="q" value="{{ f.q }}" placeholder="{{ T('例如：注塑、检测、冷链物流', 'e.g. injection moulding, testing lab, cold-chain logistics') }}"></label>
@@ -61,12 +61,14 @@
   </details>
 </form>
 
-<p class="small muted">{{ T('找到 %d 个项目（共 %d 个）', '%d of %d listings')|format(rows|length, total) }}</p>
+<p class="small muted" id="result-count" data-total="{{ total }}" data-tpl="{{ T('找到 %d 个项目（共 %d 个）', '%d of %d listings') }}">{{ T('找到 %d 个项目（共 %d 个）', '%d of %d listings')|format(rows|length, total) }}</p>
 <div class="cards">
 {% for r in rows %}
+  <div class="result" {% for k, v in attrs[r.id].items() %}data-{{ k }}="{{ v }}" {% endfor %}>
   {% call listing_card(cards[r.id], P ~ '/opportunities/' ~ r.id) %}
     <a class="button" href="{{ P }}/opportunities/{{ r.id }}#inquiry">{{ T('咨询此项目', 'Ask about this company') }}</a>
   {% endcall %}
+  </div>
 {% else %}
   <p class="empty">{{ T('暂无符合条件的项目。', 'No listings match.') }}</p>
 {% endfor %}

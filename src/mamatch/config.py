@@ -21,3 +21,6 @@ OUTREACH_PERIOD_DAYS = 182
 SUCCESS_FEE_RATE = float(os.environ.get("MAMATCH_SUCCESS_RATE", "0.04"))  # of final deal value
 SUCCESS_FEE_MIN_RMB = int(os.environ.get("MAMATCH_SUCCESS_MIN", "300000"))
 PLATFORM_SHARE = float(os.environ.get("MAMATCH_PLATFORM_SHARE", "0.25"))  # of fees the adviser collects
+
+# Static export only: shows the demo guide page (`mamatch export-static`).
+DEMO_GUIDE = False

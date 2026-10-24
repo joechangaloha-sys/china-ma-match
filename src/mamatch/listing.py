@@ -33,6 +33,34 @@ def margin(target: Target) -> float | None:
     return target.normalized_earnings / target.revenue * 100
 
 
+def bounds(value: float | None, edges: list[float]) -> tuple[float | None, float | None]:
+    """The band a value falls in, as (lower edge, upper edge); None outside the edges or when unknown."""
+    if value is None:
+        return None, None
+    lo = 0.0
+    for e in edges:
+        if value < e:
+            return lo, e
+        lo = e
+    return lo, None
+
+
+def search_attrs(target: Target) -> dict:
+    """Band edges and labels the in-browser search (static demo) filters on: never exact figures."""
+    years = _years(target)
+    rev, emp, yrs, price = (bounds(target.revenue, teaser.REVENUE_EDGES), bounds(target.employees, teaser.EMPLOYEE_EDGES),
+                            bounds(years, teaser.YEARS_EDGES), bounds(target.asking_value, PRICE_EDGES))
+    m = margin(target)
+    zh, en, _ = SECTORS.get(target.sector, ("", "", ""))
+    words = " ".join([target.products_zh, target.products_en, zh, en, *SECTOR_KEYWORDS.get(target.sector, [])]).lower()
+    fmt = lambda v: "" if v is None else f"{v:g}"  # noqa: E731
+    return {"sector": target.sector, "macro": macro_region(target.province), "rev-lo": fmt(rev[0]), "rev-hi": fmt(rev[1]),
+            "emp-lo": fmt(emp[0]), "emp-hi": fmt(emp[1]), "yrs-lo": fmt(yrs[0]), "price-hi": fmt(price[1]),
+            "price-lo": fmt(price[0]), "profitable": {True: "yes", False: "no", None: ""}[card_profitable(target)],
+            "margin-lo": fmt(bounds(m, MARGIN_EDGES)[0]) if m is not None else "", "reason": target.sale_reason,
+            "deal": target.deal_type, "words": words}
+
+
 def stake_label(pct: float | None, deal_type: str) -> str:
     if pct is None:
         return {"full_sale": "100%", "majority": "51%以上 Majority", "minority": "少数股权 Minority"}.get(deal_type, "—")
