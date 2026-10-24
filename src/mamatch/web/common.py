@@ -28,7 +28,7 @@ templates.env.globals.update(
     REJECT_REASONS=offers.REJECT_REASONS, sector_label=sector_label, risk_label=reid.risk_label,
     macro_region=macro_region, FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES,
     SEVERITY=datacheck.SEVERITY, CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees, cfg=config,
-    I=I,
+    I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
 )
 
 

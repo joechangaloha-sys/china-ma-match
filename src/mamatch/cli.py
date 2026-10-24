@@ -35,6 +35,18 @@ def cmd_ingest(args) -> None:
     print(f"{added} new buyer signals indexed")
 
 
+def cmd_create_user(args) -> None:
+    import getpass
+
+    from . import auth
+
+    db.init_db()
+    password = getpass.getpass("Password (10+ characters): ")
+    with db.session_scope() as s:
+        user = auth.create_user(s, email=args.email, password=password, role=args.role, name=args.name)
+        print(f"Created {user.role} {user.email}")
+
+
 def cmd_serve(args) -> None:
     import uvicorn
 
@@ -57,7 +69,13 @@ def main() -> None:
     a.add_argument("--keyword", action="append", help="Override the default keyword list")
     a.set_defaults(func=cmd_ingest)
 
-    a = sub.add_parser("serve", help="Run the adviser workspace")
+    a = sub.add_parser("create-user", help="Create a sign-in (deal managers; sellers come by invite, buyers register)")
+    a.add_argument("email")
+    a.add_argument("--role", default="deal_manager", choices=["deal_manager", "seller", "buyer"])
+    a.add_argument("--name", default="")
+    a.set_defaults(func=cmd_create_user)
+
+    a = sub.add_parser("serve", help="Run the website")
     a.add_argument("--host", default="127.0.0.1")
     a.add_argument("--port", type=int, default=8600)
     a.add_argument("--reload", action="store_true")

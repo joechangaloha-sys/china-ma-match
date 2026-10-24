@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, documents, infomemo, listing, offers, plans, teaser
+from .. import auth, documents, listing, offers, plans, teaser
 from ..models import Match, Target, Teaser, User
 from .common import anon_buyer, back, get_session, not_found, render, require, save_data, seller_reasons
 

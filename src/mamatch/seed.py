@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import buyers as buyer_reg
-from . import auth, config, dealstatus
+from . import auth, config
 from . import datacheck, fees, infomemo, listing, matching, offers, pipeline, plans, teaser
 from .models import AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target, User
 

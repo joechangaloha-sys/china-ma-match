@@ -137,7 +137,9 @@ def extract_rules(doc: Document) -> list[dict]:
         rest = line
         for w in LABELS[label]:
             rest = re.sub(re.escape(w), " ", rest, flags=re.I)
-        nums = [n for n in _NUM.findall(rest) if not _YEAR.fullmatch(n.replace(",", ""))]
+        # Split CSV/tab cells, but keep thousands separators ("1,260" stays one number; "10400,11800" is two).
+        cells = re.split(r"[\t;|]|,(?!\d{3}(?:\D|$))", rest)
+        nums = [n for c in cells for n in _NUM.findall(c) if not _YEAR.fullmatch(n.replace(",", ""))]
         values = [float(n.replace(",", "")) for n in nums if n.strip("-,.")]
         if not values:
             continue

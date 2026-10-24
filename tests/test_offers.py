@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy import select
 
-from mamatch import buyers, config, listing, matching, offers, pipeline, plans, teaser
+from mamatch import buyers, listing, matching, offers, pipeline, plans, teaser
 from mamatch.models import Buyer, Target
 
 
@@ -102,7 +101,7 @@ def test_registration_flow(seeded):
     buyers.invite(b)
     kw = dict(name="新买方", kind="private", uscc="91320500MA00001234", contact_name="张", contact_email="a@b.cn",
               target_sectors=["food"], target_regions=["江苏"], deal_size_min=10.0, deal_size_max=50.0,
-              target_deal_types=[])
+              target_deal_types=[], funding_evidence="bank_letter", funding_max=40.0)
     with pytest.raises(ValueError, match="Consent"):
         buyers.register(b, consent=False, **kw)
     buyers.register(b, consent=True, **kw)
