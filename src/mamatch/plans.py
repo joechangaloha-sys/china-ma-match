@@ -1,9 +1,10 @@
 """Who pays for what (pilot pricing, design note option B plus a buyer priority plan).
 
-Sellers
+Sellers (prices and the success fee: fees.py)
 - Listed (opt-in to the anonymised board): free. Sees the headline demand count.
-- Private: the headline demand count is free; the paid plan unlocks detailed demand statistics
-  and outreach (offers sent to matching buyers, one by one, with the seller's approval).
+- Private: the headline demand count is free; the outreach retainer unlocks detailed demand
+  statistics and outreach (offers sent to matching buyers, one by one, with the seller's
+  approval) for one period. The preparation pack (data check, info memo) is a separate one-off.
 
 Buyers
 - Free (verified): browses the board once a listing is older than the priority head start,
@@ -18,7 +19,7 @@ Payments are invoiced offline during the pilot; the operator records them here.
 
 from datetime import datetime, timedelta, timezone
 
-from . import config
+from . import config, fees
 from .models import Buyer, Target
 
 SELLER_PLANS = {"free": "免费 Free", "paid": "私密推介 Private outreach"}
@@ -26,17 +27,15 @@ BUYER_PLANS = {"free": "免费 Free", "priority": "优先 Priority"}
 
 
 def seller_detailed_stats(target: Target) -> bool:
-    return target.seller_plan == "paid"
+    return fees.outreach_active(target)
 
 
 def seller_outreach(target: Target) -> bool:
-    return target.visibility == "private" and target.seller_plan == "paid"
+    return target.visibility == "private" and fees.outreach_active(target)
 
 
 def mark_seller_paid(target: Target, invoice_ref: str) -> None:
-    target.seller_plan = "paid"
-    target.plan_paid_at = datetime.now(timezone.utc)
-    target.plan_invoice_ref = invoice_ref.strip()
+    fees.record_outreach(target, invoice_ref)
 
 
 def mark_buyer_priority(buyer: Buyer, on: bool = True) -> None:

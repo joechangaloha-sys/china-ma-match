@@ -112,3 +112,50 @@ def test_operator_invites_two_buyers_by_hand(db_url, monkeypatch):
     for name in ("手动买方一", "手动买方二"):
         r = c.post("/buyers", data={"name": name, "kind": "private"})
         assert r.status_code == 200 and "/b/" in r.text
+
+
+def test_seller_submits_data_and_sees_fees(db_url, monkeypatch):
+    c = _client(db_url, monkeypatch)
+    delta = _get(db_url, Target, code_name="Project Delta")
+    page = c.get(f"/s/{delta.seller_token}").text
+    assert "出售准备包" in page and "平台分成" not in page  # seller never sees the platform share
+    from mamatch import datacheck
+
+    y = datacheck.years()[-1]
+    r = c.post(f"/s/{delta.seller_token}/data", data={f"fin_{y}_revenue": "85", f"fin_{y}_net_profit": "9",
+                                                       "d_permits_personal": "yes", "d_land": "leased"})
+    assert "Data saved" in r.text
+    t = _get(db_url, Target, code_name="Project Delta")
+    assert t.financials[y]["revenue"] == 85 and t.disclosures["permits_personal"] is True
+
+    r = c.post(f"/targets/{t.id}/datacheck")
+    assert "preparation pack" in r.text
+    c.post(f"/targets/{t.id}/prep-pack", data={"invoice_ref": "INV-7"})
+    r = c.post(f"/targets/{t.id}/datacheck")
+    assert "实控人个人名下" in r.text
+
+
+def test_buyer_sees_memo_only_after_nda(db_url, monkeypatch):
+    c = _client(db_url, monkeypatch)
+    jade = _get(db_url, Target, code_name="Project Jade")
+    with db.session_scope(db_url) as s:
+        t = s.get(Target, jade.id)
+        nda = next(m for m in t.matches if m.stage == "nda_signed")
+        waiting = next(m for m in t.matches if m.stage == "shortlisted")
+        nda_token, waiting_token = nda.buyer.invite_token, waiting.buyer.invite_token
+    assert "信息备忘录" in c.get(f"/b/{nda_token}").text
+    assert "四、财务摘要" not in c.get(f"/b/{waiting_token}").text
+
+
+def test_closing_goes_through_the_fee_form(db_url, monkeypatch):
+    c = _client(db_url, monkeypatch)
+    jade = _get(db_url, Target, code_name="Project Jade")
+    with db.session_scope(db_url) as s:
+        m = next(m for m in s.get(Target, jade.id).matches if m.stage == "nda_signed")
+        mid = m.id
+    for stage in ("im_sent", "loi", "closing"):
+        c.post(f"/matches/{mid}/move", data={"to_stage": stage})
+    r = c.post(f"/matches/{mid}/move", data={"to_stage": "closed"})
+    assert "Record the closing value" in r.text
+    r = c.post(f"/matches/{mid}/close", data={"deal_value": "88", "invoice_ref": "INV-C"})
+    assert "Success fee RMB" in r.text

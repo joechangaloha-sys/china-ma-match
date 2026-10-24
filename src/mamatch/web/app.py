@@ -20,8 +20,8 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from .. import buyers as buyer_reg
-from .. import config, db, demand, listing, matching, offers, pipeline, plans, reid, teaser
-from ..models import AdviserFirm, Buyer, Match, Target, Teaser
+from .. import config, datacheck, db, demand, fees, infomemo, listing, matching, offers, pipeline, plans, reid, teaser
+from ..models import AdviserFirm, Buyer, InfoMemo, Match, Target, Teaser
 from ..taxonomy import DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS, macro_region, sector_label
 
 HERE = Path(__file__).parent
@@ -47,6 +47,8 @@ templates.env.globals.update(
     STAGES=pipeline.STAGES, BUYER_KINDS=demand.BUYER_KINDS, BUYER_STATUSES=BUYER_STATUSES,
     MACRO_REGIONS=demand.MACRO_REGIONS, SELLER_PLANS=plans.SELLER_PLANS, BUYER_PLANS=plans.BUYER_PLANS,
     sector_label=sector_label, risk_label=reid.risk_label, macro_region=macro_region,
+    FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES, SEVERITY=datacheck.SEVERITY,
+    CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees,
     region_flag=config.DEPLOYMENT_REGION, cfg=config, K=config.MIN_GROUP_SIZE,
 )
 
@@ -241,6 +243,67 @@ def target_plan(target_id: int, invoice_ref: str = Form(""), s: Session = Depend
     return back(f"/targets/{t.id}#listing", "Plan recorded as paid")
 
 
+@app.post("/targets/{target_id}/prep-pack")
+def target_prep_pack(target_id: int, invoice_ref: str = Form(""), s: Session = Depends(get_session)):
+    t = s.get(Target, target_id) or _404()
+    if not invoice_ref.strip():
+        return back(f"/targets/{t.id}#fees", "Enter the invoice reference")
+    try:
+        fees.record_prep_pack(t, invoice_ref)
+    except ValueError as exc:
+        return back(f"/targets/{t.id}#fees", str(exc))
+    return back(f"/targets/{t.id}#fees", "Preparation pack recorded as paid")
+
+
+@app.post("/targets/{target_id}/data")
+async def target_data(target_id: int, request: Request, s: Session = Depends(get_session)):
+    t = s.get(Target, target_id) or _404()
+    _save_data(t, await request.form())
+    return back(f"/targets/{t.id}#data", "Data saved")
+
+
+@app.post("/targets/{target_id}/datacheck")
+def target_datacheck(target_id: int, s: Session = Depends(get_session)):
+    t = s.get(Target, target_id) or _404()
+    try:
+        datacheck.run(s, t)
+    except ValueError as exc:
+        return back(f"/targets/{t.id}#data", str(exc))
+    return back(f"/targets/{t.id}#data")
+
+
+@app.post("/targets/{target_id}/memo")
+def target_memo(target_id: int, language: str = Form("zh"), s: Session = Depends(get_session)):
+    t = s.get(Target, target_id) or _404()
+    try:
+        infomemo.draft(s, t, language)
+    except ValueError as exc:
+        return back(f"/targets/{t.id}#memo", str(exc))
+    return back(f"/targets/{t.id}#memo")
+
+
+@app.post("/memos/{memo_id}/approve")
+def memo_approve(memo_id: int, s: Session = Depends(get_session)):
+    m = s.get(InfoMemo, memo_id) or _404()
+    try:
+        infomemo.approve(m)
+    except ValueError as exc:
+        return back(f"/targets/{m.target_id}#memo", str(exc))
+    return back(f"/targets/{m.target_id}#memo", "Info memo approved")
+
+
+@app.post("/matches/{match_id}/close")
+def match_close(match_id: int, deal_value: str = Form(""), invoice_ref: str = Form(""),
+                s: Session = Depends(get_session)):
+    m = s.get(Match, match_id) or _404()
+    try:
+        charge = fees.record_closing(s, m, _num(deal_value) or 0, invoice_ref)
+    except ValueError as exc:
+        return back(f"/targets/{m.target_id}#fees", str(exc))
+    msg = f"Closed. Success fee RMB {charge.amount:,.0f}" if charge else "Closed. No success fee (listed-only seller)."
+    return back(f"/targets/{m.target_id}#fees", msg)
+
+
 @app.post("/targets/{target_id}/match")
 def target_match(target_id: int, s: Session = Depends(get_session)):
     t = s.get(Target, target_id) or _404()
@@ -255,6 +318,8 @@ def match_move(match_id: int, to_stage: str = Form(...), note: str = Form(""),
     dest = back_to or f"/targets/{m.target_id}#matches"
     if to_stage == "teaser_sent":
         return back(dest, "Teasers go out only when the seller approves the buyer on the seller page.")
+    if to_stage == "closed":
+        return back(f"/targets/{m.target_id}#fees", "Record the closing value on the target page to close a deal.")
     try:
         pipeline.move(s, m, to_stage, note)
     except ValueError as exc:
@@ -267,6 +332,26 @@ def pipeline_view(request: Request, s: Session = Depends(get_session)):
     rows = s.scalars(select(Match).where(Match.stage != "suggested").order_by(Match.updated_at.desc())).all()
     by_stage = {k: [m for m in rows if m.stage == k] for k in pipeline.STAGES if k != "suggested"}
     return render(request, "pipeline.html", by_stage=by_stage, allowed_next=pipeline.allowed_next)
+
+
+def _save_data(t: Target, form) -> None:
+    """Financials and checklist answers from the shared data form (operator or seller)."""
+    fin = {}
+    for y in datacheck.years():
+        row = {k: float(v) for k in datacheck.FIN_FIELDS if (v := str(form.get(f"fin_{y}_{k}", "")).strip())}
+        if row:
+            fin[y] = row
+    disc = {}
+    for key, (_, kind) in datacheck.DISCLOSURES.items():
+        v = str(form.get(f"d_{key}", "")).strip()
+        if kind == "bool":
+            disc[key] = {"yes": True, "no": False}.get(v)
+        elif kind == "number":
+            disc[key] = float(v) if v else None
+        else:
+            disc[key] = v or None
+    t.financials = fin
+    t.disclosures = {k: v for k, v in disc.items() if v is not None}
 
 
 def _link(request: Request, kind: str, token: str) -> str:
@@ -315,8 +400,9 @@ def seller_reasons(m: Match) -> list[str]:
 def seller_page(token: str, request: Request, s: Session = Depends(get_session)):
     t = _seller(s, token)
     sent = [m for m in t.matches if m.stage not in ("suggested", "shortlisted")]
-    return render(request, "seller.html", t=t, portal="seller", card=listing.card(t),
-                  demand=demand.for_target(s, t, detailed=plans.seller_detailed_stats(t)),
+    detailed = plans.seller_detailed_stats(t)
+    return render(request, "seller.html", t=t, portal="seller", card=listing.card(t), detailed=detailed,
+                  demand=demand.for_target(s, t, detailed=detailed), outreach=plans.seller_outreach(t),
                   candidates=offers.outreach_candidates(t) if plans.seller_outreach(t) else [],
                   sent=sent, anon_buyer=anon_buyer, seller_reasons=seller_reasons,
                   is_priority=plans.is_priority, after_nda=offers.AFTER_NDA,
@@ -327,6 +413,13 @@ def seller_page(token: str, request: Request, s: Session = Depends(get_session))
 def seller_visibility(token: str, visibility: str = Form(...), s: Session = Depends(get_session)):
     t = _seller(s, token)
     return _set_visibility(t, visibility, f"/s/{token}")
+
+
+@app.post("/s/{token}/data")
+async def seller_data(token: str, request: Request, s: Session = Depends(get_session)):
+    t = _seller(s, token)
+    _save_data(t, await request.form())
+    return back(f"/s/{token}#data", "Data saved. Your adviser will run the check.")
 
 
 @app.post("/s/{token}/matches/{match_id}/{action}")
@@ -369,6 +462,7 @@ def buyer_page(token: str, request: Request, sector: str = "", macro: str = "", 
                   board=listing.board(s, b, sector, macro), hidden=listing.hidden_count(s, b),
                   cards={t.id: listing.card(t) for t in listing.board(s, b, sector, macro)},
                   mine=mine, interested_ids=interested_ids, shared_teaser=offers.shared_teaser,
+                  shared_memo=infomemo.shared_memo, after_nda=offers.AFTER_NDA,
                   can_search=plans.can_search(b), sector=sector, macro=macro)
 
 

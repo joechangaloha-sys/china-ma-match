@@ -118,6 +118,13 @@ class Target(Base):
     plan_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     plan_invoice_ref: Mapped[str] = mapped_column(String(50), default="")
     seller_token: Mapped[str] = mapped_column(String(40), default="")  # seller's private link
+    prep_pack_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Data the seller submits for the preparation pack. Exact figures: shown to the adviser and, in
+    # the info memo, to buyers after an NDA. Never sent abroad unless config.ALLOW_DATA_EXPORT.
+    financials: Mapped[dict] = mapped_column(JSON, default=dict)  # {"2025": {"revenue": 126.0, ...}, ...}
+    disclosures: Mapped[dict] = mapped_column(JSON, default=dict)  # answers to the diligence checklist
+    closing_value: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, final deal value
     is_example: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -126,6 +133,12 @@ class Target(Base):
                                                    order_by="desc(Teaser.version)")
     matches: Mapped[list["Match"]] = relationship(back_populates="target", cascade="all, delete-orphan",
                                                   order_by="desc(Match.score)")
+    charges: Mapped[list["SellerCharge"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                         order_by="SellerCharge.created_at")
+    data_checks: Mapped[list["DataCheck"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                          order_by="desc(DataCheck.created_at)")
+    memos: Mapped[list["InfoMemo"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                   order_by="desc(InfoMemo.version)")
 
 
 class Teaser(Base):
@@ -179,3 +192,51 @@ class DealEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     match: Mapped[Match] = relationship(back_populates="events")
+
+
+class SellerCharge(Base):
+    """A fee the seller has paid or owes: preparation pack, outreach retainer, success fee (see fees.py)."""
+
+    __tablename__ = "seller_charges"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    kind: Mapped[str] = mapped_column(String(20))  # prep_pack | outreach | success
+    amount: Mapped[float] = mapped_column(Float)  # RMB, before VAT
+    invoice_ref: Mapped[str] = mapped_column(String(50), default="")
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)  # success fee: deal value, rate, credits, shares
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    target: Mapped[Target] = relationship(back_populates="charges")
+
+
+class DataCheck(Base):
+    """Result of checking the seller's submitted data for gaps, inconsistencies and deal risks."""
+
+    __tablename__ = "data_checks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    findings: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    generated_by: Mapped[str] = mapped_column(String(40), default="rules")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    target: Mapped[Target] = relationship(back_populates="data_checks")
+
+
+class InfoMemo(Base):
+    """Information memorandum (信息备忘录): shared with a buyer only after an NDA and adviser approval."""
+
+    __tablename__ = "info_memos"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    language: Mapped[str] = mapped_column(String(5), default="zh")
+    body: Mapped[dict] = mapped_column(JSON)  # {"title": ..., "sections": [{"heading", "paragraphs", "table"}]}
+    name_findings: Mapped[list[dict]] = mapped_column(JSON, default=list)  # names that must not appear
+    generated_by: Mapped[str] = mapped_column(String(40), default="offline")
+    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | approved
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    target: Mapped[Target] = relationship(back_populates="memos")

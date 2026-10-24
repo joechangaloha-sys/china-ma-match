@@ -1,6 +1,29 @@
 {% extends "base.html" %}
-{% from "_macros.html" import demand_panel, listing_card %}
-{% block title %}{{ t.code_name }}{% endblock %}
+{% from "_macros.html" import demand_panel, listing_card, fees_panel, data_form, findings_list, memo_view %}
+{% block title %}{{ t.code_name }}<section class="panel" id="fees">
+  <h2>服务与费用 Services and fees</h2>
+  {{ fees_panel(t) }}
+  <p class="small muted">匿名挂牌始终免费，无成功费。Listing anonymously is always free, with no success fee.</p>
+</section>
+
+<section class="panel" id="data">
+  <h2>提交资料 Your data</h2>
+  <p class="small muted">资料仅供您的顾问核查和编写信息备忘录；买方只有在签署保密协议后才会看到备忘录，且不含公司名称。<br>
+    Used by your adviser for the data check and the info memo. Buyers see the memo only after signing an NDA, and without your company name.</p>
+  {{ data_form(t, '/s/%s/data'|format(t.seller_token)) }}
+  {% if t.data_checks %}
+  <h3>核查结果 Check results</h3>
+  {{ findings_list(t.data_checks[0]) }}
+  {% endif %}
+</section>
+
+{% if t.memos %}
+<section class="panel" id="memo">
+  <h2>信息备忘录 Info memo <span class="pill">{{ '已审核 approved' if t.memos[0].status == 'approved' else '草稿 draft' }}</span></h2>
+  {{ memo_view(t.memos[0]) }}
+</section>
+{% endif %}
+{% endblock %}
 {% block body %}
 <div>
   <h1>{{ t.code_name }}</h1>
@@ -9,7 +32,7 @@
 
 <section class="panel">
   <h2>有多少买方在找像您这样的企业 How many buyers want a company like yours</h2>
-  {{ demand_panel(demand, t.seller_plan == 'paid',
+  {{ demand_panel(demand, detailed,
      '按规模、买方类型、交易方式和省份的细分，以及向匹配买方逐一推介，属于私密推介方案（RMB %s/项目）。请联系您的顾问。 The breakdown by size, buyer type, deal type and province, and outreach to matching buyers, come with the private outreach plan (RMB %s per mandate). Ask your adviser.'|format(cfg.SELLER_PLAN_FEE_RMB, cfg.SELLER_PLAN_FEE_RMB)) }}
 </section>
 
@@ -36,7 +59,7 @@
 
 <section class="panel" id="outreach">
   <h2>推介 Outreach</h2>
-  {% if t.visibility == 'private' and t.seller_plan == 'paid' %}
+  {% if outreach %}
   <p class="small muted">顾问根据买方公开的收购偏好推荐了以下买方。批准后对方将收到匿名简介；双方名称在签署保密协议并经您同意后才互相披露。<br>
     Your adviser shortlisted these buyers from their stated criteria. Approving one sends them the anonymised teaser. Names are disclosed both ways only after an NDA and your approval.</p>
   {% for m in candidates %}
@@ -73,4 +96,27 @@
   </table></div>
   {% endif %}
 </section>
+<section class="panel" id="fees">
+  <h2>服务与费用 Services and fees</h2>
+  {{ fees_panel(t) }}
+  <p class="small muted">匿名挂牌始终免费，无成功费。Listing anonymously is always free, with no success fee.</p>
+</section>
+
+<section class="panel" id="data">
+  <h2>提交资料 Your data</h2>
+  <p class="small muted">资料仅供您的顾问核查和编写信息备忘录；买方只有在签署保密协议后才会看到备忘录，且不含公司名称。<br>
+    Used by your adviser for the data check and the info memo. Buyers see the memo only after signing an NDA, and without your company name.</p>
+  {{ data_form(t, '/s/%s/data'|format(t.seller_token)) }}
+  {% if t.data_checks %}
+  <h3>核查结果 Check results</h3>
+  {{ findings_list(t.data_checks[0]) }}
+  {% endif %}
+</section>
+
+{% if t.memos %}
+<section class="panel" id="memo">
+  <h2>信息备忘录 Info memo <span class="pill">{{ '已审核 approved' if t.memos[0].status == 'approved' else '草稿 draft' }}</span></h2>
+  {{ memo_view(t.memos[0]) }}
+</section>
+{% endif %}
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import listing_card %}
+{% from "_macros.html" import listing_card, memo_view %}
 {% block title %}{{ b.name }}{% endblock %}
 {% block body %}
 <div>
@@ -59,6 +59,8 @@
       <form method="post" action="/b/{{ b.invite_token }}/matches/{{ m.id }}/respond"><input type="hidden" name="interested" value="0"><button class="ghost">不考虑 Decline</button></form>
     </div>
     {% elif m.stage == 'interested' %}<p class="small muted">顾问将与您联系安排保密协议。The adviser will contact you about an NDA.</p>{% endif %}
+    {% set im = shared_memo(m.target) if m.stage in after_nda else none %}
+    {% if im %}<details><summary>信息备忘录 Info memo</summary>{{ memo_view(im) }}</details>{% endif %}
   </div>
   {% else %}
   <p class="empty">暂无。None yet.</p>

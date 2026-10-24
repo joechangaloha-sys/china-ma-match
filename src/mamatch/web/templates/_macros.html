@@ -41,3 +41,110 @@
   {{ caller() if caller }}
 </div>
 {% endmacro %}
+
+{% macro fees_panel(t, operator=false, closable=[]) %}
+{% set est = fees.estimate(t) %}
+<div class="tbl"><table class="small">
+  <tr><th>项目 Item</th><th>价格 Price (RMB, ex VAT)</th><th>状态 Status</th></tr>
+  <tr><td>匿名简介、需求总数、匿名挂牌 Teaser, demand total, anonymous listing</td><td>免费 Free</td><td>—</td></tr>
+  <tr><td>出售准备包：资料核查 + 信息备忘录 Preparation pack: data check + info memo</td><td class="num">{{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}</td>
+    <td>{% if fees.prep_pack_paid(t) %}<span class="pill">已付 paid {{ t.prep_pack_paid_at.strftime('%Y-%m-%d') }}</span>{% else %}未购买 not bought{% endif %}</td></tr>
+  <tr><td>推介服务：需求细分 + 逐一推介（每{{ cfg.OUTREACH_PERIOD_DAYS }}天）Outreach retainer per {{ cfg.OUTREACH_PERIOD_DAYS }} days</td><td class="num">{{ '{:,}'.format(cfg.SELLER_PLAN_FEE_RMB) }}</td>
+    <td>{% set until = fees.outreach_until(t) %}{% if fees.outreach_active(t) %}<span class="pill">有效至 until {{ until.strftime('%Y-%m-%d') }}</span>{% elif until %}已过期 expired {{ until.strftime('%Y-%m-%d') }}{% else %}未购买 not bought{% endif %}</td></tr>
+  <tr><td>成功费（仅推介服务客户）Success fee, outreach clients only</td>
+    <td class="num">{{ '%g'|format(cfg.SUCCESS_FEE_RATE * 100) }}%，最低 min {{ '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB) }}</td>
+    <td class="small">已付费用全额抵扣 Fees already paid are credited</td></tr>
+</table></div>
+{% if est and fees.success_fee_applies(t) %}
+<p class="small">按期望估值 RMB {{ '%g'|format(t.asking_value) }}m 估算 Estimate at asking value: 成功费 gross {{ '{:,.0f}'.format(est.gross) }} − 抵扣 credited {{ '{:,.0f}'.format(est.credited) }} = <b>{{ '{:,.0f}'.format(est.net) }}</b>
+  {% if operator %}<span class="muted">（平台分成 platform share {{ '{:,.0f}'.format(est.platform_share) }}）</span>{% endif %}</p>
+{% endif %}
+{% if t.charges %}
+<div class="tbl"><table class="small">
+  <tr><th>日期 Date</th><th>项目 Item</th><th class="num">金额 Amount</th><th>发票 Invoice</th>{% if operator %}<th class="num">平台分成 Platform</th>{% endif %}</tr>
+  {% for c in t.charges %}
+  <tr><td>{{ c.created_at.strftime('%Y-%m-%d') }}</td><td>{{ CHARGE_KINDS[c.kind] }}{% if c.kind == 'success' %}<br><span class="muted">成交 RMB {{ '{:,.0f}'.format(c.detail.deal_value_rmb) }} · gross {{ '{:,.0f}'.format(c.detail.gross) }} − credited {{ '{:,.0f}'.format(c.detail.credited) }}</span>{% endif %}</td>
+    <td class="num">{{ '{:,.0f}'.format(c.amount) }}</td><td>{{ c.invoice_ref or '—' }}</td>{% if operator %}<td class="num">{{ '{:,.0f}'.format(c.detail.get('platform_share', 0)) }}</td>{% endif %}</tr>
+  {% endfor %}
+</table></div>
+{% endif %}
+{% if operator %}
+<div class="actions">
+  {% if not fees.prep_pack_paid(t) %}
+  <form class="inline" method="post" action="/targets/{{ t.id }}/prep-pack">
+    <input name="invoice_ref" placeholder="发票号 invoice ref" aria-label="Invoice reference for the preparation pack">
+    <button class="ghost">记录准备包付款 Record prep pack</button></form>
+  {% endif %}
+  <form class="inline" method="post" action="/targets/{{ t.id }}/plan">
+    <input name="invoice_ref" placeholder="发票号 invoice ref" aria-label="Invoice reference for the outreach retainer">
+    <button class="ghost">{{ '续期推介服务 Renew outreach' if fees.outreach_until(t) else '记录推介服务付款 Record outreach' }}</button></form>
+</div>
+{% for m in closable %}
+<form class="inline" method="post" action="/matches/{{ m.id }}/close">
+  <span class="small">交割 Close with <b>{{ m.buyer.name }}</b>:</span>
+  <input name="deal_value" inputmode="decimal" placeholder="成交金额 RMB m" aria-label="Final deal value in RMB millions" required>
+  <input name="invoice_ref" placeholder="发票号 invoice ref" aria-label="Invoice reference for the success fee">
+  <button>记录交割 Record closing</button></form>
+{% endfor %}
+<p class="small muted">卖方费用由合作顾问依其委托协议开票收取，平台按 {{ '%g'|format(cfg.PLATFORM_SHARE * 100) }}% 分成。Seller fees are invoiced by the partner adviser under its engagement letter; the platform's share is {{ '%g'|format(cfg.PLATFORM_SHARE * 100) }}%.</p>
+{% endif %}
+{% endmacro %}
+
+{% macro data_form(t, action) %}
+<form method="post" action="{{ action }}" class="dataform">
+  <div class="tbl"><table class="small">
+    <tr><th>百万元 RMB m</th>{% for y in fin_years() %}<th>{{ y }}</th>{% endfor %}</tr>
+    {% for key, label in FIN_FIELDS.items() %}
+    <tr><td>{{ label }}</td>
+      {% for y in fin_years() %}{% set v = (t.financials or {}).get(y, {}).get(key) %}
+      <td><input name="fin_{{ y }}_{{ key }}" inputmode="decimal" size="7" value="{{ '%g'|format(v) if v is not none }}" aria-label="{{ label }} {{ y }}"></td>
+      {% endfor %}</tr>
+    {% endfor %}
+  </table></div>
+  <div class="grid">
+  {% for key, (label, kind) in DISCLOSURES.items() %}
+    {% set v = (t.disclosures or {}).get(key) %}
+    <label class="{{ 'wide' if kind == 'text' }}">{{ label }}
+    {% if kind == 'bool' %}
+      <select name="d_{{ key }}"><option value="">—</option><option value="yes" {{ 'selected' if v is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if v is sameas false }}>否 No</option></select>
+    {% elif kind.startswith('choice:') %}
+      <select name="d_{{ key }}"><option value="">—</option>
+        {% for pair in kind[7:].split(',') %}{% set code, text = pair.split('=') %}<option value="{{ code }}" {{ 'selected' if v == code }}>{{ text }}</option>{% endfor %}</select>
+    {% elif kind == 'text' %}
+      <textarea name="d_{{ key }}">{{ v or '' }}</textarea>
+    {% else %}
+      <input name="d_{{ key }}" inputmode="decimal" value="{{ '%g'|format(v) if v is not none }}">
+    {% endif %}</label>
+  {% endfor %}
+  </div>
+  <button>保存资料 Save data</button>
+</form>
+{% endmacro %}
+
+{% macro findings_list(dc) %}
+<div class="small muted">{{ dc.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ dc.generated_by }} · {{ dc.findings|length }} 项 findings</div>
+{% for f in dc.findings %}
+<div class="finding {{ f.severity }}">
+  <span class="pill {{ 'high' if f.severity == 'high' else 'medium' if f.severity == 'medium' else 'low' }}">{{ SEVERITY[f.severity] }}</span>
+  {{ f.message }}<br><span class="small muted">→ {{ f.question }}</span>
+</div>
+{% else %}
+<p class="empty">没有发现问题。No issues found.</p>
+{% endfor %}
+{% endmacro %}
+
+{% macro memo_view(m) %}
+<div class="memo">
+  <h3>{{ m.body.title }}</h3>
+  {% for sec in m.body.sections %}
+  <h4>{{ sec.heading }}</h4>
+  {% for para in sec.paragraphs %}<p>{{ para }}</p>{% endfor %}
+  {% if sec.table %}
+  <div class="tbl"><table class="small">
+    <tr>{% for c in sec.table.columns %}<th class="{{ 'num' if not loop.first }}">{{ c }}</th>{% endfor %}</tr>
+    {% for row in sec.table.rows %}<tr>{% for c in row %}<td class="{{ 'num' if not loop.first }}">{{ c }}</td>{% endfor %}</tr>{% endfor %}
+  </table></div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endmacro %}

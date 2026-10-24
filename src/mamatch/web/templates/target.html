@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import demand_panel, listing_card %}
+{% from "_macros.html" import demand_panel, listing_card, fees_panel, data_form, findings_list, memo_view %}
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
 <div>
@@ -41,20 +41,50 @@
     <input type="hidden" name="visibility" value="{{ 'private' if t.visibility == 'listed' else 'listed' }}">
     <button class="ghost">{{ '撤下 Unlist' if t.visibility == 'listed' else '匿名挂牌 List anonymously' }}</button>
   </form>
-  <p class="small">方案 Plan: <b>{{ SELLER_PLANS[t.seller_plan] }}</b>
-    {% if t.seller_plan == 'paid' %} · 发票 {{ t.plan_invoice_ref }} · {{ t.plan_paid_at.strftime('%Y-%m-%d') if t.plan_paid_at }}{% endif %}</p>
-  {% if t.seller_plan != 'paid' %}
-  <form class="inline" method="post" action="/targets/{{ t.id }}/plan">
-    <label>发票号 Invoice ref <input id="invoice_ref" name="invoice_ref" placeholder="PILOT-001"></label>
-    <button class="ghost">记录付款 Record payment (RMB {{ cfg.SELLER_PLAN_FEE_RMB }})</button>
-  </form>
-  {% endif %}
 </section>
 <section class="panel">
   <h2>挂牌卡片预览 Listing card</h2>
   {{ listing_card(card) }}
 </section>
 </div>
+
+<section class="panel" id="fees">
+  <h2>费用 Fees <span class="muted small">卖方页面显示同一价目表（不含平台分成）· The seller sees the same price list, without the platform share</span></h2>
+  {{ fees_panel(t, operator=true, closable=t.matches|selectattr('stage', 'equalto', 'closing')|list) }}
+</section>
+
+<section class="panel" id="data">
+  <h2>卖方资料与核查 Seller data and check <span class="muted small">出售准备包 preparation pack</span></h2>
+  {% if not fees.prep_pack_paid(t) %}<p class="upsell small">资料核查和信息备忘录属于出售准备包。卖方可先提交资料。The data check and info memo come with the preparation pack; the seller can submit data before buying it.</p>{% endif %}
+  <p class="small muted">{{ '已允许将完整数据发送至 Claude' if cfg.ALLOW_DATA_EXPORT else '完整数据不出境：仅使用规则核查和模板备忘录（MAMATCH_ALLOW_DATA_EXPORT 未开启）' }} ·
+    {{ 'Full data may be sent to Claude.' if cfg.ALLOW_DATA_EXPORT else 'Full data stays here: rule-based check and template memo only (MAMATCH_ALLOW_DATA_EXPORT is off).' }}</p>
+  <details {{ 'open' if not t.financials }}><summary>资料 Data ({{ t.financials|length }} 年 years)</summary>
+    {{ data_form(t, '/targets/%s/data'|format(t.id)) }}
+  </details>
+  <form class="inline" method="post" action="/targets/{{ t.id }}/datacheck"><button {{ 'disabled' if not fees.prep_pack_paid(t) }}>运行核查 Run data check</button></form>
+  {% if t.data_checks %}{{ findings_list(t.data_checks[0]) }}{% endif %}
+</section>
+
+<section class="panel" id="memo">
+  <h2>信息备忘录 Info memo <span class="muted small">签署保密协议后才向买方提供 · goes to buyers only after an NDA</span></h2>
+  <form class="inline" method="post" action="/targets/{{ t.id }}/memo">
+    <select name="language" aria-label="Memo language"><option value="zh">中文</option><option value="en">English</option></select>
+    <button {{ 'disabled' if not fees.prep_pack_paid(t) }}>生成草稿 Draft info memo</button>
+  </form>
+  {% for m in t.memos[:3] %}
+  <div class="teaser">
+    <div class="small muted">v{{ m.version }} · {{ m.language }} · {{ m.generated_by }} · {{ m.created_at.strftime('%Y-%m-%d %H:%M') }}
+      {% if m.status == 'approved' %}<span class="pill">已批准 approved</span>{% endif %}</div>
+    {% if m.name_findings %}<ul class="findings">{% for f in m.name_findings %}<li>{{ f.message }} <code>{{ f.matched }}</code></li>{% endfor %}</ul>{% endif %}
+    <details {{ 'open' if loop.first }}><summary>查看 View</summary>{{ memo_view(m) }}</details>
+    {% if m.status != 'approved' and not m.name_findings %}
+    <form class="inline" method="post" action="/memos/{{ m.id }}/approve"><button class="ghost">审核通过 Approve</button></form>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="empty">还没有备忘录。No info memo yet.</p>
+  {% endfor %}
+</section>
 
 <section class="panel" id="demand">
   <h2>买方需求 Buyer demand <span class="muted small">运营方可见全部细分；卖方仅在付费方案下可见 · Sellers see the breakdown only on the paid plan</span></h2>

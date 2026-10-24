@@ -32,6 +32,8 @@ def _add_missing_columns(engine) -> None:
 
     Enough for the MVP's SQLite files; switch to Alembic before any production deployment.
     """
+    import json
+
     from sqlalchemy import inspect, text
 
     insp = inspect(engine)
@@ -42,8 +44,13 @@ def _add_missing_columns(engine) -> None:
                 if col.name in existing:
                     continue
                 default = col.default.arg if col.default is not None else None
-                if callable(default):  # e.g. JSON list columns default to list()
-                    literal = "'[]'" if col.type.__class__.__name__ == "JSON" else "NULL"
+                if callable(default):
+                    # JSON columns default to list() or dict(); SQLAlchemy wraps them to take a context.
+                    # Other callables (random ids) must not give every old row the same value.
+                    if col.type.__class__.__name__ == "JSON":
+                        literal = "'" + json.dumps(default(None)) + "'"
+                    else:
+                        literal = "NULL"
                 elif isinstance(default, bool):
                     literal = "1" if default else "0"
                 elif isinstance(default, (int, float)):

@@ -19,9 +19,16 @@ Background and positioning: [docs/research.md](docs/research.md). Design and pri
      verified buyers browse. Needs an approved, low-risk teaser first.
    - **Private:** not listed. The paid plan unlocks the detailed demand breakdown and outreach: the
      adviser shortlists matching buyers, the seller approves each one, and approval sends the teaser.
-4. **Buyer priority plan (paid):** new listings 7 days early, search and filters on the board, and
+4. **Private-seller fees** (`fees.py`): teaser, demand total and listing are free. A one-off
+   **preparation pack** covers a data check of what the seller submits (three years of figures and
+   a diligence checklist: invoiced vs. book revenue, social insurance, permits in the founder's
+   name, land, customer concentration, guarantees) and an **info memo** draft that buyers see only
+   after an NDA. An **outreach retainer** runs per 182 days. A **success fee** (4%, minimum RMB 300k,
+   placeholders) applies at closing for outreach clients, less fees already paid. Fees are
+   invoiced by the partner adviser; the platform's 25% share is recorded with each charge.
+5. **Buyer priority plan (paid):** new listings 7 days early, search and filters on the board, and
    first place among equally good fits in a seller's outreach list (shown to the seller).
-5. **Teasers and re-identification check** (from v1) in Chinese, Japanese or English, and a
+6. **Teasers and re-identification check** (from v1) in Chinese, Japanese or English, and a
    **pipeline** from suggested to closed. Names are disclosed both ways only after an NDA and the
    seller's approval.
 
@@ -56,6 +63,9 @@ src/mamatch/
   plans.py           seller and buyer plans, what each unlocks
   listing.py         anonymised board and listing cards
   offers.py          seller-approved outreach, board interest, name disclosure
+  fees.py            seller fees, retainer period, success fee with credits
+  datacheck.py       checks on seller-submitted data
+  infomemo.py        info memo drafts (masked identity, exact figures, post-NDA)
   teaser.py          banded facts, teaser drafting
   reid.py            re-identification check
   matching.py        buyer ranking with reasons
@@ -79,7 +89,9 @@ tests/               offline tests; fixtures/cninfo_query.json is a real CNINFO 
 
 - **Data residency.** Deal data must be hosted in mainland China (PIPL, data-export rules).
   Calling the Claude API sends teaser inputs abroad. The inputs are banded and name-free, but
-  confirm the setup with PRC counsel, or keep Claude to public announcement data only.
+  confirm the setup with PRC counsel, or keep Claude to public announcement data only. The data
+  check and info memo use exact financials, so they stay rule-based and template-based unless
+  `MAMATCH_ALLOW_DATA_EXPORT=1` (set it only after counsel approves, or with a mainland-hosted model).
 - **Platform licensing.** Paid plans for registered users make this an operating internet
   information service: it needs an ICP operating licence, and foreign ownership is capped, so a
   Chinese partner is needed. Stay clear of trading-venue rules: registered buyers only, one

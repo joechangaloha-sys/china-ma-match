@@ -11,8 +11,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import buyers as buyer_reg
-from . import listing, matching, offers, pipeline, plans, teaser
-from .models import AdviserFirm, Buyer, BuyerSignal, Target
+from . import config
+from . import datacheck, fees, infomemo, listing, matching, offers, pipeline, plans, teaser
+from .models import AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target
 
 NOW = datetime.now(timezone.utc)
 
@@ -78,6 +79,24 @@ EXAMPLE_TARGETS = [
 # How each example target is set up for the v2 demo: (visibility, seller plan, listed days ago)
 EXAMPLE_SETUP = {"Project Jade": ("private", "paid", None), "Project Kiln": ("listed", "free", 12),
                  "Project Delta": ("listed", "free", 2)}
+
+
+# Preparation-pack data for one example: three years of figures (RMB m) and checklist answers,
+# with the kind of issues the data check should catch (uninvoiced revenue, social insurance gaps,
+# a permit in the founder's name).
+EXAMPLE_PREP = {
+    "Project Jade": dict(
+        financials={"-3": dict(revenue=104.0, gross_profit=21.0, net_profit=8.9, total_assets=96.0,
+                               total_liabilities=41.0, cash=12.0),
+                    "-2": dict(revenue=118.0, gross_profit=24.5, net_profit=10.2, total_assets=101.0,
+                               total_liabilities=43.0, cash=15.5),
+                    "-1": dict(revenue=126.0, gross_profit=26.0, net_profit=11.5, total_assets=108.0,
+                               total_liabilities=44.0, cash=18.0)},
+        disclosures=dict(invoiced_revenue=108.0, top_customer_share=38, related_party_share=5, employees_insured=132,
+                         permits_personal=True, land="owned", owner_guarantees=True, pending_disputes=False,
+                         notes="排污许可证登记在创始人个人名下。"),
+    ),
+}
 
 
 def _uscc(i: int) -> str:
@@ -146,7 +165,30 @@ def seed(session: Session) -> None:
         if not t.seller_token and code in EXAMPLE_SETUP:
             _setup_target(session, t, *EXAMPLE_SETUP[code])
     session.flush()
+    for code, t in have.items():
+        if t.seller_plan == "paid" and not any(c.kind == "outreach" for c in t.charges):
+            # Example databases from before the fee ledger: record the retainer they already show as paid.
+            t.charges.append(SellerCharge(kind="outreach", amount=config.SELLER_PLAN_FEE_RMB,
+                                          invoice_ref=t.plan_invoice_ref,
+                                          detail={"platform_share": config.SELLER_PLAN_FEE_RMB * config.PLATFORM_SHARE}))
+        if code in EXAMPLE_PREP and not fees.prep_pack_paid(t):
+            _setup_prep(session, t, EXAMPLE_PREP[code])
+    session.flush()
 
+
+def _setup_prep(session: Session, t: Target, spec: dict) -> None:
+    """Preparation pack paid, data submitted and checked, IM approved; the furthest buyer signs the NDA."""
+    ys = datacheck.years()
+    t.financials = {ys[int(k)]: v for k, v in spec["financials"].items()}
+    t.disclosures = dict(spec["disclosures"])
+    fees.record_prep_pack(t, "PILOT-EX-002")
+    datacheck.run(session, t)
+    infomemo.approve(infomemo.draft(session, t, "zh"))
+    session.flush()
+    for m in t.matches:
+        if m.stage == "interested":
+            pipeline.move(session, m, "nda_signed", "NDA signed")
+            break
 
 def _make_verified(buyer: Buyer, i: int) -> None:
     buyer.invite_token = buyer.invite_token or buyer_reg.new_token()
