@@ -10,10 +10,10 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import (analytics, auth, buyers, datacheck, dealstatus, documents, fees, infomemo, listing, matching, offers,
+from .. import (analytics, auth, authority, buyers, datacheck, dealstatus, documents, fees, infomemo, listing, matching, offers,
                 pipeline, plans, teaser)
-from ..models import (AuditEvent, Buyer, Document, ExpertReferral, ExtractedField, InfoMemo, Match, Target, Teaser,
-                      User)
+from ..models import (Adviser, AuditEvent, Buyer, Document, ExpertReferral, ExtractedField, InfoMemo,
+                      MandateAuthorization, Match, Target, Teaser, User)
 from ..taxonomy import FOUNDER_TRANSITION, PAYMENT_TERMS, TIMING
 from .common import I, back, firm, get_session, not_found, num, render, require, save_data
 
@@ -72,6 +72,39 @@ def buyer_verify(buyer_id: int, user: User = Depends(dm), s: Session = Depends(g
     return back(f"{I}/buyers", f"已认证 Verified: {b.name}")
 
 
+@router.get("/advisers", response_class=HTMLResponse)
+def adviser_queue(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
+    rows = s.scalars(select(Adviser).order_by(Adviser.created_at.desc())).all()
+    return render(request, "adviser_queue.html", user, portal="internal", rows=rows, PROFESSIONS=authority.PROFESSIONS)
+
+
+@router.post("/advisers/{adviser_id}/verify")
+def adviser_verify(adviser_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
+    a = s.get(Adviser, adviser_id) or not_found()
+    authority.verify_adviser(s, a, user)
+    return back(f"{I}/advisers", f"已认证 Verified: {a.firm}")
+
+
+@router.post("/targets/{target_id}/authority")
+def authority_verify(target_id: int, note: str = Form(""), user: User = Depends(dm), s: Session = Depends(get_session)):
+    t = _t(s, target_id)
+    try:
+        authority.verify_authority(s, t, user, note)
+    except ValueError as exc:
+        return back(f"{I}/targets/{t.id}#authority", str(exc))
+    return back(f"{I}/targets/{t.id}#authority", "出售权限已核验 Authority to sell verified")
+
+
+@router.post("/authorizations/{auth_id}/revoke")
+def authorization_revoke(auth_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
+    a = s.get(MandateAuthorization, auth_id) or not_found()
+    try:
+        authority.revoke(s, a, user)
+    except ValueError as exc:
+        return back(f"{I}/targets/{a.target_id}#authority", str(exc))
+    return back(f"{I}/targets/{a.target_id}#authority", "Authorisation revoked")
+
+
 # ---------------------------------------------------------------- mandates
 
 @router.get("/targets/new", response_class=HTMLResponse)
@@ -126,6 +159,7 @@ def target_detail(target_id: int, request: Request, user: User = Depends(dm), s:
     return render(request, "target.html", user, portal="internal", t=t, facts=teaser.facts(t), card=listing.card(t),
                   invite=invite, seller=seller, next_statuses=dealstatus.allowed_next(t.status),
                   missing=documents.missing_kinds(t), referral_kinds=REFERRAL_KINDS,
+                  OWNER_ROLES=authority.OWNER_ROLES, PROFESSIONS=authority.PROFESSIONS,
                   nda_available=offers.nda_available)
 
 

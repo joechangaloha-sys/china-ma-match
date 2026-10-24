@@ -9,9 +9,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, documents, listing, offers, plans, teaser
-from ..models import Match, Target, Teaser, User
-from .common import anon_buyer, back, get_session, not_found, render, require, save_data, seller_reasons
+from .. import auth, authority, documents, listing, offers, plans, teaser
+from ..models import MandateAuthorization, Match, Target, Teaser, User
+from .common import anon_buyer, back, get_session, not_found, num, render, require, save_data, seller_reasons
 
 router = APIRouter(prefix="/seller")
 seller_only = require("seller")
@@ -42,6 +42,8 @@ def seller_page(target_id: int, request: Request, user: User = Depends(seller_on
                   sent=[m for m in t.matches if m.stage not in ("suggested", "shortlisted")],
                   anon_buyer=anon_buyer, seller_reasons=seller_reasons, after_nda=offers.AFTER_NDA,
                   latest_teaser=latest_teaser, missing=documents.missing_kinds(t),
+                  OWNER_ROLES=authority.OWNER_ROLES, SCOPES=authority.SCOPES, PROFESSIONS=authority.PROFESSIONS,
+                  auth_text=authority.AUTH_TEXT,
                   memo=next(iter(t.memos), None))
 
 
@@ -124,3 +126,29 @@ def seller_match_action(target_id: int, match_id: int, action: str, user: User =
         msg = str(exc)
     auth.log(s, user, f"seller_{action}", target_id=t.id, match_id=m.id)
     return back(f"/seller/{t.id}#buyers", msg)
+
+
+@router.post("/{target_id}/authority")
+def seller_authority(target_id: int, owner_role: str = Form(""), share_pct: str = Form(""), accept: str = Form(""),
+                     confirm_authority: str = Form(""), user: User = Depends(seller_only), s: Session = Depends(get_session)):
+    t = _mine(s, user, target_id)
+    if not confirm_authority:
+        return back(f"/seller/{t.id}#authority", "请确认您有权出售该企业 Please confirm you are entitled to sell the company.")
+    try:
+        authority.owner_confirm(s, t, user, role=owner_role, share_pct=num(share_pct), accept_authorizations=bool(accept))
+    except ValueError as exc:
+        return back(f"/seller/{t.id}#authority", str(exc))
+    return back(f"/seller/{t.id}#authority", "已确认，交易经理将核对 Confirmed; your deal manager will check it.")
+
+
+@router.post("/{target_id}/authorizations/{auth_id}/revoke")
+def seller_revoke(target_id: int, auth_id: int, user: User = Depends(seller_only), s: Session = Depends(get_session)):
+    t = _mine(s, user, target_id)
+    a = s.get(MandateAuthorization, auth_id)
+    if a is None or a.target_id != t.id:
+        not_found()
+    try:
+        authority.revoke(s, a, user)
+    except ValueError as exc:
+        return back(f"/seller/{t.id}#authority", str(exc))
+    return back(f"/seller/{t.id}#authority", "已撤回授权 Authorisation revoked")

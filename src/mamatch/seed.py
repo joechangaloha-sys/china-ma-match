@@ -11,9 +11,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import buyers as buyer_reg
-from . import auth, config
+from . import auth, authority, config
 from . import datacheck, fees, infomemo, listing, matching, offers, pipeline, plans, teaser
-from .models import AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target, User
+from .models import Adviser, AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target, User
 
 NOW = datetime.now(timezone.utc)
 
@@ -118,7 +118,17 @@ DEMO_USERS = [
     ("seller.jade@demo.mamatch.test", "seller", "示例·王先生", "Project Jade", None),
     ("buyer.huadong@demo.mamatch.test", "buyer", "示例·华东精密 并购部", None, "EX000"),
     ("buyer.pending@demo.mamatch.test", "buyer", "示例·待审核买方A", None, "EXP001"),
+    ("adviser@demo.mamatch.test", "adviser", "示例·李会计师", None, None),
 ]
+
+
+def _example_authority(t: Target) -> None:
+    """Example sellers: authority stated by the owner and checked by the deal manager."""
+    if t.authority_verified_at is None:
+        t.owner_role = t.owner_role or "legal_rep"
+        t.owner_confirmed_at = t.owner_confirmed_at or NOW
+        t.authority_verified_at = NOW
+        t.authority_note = "示例：营业执照法定代表人与股东名册一致 Example: licence and shareholder register checked"
 
 
 def _uscc(i: int) -> str:
@@ -186,6 +196,7 @@ def seed(session: Session) -> None:
             if not t.teasers:
                 _setup_target(session, t, *EXAMPLE_SETUP[code])
             else:  # example database from before seller approval and deal status existed
+                _example_authority(t)
                 for tz in t.teasers:
                     if tz.status == "approved" and not tz.seller_approved_at:
                         teaser.seller_approve(tz)
@@ -217,6 +228,17 @@ def _seed_users(session: Session, targets: dict[str, Target]) -> None:
         if target_code and target_code in targets:
             targets[target_code].seller_user_id = user.id
             targets[target_code].seller_token = ""  # invite used
+    for t in targets.values():
+        if t.is_example:
+            _example_authority(t)
+    adviser_user = session.scalar(select(User).where(User.email == "adviser@demo.mamatch.test"))
+    if adviser_user and not session.scalar(select(Adviser.id).where(Adviser.user_id == adviser_user.id)):
+        adv = authority.register_adviser(session, adviser_user, firm="示例·长三角会计师事务所", profession="accountant",
+                                         license_no="EX-CPA-000001", firm_uscc="91320500MA00008888")
+        authority.verify_adviser(session, adv, adviser_user)
+        if "Project Delta" in targets:
+            a = authority.start_mandate(session, adv, targets["Project Delta"])
+            a.status, a.confirmed_at, a.verified_at = "verified", NOW, NOW
     if (b := session.scalar(select(Buyer).where(Buyer.external_id == "EX000"))) and not b.funding_max:
         b.funding_min, b.funding_max, b.funding_evidence = 30, 300, "bank_letter"
         b.thesis_text = "补强新能源汽车热管理零部件产能，收购长三角中小汽配供应商。"
@@ -246,6 +268,7 @@ def _make_verified(buyer: Buyer, i: int) -> None:
 
 def _setup_target(session: Session, t: Target, visibility: str, plan: str, listed_days_ago: int | None) -> None:
     t.seller_token = buyer_reg.new_token()
+    _example_authority(t)
     if not any(tz.status == "approved" for tz in t.teasers):
         tz = teaser.draft(session, t, "zh", use_llm=False)
         teaser.approve(tz)

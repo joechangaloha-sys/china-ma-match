@@ -17,6 +17,30 @@
   {% if t.status not in order %}<p><b>{{ L(STATUSES[t.status]) }}</b></p>{% endif %}
 </section>
 
+<section class="panel" id="authority">
+  <h2>{{ T('出售权限与授权', 'Authority and authorisations') }}</h2>
+  {% if not t.owner_confirmed_at %}
+  <form class="grid" method="post" action="{{ P }}/seller/{{ t.id }}/authority">
+    <label>{{ T('您在公司中的身份', 'Your role in the company') }} <select name="owner_role" required><option value="">—</option>{% for k, v in OWNER_ROLES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+    <label>{{ T('持股比例（股东填写，%）', 'Shareholding (shareholders, %)') }} <input name="share_pct" inputmode="decimal"></label>
+    {% for a in t.authorizations if a.status == 'requested' %}
+    <div class="wide small"><b>{{ a.adviser.firm }}</b> · {{ L(PROFESSIONS[a.adviser.profession]) }}<p class="nda">{{ L(AUTH_TEXT) }}</p>
+      <label class="check"><input type="checkbox" name="accept" value="1" required> {{ T('我授权该顾问代表我处理本次出售', 'I authorise this adviser to act for me in this sale') }}</label></div>
+    {% endfor %}
+    <label class="check wide"><input type="checkbox" name="confirm_authority" value="1" required> {{ T('我确认有权出售或安排出售该企业。', 'I confirm I am entitled to sell, or arrange the sale of, this company.') }}</label>
+    <div class="wide"><button>{{ T('确认', 'Confirm') }}</button></div>
+  </form>
+  {% else %}
+  <p>{{ L(OWNER_ROLES.get(t.owner_role, t.owner_role)) }}{% if t.owner_share_pct %} · {{ '%g'|format(t.owner_share_pct) }}%{% endif %} ·
+    {% if t.authority_verified_at %}<span class="pill">{{ T('交易经理已核验', 'verified by the deal manager') }}</span>{% else %}<span class="pill medium">{{ T('待交易经理核验', 'being verified') }}</span>{% endif %}</p>
+  {% if not t.authority_verified_at %}<p class="small muted">{{ T('请上传营业执照和股权文件；核验完成前，项目不会对买方展示。', 'Please upload the business licence and ownership documents; nothing is shown to buyers until this is verified.') }}</p>{% endif %}
+  {% endif %}
+  {% for a in t.authorizations %}
+  <div class="row small">{{ T('顾问', 'Adviser') }}: <b>{{ a.adviser.firm }}</b> · {{ L(PROFESSIONS[a.adviser.profession]) }} · {{ L(AUTH_STATUS[a.status]) }}
+    {% if a.status in ('owner_confirmed', 'verified') %}<form class="inline" method="post" action="{{ P }}/seller/{{ t.id }}/authorizations/{{ a.id }}/revoke"><button class="ghost small">{{ T('撤回授权', 'Revoke') }}</button></form>{% endif %}</div>
+  {% endfor %}
+</section>
+
 <section class="panel" id="documents">
   <h2>{{ T('资料清单', 'Document checklist') }}</h2>
   <p class="small muted">{{ T('文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为“资料室”的文件。',

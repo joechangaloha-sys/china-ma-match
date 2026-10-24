@@ -262,14 +262,21 @@ def test_deal_manager_mandate_flow(app, db_url):
     tz = int(re.search(rf"{I}/teasers/(\d+)/approve", r.text).group(1))
     dm.post(f"{I}/teasers/{tz}/approve")
     assert "seller must approve" in dm.post(f"{url}/visibility", data={"visibility": "listed"}).text
-    # The seller opens their account from the invite link and approves the teaser.
+    # The seller opens their account from the invite link, states their authority and approves the teaser.
     token = re.search(r"/invite/([\w-]+)", dm.get(url).text).group(1)
     seller = client(app)
-    seller.post(f"/invite/{token}", data={"name": "测", "email": "s.test@example.test", "password": "long-enough-pw"})
+    seller.post(f"/invite/{token}", data={"name": "测", "email": "s.test@example.test", "password": "long-enough-pw",
+                                          "owner_role": "legal_rep", "confirm_authority": "1"})
     assert seller.post(f"/seller/{tid}/teasers/{tz}/approve").status_code == 200
+    r = seller.post(f"/seller/{tid}/visibility", data={"visibility": "listed"})
+    assert "尚未核验" in r.text  # authority not verified yet
+    assert "Upload the business licence" in dm.post(f"{url}/authority").text
+    for kind in ("license", "ownership"):
+        seller.post(f"/seller/{tid}/documents", data={"kind": kind}, files={"file": (f"{kind}.txt", b"x", "text/plain")})
+    dm.post(f"{url}/authority", data={"note": "licence checked"})
     seller.post(f"/seller/{tid}/visibility", data={"visibility": "listed"})
     t = _get(db_url, Target, id=tid)
-    assert t.visibility == "listed" and t.status == "in_market"
+    assert t.visibility == "listed" and t.status == "in_market" and t.authority_verified_at
     assert "测试有限公司" not in client(app).get(f"/opportunities/{tid}").text
     assert client(app).get(f"/invite/{token}").status_code == 404  # one-time link
 
@@ -367,11 +374,13 @@ def test_detailed_search_page(app):
 def test_faq_and_why_section_in_both_languages(app):
     en = client(app, lang="en-US")
     home = en.get("/en/").text
-    assert "Why we built this" in home and "Joe Chang" in home and "bulge-bracket" in home
+    assert "Why we built this" in home and "Joe Chang" not in home
+    assert "bulge-bracket investment banks, major law firms and Big Four accounting firms" in home
     faq = en.get("/en/faq").text
     assert "Frequently asked questions" in faq and "How do fees work for advisers?" in faq and "25%" in faq and "unaffected" not in home
     zh = client(app).get("/zh/faq").text
     assert "常见问题" in zh and "顾问的收费如何安排" in zh
+    assert "How do you verify authority?" in faq and "Can an adviser make decisions for the client?" in faq
 
 
 def test_adviser_can_submit_for_a_client(app, db_url):
@@ -384,3 +393,69 @@ def test_adviser_can_submit_for_a_client(app, db_url):
     t = _get(db_url, Target, legal_name="示例·客户公司")
     assert t.submitted_by == "adviser" and t.adviser_firm == "示例·某会计师事务所"
     assert "示例·某会计师事务所" in client(app, DM).get(I).text
+
+
+
+ADVISER = "adviser@demo.mamatch.test"
+
+
+def test_adviser_journey_with_client_authorisation(app, db_url):
+    # 1. A new adviser registers and must be verified before acting for anyone.
+    adv = client(app)
+    adv.post("/register/adviser", data={"email": "cpa@example.test", "password": "long-enough-pw", "name": "周",
+                                        "firm": "示例·某会计师事务所", "profession": "accountant", "license_no": "CPA-123",
+                                        "consent": "1"})
+    data = {"company": "示例·客户企业有限公司", "owner_name": "示例·赵总", "owner_contact": "139", "sector": "food",
+            "province": "浙江", "revenue": "30", "confirm": "1"}
+    adv.post("/adviser/mandates", data=data)
+    assert _get(db_url, Target, legal_name="示例·客户企业有限公司") is None
+    from mamatch.models import Adviser
+    a = _get(db_url, Adviser, firm="示例·某会计师事务所")
+    dm = client(app, DM)
+    assert "示例·某会计师事务所" in dm.get(f"{I}/advisers").text
+    dm.post(f"{I}/advisers/{a.id}/verify")
+    # 2. The verified adviser opens the mandate and gets the owner's authorisation link.
+    r = adv.post("/adviser/mandates", data=data)
+    t = _get(db_url, Target, legal_name="示例·客户企业有限公司")
+    assert t.submitted_by == "adviser" and "/invite/" in r.text
+    token = re.search(r"/invite/([\w-]+)", r.text).group(1)
+    # 3. The owner opens their account, states their role and signs the adviser's authorisation.
+    invite = client(app).get(f"/invite/{token}").text
+    assert "示例·某会计师事务所" in invite and "授权" in invite
+    owner = client(app)
+    r = owner.post(f"/invite/{token}", data={"name": "赵", "email": "owner@example.test", "password": "long-enough-pw",
+                                             "owner_role": "shareholder", "share_pct": "80", "confirm_authority": "1"})
+    assert "请确认对顾问的授权" in r.text  # the authorisation must be accepted explicitly
+    owner.post(f"/invite/{token}", data={"name": "赵", "email": "owner@example.test", "password": "long-enough-pw",
+                                         "owner_role": "shareholder", "share_pct": "80", "confirm_authority": "1",
+                                         "accept": "1"})
+    def auth_state(tid):
+        with db.session_scope(db_url) as s:
+            tt = s.get(Target, tid)
+            return tt.owner_role, tt.owner_share_pct, tt.authority_verified_at, [(a.id, a.status) for a in tt.authorizations]
+
+    role, share, _, auths = auth_state(t.id)
+    assert role == "shareholder" and share == 80 and auths[0][1] == "owner_confirmed"
+    # 4. The adviser uploads the documents; the deal manager verifies authority, which activates the authorisation.
+    for kind in ("license", "ownership"):
+        r = adv.post(f"/adviser/{t.id}/documents", data={"kind": kind}, files={"file": (f"{kind}.txt", b"x", "text/plain")})
+        assert "已上传" in r.text
+    dm.post(f"{I}/targets/{t.id}/authority", data={"note": "执照与股东名册一致"})
+    _, _, verified_at, auths = auth_state(t.id)
+    assert verified_at and auths[0][1] == "verified"
+    # 5. The adviser cannot make the owner's decisions, and loses access when the owner revokes.
+    assert adv.post(f"/seller/{t.id}/visibility", data={"visibility": "listed"}).status_code == 403
+    owner.post(f"/seller/{t.id}/authorizations/{auths[0][0]}/revoke")
+    assert adv.get(f"/adviser/{t.id}").status_code == 404
+    with db.session_scope(db_url) as s:
+        actions = {e.action for e in s.scalars(select(AuditEvent).where(AuditEvent.target_id == t.id))}
+    assert {"authorization_requested", "authorization_confirmed", "authority_verified", "authorization_revoked"} <= actions
+
+
+def test_adviser_sees_only_authorised_mandates(app, db_url):
+    adv = client(app, ADVISER)
+    delta = _get(db_url, Target, code_name="Project Delta")  # authorised in the seed
+    jade = _get(db_url, Target, code_name="Project Jade")
+    assert adv.get(f"/adviser/{delta.id}").status_code == 200
+    assert adv.get(f"/adviser/{jade.id}").status_code == 404
+    assert client(app, ADVISER).get(I).status_code == 403

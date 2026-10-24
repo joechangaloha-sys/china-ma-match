@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, listing, offers, teaser
+from .. import auth, authority, listing, offers, teaser
 from ..buyers import new_token
 from ..models import Buyer, Target, User
 from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
@@ -20,7 +20,7 @@ PAGES = {"sell": "page_sell.html", "buy": "page_buy.html", "fees": "page_fees.ht
 
 
 def _home_for(user: User | None) -> str:
-    return {"deal_manager": I, "seller": "/seller", "buyer": "/buyer"}.get(user.role if user else "", "/")
+    return {"deal_manager": I, "seller": "/seller", "buyer": "/buyer", "adviser": "/adviser"}.get(user.role if user else "", "/")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -157,6 +157,29 @@ def logout(request: Request, s: Session = Depends(get_session)):
     return resp
 
 
+@router.get("/register/adviser", response_class=HTMLResponse)
+def adviser_register_page(request: Request, user: User | None = Depends(current_user)):
+    return render(request, "register_adviser.html", user, portal="public", PROFESSIONS=authority.PROFESSIONS)
+
+
+@router.post("/register/adviser")
+def adviser_register(request: Request, s: Session = Depends(get_session), email: str = Form(""), password: str = Form(""),
+                     name: str = Form(""), firm: str = Form(""), profession: str = Form("accountant"),
+                     license_no: str = Form(""), firm_uscc: str = Form(""), consent: str = Form("")):
+    if not consent:
+        return back("/register/adviser", "请同意服务条款与隐私说明 Please accept the terms and privacy notice.")
+    try:
+        user = auth.create_user(s, email=email, password=password, role="adviser", name=name, organization=firm)
+        authority.register_adviser(s, user, firm=firm, profession=profession, license_no=license_no, firm_uscc=firm_uscc)
+    except ValueError as exc:
+        s.rollback()
+        return back("/register/adviser", str(exc))
+    resp = RedirectResponse("/adviser", status_code=303)
+    resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
+                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
+    return resp
+
+
 @router.get("/register", response_class=HTMLResponse)
 def register_page(request: Request, user: User | None = Depends(current_user)):
     return render(request, "register.html", user, portal="public")
@@ -189,18 +212,30 @@ def invite_page(token: str, request: Request, s: Session = Depends(get_session))
     t = s.scalar(select(Target).where(Target.seller_token == token)) if token else None
     if t is None:
         not_found()
-    return render(request, "invite.html", None, portal="public", t=t, token=token)
+    pending = [a for a in t.authorizations if a.status == "requested"]
+    return render(request, "invite.html", None, portal="public", t=t, token=token, pending=pending,
+                  OWNER_ROLES=authority.OWNER_ROLES, SCOPES=authority.SCOPES, PROFESSIONS=authority.PROFESSIONS,
+                  auth_text=authority.AUTH_TEXT)
 
 
 @router.post("/invite/{token}")
 def invite_accept(token: str, request: Request, s: Session = Depends(get_session), email: str = Form(""),
-                  password: str = Form(""), name: str = Form("")):
+                  password: str = Form(""), name: str = Form(""), owner_role: str = Form(""),
+                  share_pct: str = Form(""), accept: str = Form(""), confirm_authority: str = Form("")):
     t = s.scalar(select(Target).where(Target.seller_token == token)) if token else None
     if t is None:
         not_found()
+    if not confirm_authority:
+        return back(f"/invite/{token}", "请确认您有权出售该企业 Please confirm you are entitled to sell the company.")
+    try:
+        share = num(share_pct)
+    except ValueError:
+        return back(f"/invite/{token}", "持股比例请填写数字 Shareholding must be a number.")
     try:
         user = auth.create_user(s, email=email, password=password, role="seller", name=name)
+        authority.owner_confirm(s, t, user, role=owner_role, share_pct=share, accept_authorizations=bool(accept))
     except ValueError as exc:
+        s.rollback()
         return back(f"/invite/{token}", str(exc))
     t.seller_user_id, t.seller_token = user.id, ""
     auth.log(s, user, "seller_account_created", target_id=t.id)

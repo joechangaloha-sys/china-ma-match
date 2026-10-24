@@ -3,10 +3,25 @@
 {% block body %}
 <form class="panel narrow grid" method="post" action="{{ P }}/invite/{{ token }}">
   <h1 class="wide">{{ T('开通您的卖方账户', 'Open your seller account') }}</h1>
-  <p class="wide small">{{ t.code_name }} · {{ T('您的交易经理已为您开通出售流程。', 'Your deal manager has opened the sale process for you.') }}</p>
+  <p class="wide small">{{ t.code_name }} · {{ t.legal_name }}</p>
   <label class="wide">{{ T('姓名', 'Your name') }} <input name="name" required></label>
   <label class="wide">{{ T('邮箱', 'Email') }} <input name="email" type="email" autocomplete="username" required></label>
   <label class="wide">{{ T('密码（至少10位）', 'Password (10+ characters)') }} <input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
-  <div class="wide"><button>{{ T('开通', 'Open account') }}</button></div>
+
+  <fieldset class="wide"><legend>{{ T('您的出售权限', 'Your authority to sell') }}</legend>
+    <label>{{ T('您在公司中的身份', 'Your role in the company') }} <select name="owner_role" required><option value="">—</option>{% for k, v in OWNER_ROLES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+    <label>{{ T('持股比例（股东填写，%）', 'Shareholding (shareholders, %)') }} <input name="share_pct" inputmode="decimal"></label>
+    <label class="check"><input type="checkbox" name="confirm_authority" value="1" required> {{ T('我确认有权出售或安排出售该企业，并会提供营业执照和股权文件供核对。', 'I confirm I am entitled to sell, or arrange the sale of, this company, and will provide the business licence and ownership documents for checking.') }}</label>
+  </fieldset>
+
+  {% for a in pending %}
+  <fieldset class="wide"><legend>{{ T('顾问授权', 'Adviser authorisation') }}</legend>
+    <p class="small"><b>{{ a.adviser.firm }}</b> · {{ L(PROFESSIONS[a.adviser.profession]) }} · {{ a.adviser.user.name }}<br>
+      {{ T('授权范围', 'Scope') }}: {% for sc in a.scope %}{{ L(SCOPES[sc]) }}{{ '；' if lang == 'zh' and not loop.last else ('; ' if not loop.last) }}{% endfor %}</p>
+    <p class="small nda">{{ L(AUTH_TEXT) }}</p>
+    <label class="check"><input type="checkbox" name="accept" value="1" required> {{ T('我授权该顾问在上述范围内代表我处理本次出售', 'I authorise this adviser to act for me in this sale within the scope above') }}</label>
+  </fieldset>
+  {% endfor %}
+  <div class="wide"><button>{{ T('开通并确认', 'Open account and confirm') }}</button></div>
 </form>
 {% endblock %}

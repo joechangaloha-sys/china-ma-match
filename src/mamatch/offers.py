@@ -37,6 +37,8 @@ def approve_and_send(session: Session, match: Match) -> DealEvent:
     target, buyer = match.target, match.buyer
     if not plans.seller_outreach(target):
         raise ValueError("Outreach needs a private target on the paid plan.")
+    if target.authority_verified_at is None:
+        raise ValueError("卖方的出售权限尚未核验 The owner's authority to sell has not been verified yet.")
     if buyer.status != "verified":
         raise ValueError("This buyer is not verified yet.")
     if match.stage != "shortlisted":

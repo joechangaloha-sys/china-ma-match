@@ -137,6 +137,15 @@ class Target(Base):
     # The owner's accountant, lawyer or adviser can submit for them and keeps their own engagement.
     submitted_by: Mapped[str] = mapped_column(String(20), default="owner")  # owner | adviser
     adviser_firm: Mapped[str] = mapped_column(String(200), default="")
+
+    # Authority to sell: the owner confirms who they are in the company; a deal manager checks it
+    # against the business licence and shareholder register before anything goes to buyers.
+    owner_role: Mapped[str] = mapped_column(String(20), default="")  # authority.OWNER_ROLES
+    owner_share_pct: Mapped[float | None] = mapped_column(Float, nullable=True)
+    owner_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    authority_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    authority_verified_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    authority_note: Mapped[str] = mapped_column(Text, default="")
     normalized_earnings: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, adviser-approved
     show_earnings: Mapped[bool] = mapped_column(default=False)  # seller approved showing earnings and margin bands
     # Seller-approved public description of products and services (no names, brands or customers),
@@ -170,6 +179,8 @@ class Target(Base):
                                                           order_by="ExtractedField.id")
     referrals: Mapped[list["ExpertReferral"]] = relationship(back_populates="target", cascade="all, delete-orphan",
                                                              order_by="ExpertReferral.created_at")
+    authorizations: Mapped[list["MandateAuthorization"]] = relationship(
+        back_populates="target", cascade="all, delete-orphan", order_by="MandateAuthorization.requested_at")
 
 
 class Teaser(Base):
@@ -403,3 +414,47 @@ class AuditEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     user: Mapped[User | None] = relationship()
+
+
+class Adviser(Base):
+    """An accountant, lawyer or consultant who acts for sellers. Verified before acting for anyone."""
+
+    __tablename__ = "advisers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
+    firm: Mapped[str] = mapped_column(String(200))
+    profession: Mapped[str] = mapped_column(String(20))  # authority.PROFESSIONS
+    license_no: Mapped[str] = mapped_column(String(60), default="")  # CPA certificate, lawyer's practice licence, ...
+    firm_uscc: Mapped[str] = mapped_column(String(18), default="")
+    status: Mapped[str] = mapped_column(String(20), default="registered")  # registered | verified | suspended
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped["User"] = relationship()
+
+
+class MandateAuthorization(Base):
+    """The owner's written authority for one adviser to act on one sale, and its verification.
+
+    requested (adviser prepared the mandate) -> owner_confirmed (owner signed in and accepted the
+    authorisation text) -> verified (deal manager checked the owner's authority) ; revoked at any time
+    by the owner or a deal manager.
+    """
+
+    __tablename__ = "mandate_authorizations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    adviser_id: Mapped[int] = mapped_column(ForeignKey("advisers.id"))
+    status: Mapped[str] = mapped_column(String(20), default="requested")
+    scope: Mapped[list[str]] = mapped_column(JSON, default=list)  # authority.SCOPES keys
+    owner_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    text_version: Mapped[str] = mapped_column(String(20), default="")
+    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    target: Mapped[Target] = relationship(back_populates="authorizations")
+    adviser: Mapped[Adviser] = relationship()

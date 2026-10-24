@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ T('我的客户', 'My clients') }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ adv.firm }}</h1>
+  <p class="sub">{{ L(PROFESSIONS[adv.profession]) }} · {{ T('执业证书', 'Licence') }} {{ adv.license_no }} ·
+    {% if adv.status == 'verified' %}<span class="pill">{{ T('已认证', 'Verified') }}</span>{% else %}<span class="pill medium">{{ T('审核中', 'Being verified') }}</span>{% endif %}</p>
+</div>
+
+<section class="panel">
+  <h2>{{ T('如何为客户登记出售', 'How to list a client’s business') }}</h2>
+  <ol class="steps small">
+    <li>{{ T('在下方填写客户企业的基本信息（需事先取得客户同意）。', 'Enter the client company’s basic facts below (with the client’s prior consent).') }}</li>
+    <li>{{ T('把系统生成的授权链接发给企业主。企业主在自己的账户中确认身份（法定代表人、股东等）并签署对您的授权。', 'Send the owner the authorisation link we generate. The owner confirms their role (legal representative, shareholder, ...) in their own account and signs your authorisation.') }}</li>
+    <li>{{ T('上传营业执照和股权文件；交易经理核对企业主的出售权限后，项目才能对买方展示。', 'Upload the business licence and ownership documents; the deal manager checks the owner’s authority before anything is shown to buyers.') }}</li>
+    <li>{{ T('您可以继续上传资料、填写问卷；确认简介、公开挂牌、选择买方和披露名称由企业主本人决定。', 'You can keep uploading documents and answering the questionnaire; approving the teaser, publishing, choosing buyers and disclosing the name stay with the owner.') }}</li>
+  </ol>
+</section>
+
+<section class="panel">
+  <h2>{{ T('客户项目', 'Client mandates') }}</h2>
+  <div class="tbl"><table>
+    <tr><th>{{ T('项目', 'Mandate') }}</th><th>{{ T('授权', 'Authorisation') }}</th><th>{{ T('出售权限', 'Authority to sell') }}</th><th>{{ T('状态', 'Status') }}</th></tr>
+    {% for a in auths %}
+    <tr><td>{% if a.status != 'revoked' %}<a href="{{ P }}/adviser/{{ a.target_id }}">{{ a.target.code_name }}</a>{% else %}{{ a.target.code_name }}{% endif %}</td>
+      <td><span class="pill {{ 'medium' if a.status in ('requested', 'owner_confirmed') else 'high' if a.status == 'revoked' }}">{{ L(AUTH_STATUS[a.status]) }}</span></td>
+      <td>{{ T('已核验', 'Verified') if a.target.authority_verified_at else T('待核验', 'Not yet verified') }}</td>
+      <td class="small">{{ L(STATUSES[a.target.status]) }}</td></tr>
+    {% else %}<tr><td colspan="4" class="empty">{{ T('暂无。', 'None yet.') }}</td></tr>{% endfor %}
+  </table></div>
+</section>
+
+<form class="panel grid" id="new" method="post" action="{{ P }}/adviser/mandates">
+  <h2 class="wide">{{ T('为客户新建出售项目', 'New mandate for a client') }}</h2>
+  {% if adv.status != 'verified' %}<p class="wide upsell small">{{ T('您的顾问资格通过审核后即可新建项目。', 'You can open mandates once your adviser profile is verified.') }}</p>{% endif %}
+  <label>{{ T('公司全称', 'Company legal name') }} <input name="company" required></label>
+  <label>{{ T('统一社会信用代码', 'Unified social credit code') }} <input name="uscc" maxlength="18"></label>
+  <label>{{ T('企业主姓名', 'Owner’s name') }} <input name="owner_name" required></label>
+  <label>{{ T('企业主电话或邮箱', 'Owner’s phone or email') }} <input name="owner_contact" required></label>
+  <label>{{ T('城市', 'City') }} <input name="city"></label>
+  <label>{{ T('省市', 'Province') }} <select name="province">{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
+  <label>{{ T('行业', 'Sector') }} <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
+  <label>{{ T('年收入（百万元）', 'Revenue, RMB m') }} <input name="revenue" inputmode="decimal"></label>
+  <label>{{ T('年净利润（百万元）', 'Net profit, RMB m') }} <input name="net_profit" inputmode="decimal"></label>
+  <label>{{ T('员工人数', 'Employees') }} <input name="employees" inputmode="numeric"></label>
+  <label>{{ T('成立年份', 'Founded') }} <input name="founded_year" inputmode="numeric"></label>
+  <label>{{ T('交易方式', 'Deal') }} <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T('出售原因', 'Reason') }} <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label class="wide">{{ T('业务、客户与优势', 'Business, customers and strengths') }} <textarea name="notes"></textarea></label>
+  <label class="check wide"><input type="checkbox" name="confirm" value="1" required> {{ T('我确认已获得客户同意提交上述信息；客户本人确认授权前，项目不会对买方展示。', 'I confirm the client agreed to my submitting this information. Nothing is shown to buyers until the owner confirms the authorisation.') }}</label>
+  <div class="wide"><button {{ 'disabled' if adv.status != 'verified' }}>{{ T('新建并生成授权链接', 'Create and get the authorisation link') }}</button></div>
+</form>
+{% endblock %}

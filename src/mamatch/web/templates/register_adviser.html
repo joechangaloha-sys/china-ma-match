@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ T('顾问注册', 'Register as an adviser') }}{% endblock %}
+{% block body %}
+<form class="panel narrow grid" method="post" action="{{ P }}/register/adviser">
+  <h1 class="wide">{{ T('会计师、律师和顾问注册', 'Accountants, lawyers and advisers') }}</h1>
+  <p class="wide small muted">{{ T('我们会向发证机构核对您的执业证书，并向工商登记核对您的机构。通过后，您可以在客户本人授权下为其准备出售。',
+                                  'We check your professional licence with the issuing body and your firm with the business registry. Once verified, you can prepare a sale for a client under that client’s own authorisation.') }}</p>
+  <label class="wide">{{ T('邮箱', 'Email') }} <input name="email" type="email" autocomplete="username" required></label>
+  <label class="wide">{{ T('密码（至少10位）', 'Password (10+ characters)') }} <input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+  <label>{{ T('姓名', 'Your name') }} <input name="name" required></label>
+  <label>{{ T('机构名称', 'Firm') }} <input name="firm" required></label>
+  <label>{{ T('专业', 'Profession') }} <select name="profession">{% for k, v in PROFESSIONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T('执业证书编号', 'Professional licence number') }} <input name="license_no" required></label>
+  <label class="wide">{{ T('机构统一社会信用代码', 'Firm’s unified social credit code') }} <input name="firm_uscc" maxlength="18"></label>
+  <label class="check wide"><input type="checkbox" name="consent" value="1" required> {{ T('同意服务条款与隐私说明，并确认以上信息真实', 'I accept the terms and privacy notice and confirm this information is accurate.') }}</label>
+  <div class="wide"><button>{{ T('注册', 'Register') }}</button></div>
+</form>
+{% endblock %}

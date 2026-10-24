@@ -24,6 +24,7 @@
     <label class="check"><input type="radio" name="submitted_by" value="owner" checked> {{ T('企业主', 'The owner') }}</label>
     <label class="check"><input type="radio" name="submitted_by" value="adviser"> {{ T('企业主的会计师、律师或顾问', "The owner's accountant, lawyer or adviser") }}</label>
     <label>{{ T('您的机构（顾问填写）', 'Your firm (advisers)') }} <input name="adviser_firm"></label>
+    <p class="small">{{ T('会计师、律师和顾问请先', 'Accountants, lawyers and advisers can') }} <a href="{{ P }}/register/adviser">{{ T('注册顾问账户', 'register an adviser account') }}</a>{{ T('，在客户本人授权下为其准备出售。', ' to prepare a sale under the client’s own authorisation.') }}</p>
     <p class="small muted">{{ T('顾问代表客户登记，继续以自己的委托关系服务客户。平台服务费由顾问向客户开票时，按事先约定的比例与平台分成，并向客户披露。', 'Advisers listing for a client keep their own client relationship and engagement. Where the platform’s services are invoiced through the adviser, the fee is shared with the platform on terms agreed in advance and disclosed to the client.') }}</p>
   </fieldset>
   <label>{{ T('公司名称', 'Company') }} <input name="company" required></label>

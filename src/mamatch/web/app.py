@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .. import db, i18n
-from . import buyer, internal, public, seller
+from . import adviser, buyer, internal, public, seller
 
 HERE = Path(__file__).parent
 
@@ -67,4 +67,5 @@ app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
 app.include_router(internal.router)
 app.include_router(seller.router)
 app.include_router(buyer.router)
+app.include_router(adviser.router)
 app.include_router(public.router)  # last: it ends with a catch-all for information pages

@@ -37,6 +37,10 @@ in the browser. See README.md for the structure.
 - Not translated yet: matching reasons shown to sellers (English only), AI-drafted teaser/memo text (shown in the
   language it was drafted in; buyers get an English version if one was drafted and approved).
 
+- Adviser accounts and verified authorisation (`authority.py`, `web/adviser.py`): see README. Founders are
+  described as having bulge-bracket, major law firm and Big Four experience (no names). The authorisation text
+  in `authority.AUTH_TEXT` and the NDA text need counsel review.
+
 ## Next steps
 
 1. Click through the internal mandate page and buyer portal in the browser as the deal manager and the demo

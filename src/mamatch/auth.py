@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from .models import AuditEvent, User, UserSession
 
-ROLES = {"seller": "卖方 Seller", "buyer": "买方 Buyer", "deal_manager": "交易经理 Deal manager"}
+ROLES = {"seller": "卖方 Seller", "buyer": "买方 Buyer", "adviser": "顾问 Adviser", "deal_manager": "交易经理 Deal manager"}
 SESSION_DAYS = 14
 _N, _R, _P = 2**14, 8, 1
 

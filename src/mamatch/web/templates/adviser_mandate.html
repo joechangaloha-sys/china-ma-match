@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card, data_form, findings_list with context %}
+{% block title %}{{ t.code_name }}{% endblock %}
+{% block body %}
+<div>
+  <p class="small"><a href="{{ P }}/adviser">← {{ T('我的客户', 'My clients') }}</a></p>
+  <h1>{{ t.code_name }}</h1>
+  <p class="sub">{{ t.legal_name }} · {{ L(STATUSES[t.status]) }}</p>
+</div>
+
+<section class="panel" id="authorisation">
+  <h2>{{ T('授权', 'Authorisation') }}</h2>
+  <p><span class="pill {{ 'medium' if a.status != 'verified' }}">{{ L(AUTH_STATUS[a.status]) }}</span>
+     {{ T('出售权限', 'Authority to sell') }}: <b>{{ T('已核验', 'verified') if t.authority_verified_at else T('待核验', 'not yet verified') }}</b></p>
+  <p class="small">{{ T('授权范围', 'Scope') }}: {% for sc in a.scope %}{{ L(SCOPES[sc]) }}{{ '；' if lang == 'zh' and not loop.last else ('; ' if not loop.last) }}{% endfor %}</p>
+  {% if a.status == 'requested' and invite %}
+  <p class="small">{{ T('请将此链接发给企业主，由其本人开通账户、确认身份并签署授权：', 'Send this link to the owner to open their account, confirm their role and sign the authorisation:') }}<br>
+    <code class="link">{{ invite }}</code></p>
+  {% endif %}
+  <p class="small muted">{{ T('确认简介、公开挂牌、选择买方和披露名称由企业主本人决定。', 'Approving the teaser, publishing, choosing buyers and disclosing the name stay with the owner.') }}</p>
+</section>
+
+<section class="panel" id="documents">
+  <h2>{{ T('资料清单', 'Document checklist') }}</h2>
+  <div class="tbl"><table class="small">
+    <tr><th>{{ T('资料', 'Item') }}</th><th>{{ T('已上传', 'Uploaded') }}</th></tr>
+    {% for k, label in CHECKLIST.items() %}
+    {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}
+    <tr><td>{{ L(label) }}{% if k in missing %} <span class="pill medium">{{ T('必需', 'required') }}</span>{% endif %}</td>
+      <td>{% for d in docs %}{{ d.filename }}{{ ' · ' if not loop.last }}{% else %}—{% endfor %}</td></tr>
+    {% endfor %}
+  </table></div>
+  <form class="inline" method="post" action="{{ P }}/adviser/{{ t.id }}/documents" enctype="multipart/form-data">
+    <select name="kind" aria-label="{{ T('资料类型', 'Document type') }}">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ L(label) }}</option>{% endfor %}</select>
+    <input type="file" name="file" required aria-label="{{ T('文件', 'File') }}">
+    <button>{{ T('上传', 'Upload') }}</button>
+  </form>
+</section>
+
+<section class="panel" id="data">
+  <h2>{{ T('补充问卷', 'Questions buyers will ask') }}</h2>
+  {{ data_form(t, P ~ '/adviser/' ~ t.id ~ '/data') }}
+  {% if t.data_checks %}<h3>{{ T('需要说明的问题', 'Points to explain') }}</h3>{{ findings_list(t.data_checks[0]) }}{% endif %}
+</section>
+
+<div class="cols">
+<section class="panel">
+  <h2>{{ T('项目卡片', 'Listing card') }}</h2>
+  <p class="small">{{ T('公开方式', 'Visibility') }}: <b>{{ T('已匿名公开', 'listed, anonymised') if t.visibility == 'listed' else T('不公开', 'private') }}</b></p>
+  {{ listing_card(card) }}
+</section>
+<section class="panel">
+  <h2>{{ T('买方进展', 'Buyer progress') }}</h2>
+  {% for m in sent %}<div class="row small">{{ anon_buyer(m.buyer, lang) }} · {{ L(STAGES[m.stage]) }}</div>
+  {% else %}<p class="empty">{{ T('暂无。', 'None yet.') }}</p>{% endfor %}
+</section>
+</div>
+{% endblock %}

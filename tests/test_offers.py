@@ -46,6 +46,11 @@ def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
     with pytest.raises(ValueError, match="seller must approve"):
         listing.publish(t)
     teaser.seller_approve(tz)
+    with pytest.raises(ValueError, match="authority"):
+        listing.publish(t)
+    from datetime import datetime, timezone
+
+    t.owner_confirmed_at = t.authority_verified_at = datetime.now(timezone.utc)
     listing.publish(t)
     assert t.status == "in_market"
     card = listing.card(t)

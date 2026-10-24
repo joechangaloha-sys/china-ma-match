@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}顾问审核{% endblock %}
+{% block body %}
+<div>
+  <h1>顾问审核 Adviser checks</h1>
+  <p class="sub">向发证机构核对执业证书（注册会计师协会、律师协会等），向工商登记核对机构 · Check licences with the issuing body and firms with the business registry</p>
+</div>
+<section class="panel tbl">
+  <table>
+    <tr><th>机构 Firm</th><th>专业 Profession</th><th>执业证书 Licence</th><th>机构信用代码 Firm USCC</th><th>联系人 Contact</th><th>状态 Status</th></tr>
+    {% for a in rows %}
+    <tr><td><b>{{ a.firm }}</b></td><td>{{ PROFESSIONS[a.profession] }}</td><td><code>{{ a.license_no }}</code></td><td><code>{{ a.firm_uscc or '—' }}</code></td>
+      <td class="small">{{ a.user.name }} · {{ a.user.email }}</td>
+      <td>{% if a.status == 'verified' %}<span class="pill">已认证 verified</span>{% else %}
+        <form method="post" action="{{ I }}/advisers/{{ a.id }}/verify"><button class="ghost">已核对，认证 Verify</button></form>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="6" class="empty">没有。None.</td></tr>{% endfor %}
+  </table>
+</section>
+{% endblock %}

@@ -58,6 +58,26 @@
 </section>
 </div>
 
+<section class="panel" id="authority">
+  <h2>出售权限与顾问授权 Authority to sell and adviser authorisations</h2>
+  <table class="small">
+    <tr><th>企业主身份 Owner's role</th><td>{% if t.owner_confirmed_at %}{{ OWNER_ROLES.get(t.owner_role, t.owner_role) }}{% if t.owner_share_pct %} · {{ '%g'|format(t.owner_share_pct) }}%{% endif %} · 确认于 confirmed {{ t.owner_confirmed_at.strftime('%Y-%m-%d') }}{% else %}<span class="pill medium">企业主尚未确认 not confirmed by the owner</span>{% endif %}</td></tr>
+    <tr><th>核验 Verification</th><td>{% if t.authority_verified_at %}<span class="pill">已核验 verified {{ t.authority_verified_at.strftime('%Y-%m-%d') }}</span> {{ t.authority_note }}{% else %}<span class="pill medium">未核验 not verified</span> — 核验前不能公开或推介 nothing can be published or sent until verified{% endif %}</td></tr>
+  </table>
+  {% if not t.authority_verified_at %}
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/authority">
+    <input name="note" size="50" placeholder="核对说明：营业执照法定代表人、股东名册… What you checked" aria-label="Verification note">
+    <button class="ghost">已核对营业执照与股权文件，核验 Verify authority</button>
+  </form>
+  <p class="small muted">需要企业主已确认身份，且已上传营业执照和股权文件。Needs the owner's confirmation and the licence and ownership documents.</p>
+  {% endif %}
+  {% for a in t.authorizations %}
+  <div class="row small">顾问 Adviser: <b>{{ a.adviser.firm }}</b> · {{ PROFESSIONS[a.adviser.profession] }} · 证书 {{ a.adviser.license_no }} ·
+    {{ '已认证顾问' if a.adviser.status == 'verified' else '顾问未认证' }} · {{ AUTH_STATUS[a.status] }}
+    {% if a.status != 'revoked' %}<form class="inline" method="post" action="{{ I }}/authorizations/{{ a.id }}/revoke"><button class="ghost small">撤回 Revoke</button></form>{% endif %}</div>
+  {% endfor %}
+</section>
+
 <section class="panel" id="documents">
   <h2>资料与提取 Documents and extraction</h2>
   {% if missing %}<p class="small">缺少必需资料 Missing required: {% for k in missing %}<span class="pill medium">{{ CHECKLIST[k] }}</span> {% endfor %}</p>{% endif %}

@@ -28,7 +28,7 @@
   {% endif %}
   <span class="who">
     {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ L(ROLES[user.role]) }}</span>
-      {% if portal not in ('seller', 'buyer', 'internal') %}<a class="small" href="{{ P ~ {'seller': '/seller', 'buyer': '/buyer', 'deal_manager': I}[user.role] }}">{{ T('我的页面', 'My page') }}</a>{% endif %}
+      {% if portal not in ('seller', 'buyer', 'adviser', 'internal') %}<a class="small" href="{{ P ~ {'seller': '/seller', 'buyer': '/buyer', 'adviser': '/adviser', 'deal_manager': I}[user.role] }}">{{ T('我的页面', 'My page') }}</a>{% endif %}
       <form method="post" action="{{ P }}/logout" class="inline"><button class="ghost small">{{ T('退出', 'Sign out') }}</button></form>
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
@@ -36,12 +36,14 @@
   {% if portal == 'internal' %}
     <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
     <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
+    <a href="{{ I }}/advisers" class="{{ 'on' if request.url.path.startswith(I + '/advisers') }}">{{ T('顾问审核', 'Adviser checks') }}</a>
     <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
     <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
     <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
   {% else %}
     {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
-    {% elif portal == 'buyer' %}<a href="{{ P }}/buyer" class="on">{{ T('我的收购', 'My acquisitions') }}</a>{% endif %}
+    {% elif portal == 'buyer' %}<a href="{{ P }}/buyer" class="on">{{ T('我的收购', 'My acquisitions') }}</a>
+    {% elif portal == 'adviser' %}<a href="{{ P }}/adviser" class="on">{{ T('我的客户', 'My clients') }}</a>{% endif %}
     <a href="{{ P }}/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">{{ T('出售项目', 'Opportunities') }}</a>
     <a href="{{ P }}/sell" class="{{ 'on' if request.url.path == '/sell' }}">{{ T('出售企业', 'Sell') }}</a>
     <a href="{{ P }}/buy" class="{{ 'on' if request.url.path == '/buy' }}">{{ T('收购企业', 'Buy') }}</a>

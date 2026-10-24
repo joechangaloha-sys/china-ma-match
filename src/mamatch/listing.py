@@ -147,6 +147,8 @@ def publish(target: Target) -> None:
         raise ValueError("Approve a low-risk teaser before listing this target.")
     if not any(t.seller_approved_at for t in target.teasers):
         raise ValueError("The seller must approve the teaser before it is published.")
+    if target.authority_verified_at is None:
+        raise ValueError("卖方的出售权限尚未核验 The owner's authority to sell has not been verified yet.")
     score, findings = reid.check(target, card(target))
     if reid.risk_label(score) != "low":
         raise ValueError("The listing card failed the re-identification check: "

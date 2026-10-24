@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid
+from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid
 from ..models import AdviserFirm, Buyer, Match, Target, User
 from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, MACRO_REGIONS, PAYMENT_TERMS, REGIONS,
                         SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
@@ -26,7 +26,8 @@ templates.env.globals.update(
     FOUNDER_TRANSITION=FOUNDER_TRANSITION, TIMING=TIMING, FUNDING_EVIDENCE=FUNDING_EVIDENCE,
     STAGES=pipeline.STAGES, STATUSES=dealstatus.STATUSES, BUYER_KINDS=BUYER_KINDS,
     MACRO_REGIONS=MACRO_REGIONS, CHECKLIST=documents.CHECKLIST, ROLES=auth.ROLES,
-    REJECT_REASONS=offers.REJECT_REASONS, sector_label=sector_label, risk_label=reid.risk_label,
+    REJECT_REASONS=offers.REJECT_REASONS, AUTH_STATUS=authority.STATUS, OWNER_ROLES=authority.OWNER_ROLES,
+    PROFESSIONS=authority.PROFESSIONS, SCOPES=authority.SCOPES, AUTH_TEXT=authority.AUTH_TEXT, sector_label=sector_label, risk_label=reid.risk_label,
     macro_region=macro_region, FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES,
     SEVERITY=datacheck.SEVERITY, CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees, cfg=config,
     I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
