@@ -46,8 +46,15 @@ def score(target: Target, buyer: Buyer, now: datetime | None = None) -> Scored:
         reasons.append(f"Adjacent sector in the same family ({sector_family(target.sector)})")
     else:
         return Scored(buyer, 0.0, ["No sector fit"])
+    # Hard gates from the buyer's confirmed thesis: a fail means no match, with the reason recorded.
+    if target.sector in (buyer.excluded_sectors or []):
+        return Scored(buyer, 0.0, ["Buyer excludes this sector"])
     if buyer.target_deal_types and target.deal_type not in buyer.target_deal_types:
         return Scored(buyer, 0.0, ["Deal type not wanted"])
+    if buyer.funding_max is not None and target.asking_value and target.asking_value > buyer.funding_max:
+        return Scored(buyer, 0.0, [f"Funding (up to RMB {buyer.funding_max:g}m) below the asking price"])
+    if buyer.earnings_min is not None and target.net_profit is not None and target.net_profit < buyer.earnings_min:
+        return Scored(buyer, 0.0, ["Earnings below the buyer's minimum"])
 
     regions = set(buyer.target_regions or [])
     if not regions:

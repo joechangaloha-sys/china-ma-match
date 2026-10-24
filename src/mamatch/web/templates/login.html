@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}登录{% endblock %}
+{% block body %}
+<form class="panel narrow grid" method="post" action="/login">
+  <h1 class="wide">登录 Sign in</h1>
+  <input type="hidden" name="next" value="{{ next }}">
+  <label class="wide">邮箱 Email <input id="email" name="email" type="email" autocomplete="username" required></label>
+  <label class="wide">密码 Password <input id="password" name="password" type="password" autocomplete="current-password" required></label>
+  <div class="wide"><button>登录 Sign in</button></div>
+  <p class="wide small muted">买方 <a href="/register">注册</a> · 卖方账户由交易经理邀请开通 · Buyers can <a href="/register">register</a>; seller accounts are opened by invitation from your deal manager.</p>
+</form>
+{% endblock %}

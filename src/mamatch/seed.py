@@ -11,9 +11,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import buyers as buyer_reg
-from . import config
+from . import auth, config, dealstatus
 from . import datacheck, fees, infomemo, listing, matching, offers, pipeline, plans, teaser
-from .models import AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target
+from .models import AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target, User
 
 NOW = datetime.now(timezone.utc)
 
@@ -99,6 +99,16 @@ EXAMPLE_PREP = {
 }
 
 
+# Demo sign-ins for local testing only (fictional people, .test domain). Never reuse in production.
+DEMO_PASSWORD = "demo-pass-2026"
+DEMO_USERS = [
+    ("dm@demo.mamatch.test", "deal_manager", "示例·交易经理", None, None),
+    ("seller.jade@demo.mamatch.test", "seller", "示例·王先生", "Project Jade", None),
+    ("buyer.huadong@demo.mamatch.test", "buyer", "示例·华东精密 并购部", None, "EX000"),
+    ("buyer.pending@demo.mamatch.test", "buyer", "示例·待审核买方A", None, "EXP001"),
+]
+
+
 def _uscc(i: int) -> str:
     return f"91320500MA{i:08d}"  # format-valid, fictional
 
@@ -162,9 +172,16 @@ def seed(session: Session) -> None:
     session.flush()
 
     for code, t in have.items():
-        if not t.seller_token and code in EXAMPLE_SETUP:
-            _setup_target(session, t, *EXAMPLE_SETUP[code])
+        if code in EXAMPLE_SETUP and t.status == "draft":
+            if not t.teasers:
+                _setup_target(session, t, *EXAMPLE_SETUP[code])
+            else:  # example database from before seller approval and deal status existed
+                for tz in t.teasers:
+                    if tz.status == "approved" and not tz.seller_approved_at:
+                        teaser.seller_approve(tz)
+                t.status = "in_market"
     session.flush()
+    _seed_users(session, have)
     for code, t in have.items():
         if t.seller_plan == "paid" and not any(c.kind == "outreach" for c in t.charges):
             # Example databases from before the fee ledger: record the retainer they already show as paid.
@@ -174,6 +191,22 @@ def seed(session: Session) -> None:
         if code in EXAMPLE_PREP and not fees.prep_pack_paid(t):
             _setup_prep(session, t, EXAMPLE_PREP[code])
     session.flush()
+
+
+def _seed_users(session: Session, targets: dict[str, Target]) -> None:
+    for email, role, name, target_code, buyer_ext in DEMO_USERS:
+        if session.scalar(select(User.id).where(User.email == email)):
+            continue
+        buyer = session.scalar(select(Buyer).where(Buyer.external_id == buyer_ext)) if buyer_ext else None
+        user = auth.create_user(session, email=email, password=DEMO_PASSWORD, role=role, name=name,
+                                organization=buyer.name if buyer else "", buyer_id=buyer.id if buyer else None)
+        if target_code and target_code in targets:
+            targets[target_code].seller_user_id = user.id
+            targets[target_code].seller_token = ""  # invite used
+    if (b := session.scalar(select(Buyer).where(Buyer.external_id == "EX000"))) and not b.funding_max:
+        b.funding_min, b.funding_max, b.funding_evidence = 30, 300, "bank_letter"
+        b.thesis_text = "补强新能源汽车热管理零部件产能，收购长三角中小汽配供应商。"
+        b.experience = "上市汽车零部件企业，已完成三次同业收购。"
 
 
 def _setup_prep(session: Session, t: Target, spec: dict) -> None:
@@ -200,14 +233,18 @@ def _make_verified(buyer: Buyer, i: int) -> None:
 def _setup_target(session: Session, t: Target, visibility: str, plan: str, listed_days_ago: int | None) -> None:
     t.seller_token = buyer_reg.new_token()
     if not any(tz.status == "approved" for tz in t.teasers):
-        teaser.approve(teaser.draft(session, t, "zh", use_llm=False))
+        tz = teaser.draft(session, t, "zh", use_llm=False)
+        teaser.approve(tz)
+        teaser.seller_approve(tz)
         session.flush()  # matching.refresh() reloads the target; unflushed approvals would be lost
     if plan == "paid":
         plans.mark_seller_paid(t, "PILOT-EX-001")
+    t.status = "seller_approval"
     if visibility == "listed":
         listing.publish(t)
         t.listed_at = NOW - timedelta(days=listed_days_ago or 0)
         return
+    t.status = "in_market"
     # Private and paid: three shortlisted buyers waiting for the seller, one already sent and answered.
     matches = [m for m in matching.refresh(session, t) if m.stage == "suggested"][:4]
     for m in matches:

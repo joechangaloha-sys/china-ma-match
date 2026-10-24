@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}审计{% endblock %}
+{% block body %}
+<div><h1>审计记录 Audit log</h1><p class="sub">{% if target %}项目 #{{ target }} · <a href="{{ I }}/audit">全部 All</a>{% else %}最近300条 Latest 300{% endif %}</p></div>
+<section class="panel tbl">
+  <table class="small">
+    <tr><th>时间 When (UTC)</th><th>用户 Who</th><th>操作 Action</th><th>项目 Mandate</th><th>详情 Detail</th></tr>
+    {% for e in events %}
+    <tr><td class="num">{{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>{{ e.user.email if e.user else '—' }}</td><td><code>{{ e.action }}</code></td>
+      <td>{% if e.target_id %}<a href="{{ I }}/audit?target={{ e.target_id }}">#{{ e.target_id }}</a>{% endif %}{% if e.document_id %} · doc {{ e.document_id }}{% endif %}{% if e.match_id %} · match {{ e.match_id }}{% endif %}</td>
+      <td class="muted">{{ e.detail|tojson if e.detail }}</td></tr>
+    {% else %}<tr><td colspan="5" class="empty">—</td></tr>{% endfor %}
+  </table>
+</section>
+{% endblock %}

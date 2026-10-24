@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
+UPLOAD_DIR = os.environ.get("MAMATCH_UPLOAD_DIR", str(ROOT / "data" / "uploads"))  # outside static/: served only after a permission check
 DATABASE_URL = os.environ.get("MAMATCH_DATABASE_URL", f"sqlite:///{ROOT / 'data' / 'mamatch.db'}")
 
 # "auto": use Claude when credentials resolve, otherwise the offline heuristics.

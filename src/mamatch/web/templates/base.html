@@ -3,30 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}企业出售信息{% endblock %} · mamatch</title>
+<title>{% block title %}中小企业转让 · 长三角{% endblock %} · mamatch</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="{{ portal or 'internal' }}">
+<body class="{{ portal or 'public' }}">
 <header class="bar"><div class="in">
-  {% if portal == 'seller' %}
-  <span class="brand">mamatch 卖方页面 <span class="muted small">Your sale, private to you</span></span>
-  {% elif portal == 'public' %}
-  <a class="brand" href="/">mamatch 企业出售信息 <span class="muted small">Companies for sale</span></a>
-  {% else %}
+  {% if portal == 'internal' %}
   <a class="brand" href="{{ I }}">mamatch <span class="pill internal-pill">内部 INTERNAL</span></a>
   <nav>
-    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">卖方项目 Sellers</a>
+    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">卖方项目 Mandates</a>
+    <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">买方审核 Buyer checks</a>
     <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">交易进度 Pipeline</a>
-    <a href="/" target="_blank" rel="noopener">公开网站 Public site ↗</a>
+    <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">试点数据 Pilot metrics</a>
+    <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">审计 Audit</a>
+  </nav>
+  {% else %}
+  <a class="brand" href="/">mamatch <span class="muted small">长三角中小企业转让 Small-business sales, Yangtze River Delta</span></a>
+  <nav>
+    {% if portal == 'seller' %}<a href="/seller" class="on">我的出售 My sale</a>
+    {% elif portal == 'buyer' %}<a href="/buyer" class="on">我的收购 My acquisitions</a>{% endif %}
+    <a href="/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">出售项目 Opportunities</a>
+    <a href="/sell" class="{{ 'on' if request.url.path == '/sell' }}">出售企业 Sell</a>
+    <a href="/buy" class="{{ 'on' if request.url.path == '/buy' }}">收购企业 Buy</a>
+    <a href="/fees" class="{{ 'on' if request.url.path == '/fees' }}">费用 Fees</a>
+    <a href="/security" class="{{ 'on' if request.url.path == '/security' }}">保密 Confidentiality</a>
   </nav>
   {% endif %}
+  <span class="who">
+    {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ ROLES[user.role] }}</span>
+      {% if portal not in ('seller', 'buyer', 'internal') %}<a class="small" href="{{ {'seller': '/seller', 'buyer': '/buyer', 'deal_manager': I}[user.role] }}">我的页面 My page</a>{% endif %}
+      <form method="post" action="/logout" class="inline"><button class="ghost small">退出 Sign out</button></form>
+    {% else %}<a href="/login">登录 Sign in</a>{% endif %}
+  </span>
 </div></header>
-{% if portal not in ('public', 'seller') %}
-<div class="internal-banner" role="note">内部页面：仅限顾问使用，不对买方或公众开放 · Internal page for the adviser only, not visible to buyers or the public</div>
+{% if portal == 'internal' %}
+<div class="internal-banner" role="note">内部页面：仅限交易经理使用，不对卖方、买方或公众开放 · Internal page for deal managers only, not visible to sellers, buyers or the public</div>
 {% endif %}
 <main>
 {% if msg %}<p class="flash" role="status">{{ msg }}</p>{% endif %}
 {% block body %}{% endblock %}
 </main>
+{% if portal not in ('internal',) %}
+<footer class="foot"><div class="in small muted">
+  平台核验身份与资料来源，但不保证盈利、估值、产权或未来业绩；AI 生成内容均经人工审核。不提供法律、税务、会计或投资意见。<br>
+  We verify identity and document sources, but do not guarantee earnings, valuation, title or future performance. AI-drafted content is reviewed by people. Not legal, tax, accounting or investment advice.
+</div></footer>
+{% endif %}
 </body>
 </html>

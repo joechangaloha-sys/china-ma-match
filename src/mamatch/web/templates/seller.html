@@ -4,85 +4,121 @@
 {% block body %}
 <div>
   <h1>{{ t.code_name }}</h1>
-  <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · 您的顾问：{{ t.firm.name }}</p>
+  <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · 交易经理 Deal manager: {{ t.firm.name }}</p>
 </div>
 
-<div class="cols">
+<section class="panel">
+  <h2>进度 Where your sale stands</h2>
+  <ol class="progress">
+    {% set order = ['draft','documents_requested','extraction_review','seller_approval','in_market','introduction','nda','disclosure','diligence','loi','closing','closed'] %}
+    {% set cur = order.index(t.status) if t.status in order else -1 %}
+    {% for st in order %}<li class="{{ 'done' if loop.index0 < cur else 'now' if loop.index0 == cur }}">{{ STATUSES[st].split(' ')[0] }}</li>{% endfor %}
+  </ol>
+  {% if t.status not in order %}<p><b>{{ STATUSES[t.status] }}</b></p>{% endif %}
+</section>
+
+<section class="panel" id="documents">
+  <h2>资料清单 Document checklist</h2>
+  <p class="small muted">文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为"资料室"的文件。<br>
+    Only you and your deal manager can see these. A buyer sees data-room documents only after an NDA and your consent.</p>
+  <div class="tbl"><table class="small">
+    <tr><th>资料 Item</th><th>已上传 Uploaded</th></tr>
+    {% for k, label in CHECKLIST.items() %}
+    {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}
+    <tr><td>{{ label }}{% if k in missing %} <span class="pill medium">必需 required</span>{% endif %}</td>
+      <td>{% for d in docs %}{{ d.filename }}{{ ' · ' if not loop.last }}{% else %}—{% endfor %}</td></tr>
+    {% endfor %}
+  </table></div>
+  <form class="inline" method="post" action="/seller/{{ t.id }}/documents" enctype="multipart/form-data">
+    <select name="kind" aria-label="Document type">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select>
+    <input type="file" name="file" required aria-label="File">
+    <button>上传 Upload</button>
+  </form>
+</section>
+
+<section class="panel" id="teaser">
+  <h2>匿名简介 Your anonymous teaser</h2>
+  {% if latest_teaser %}
+  <div class="teaser">
+    <h3>{{ latest_teaser.body.headline }}</h3>
+    <p>{{ latest_teaser.body.summary }}</p>
+    <ul>{% for h in latest_teaser.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
+    {% if latest_teaser.seller_approved_at %}<span class="pill">您已确认 You approved this ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
+    {% else %}
+    <form method="post" action="/seller/{{ t.id }}/teasers/{{ latest_teaser.id }}/approve"><button>确认此简介 Approve this teaser</button></form>
+    <p class="small muted">确认前不会公开或发送给任何买方。Nothing is published or sent before you approve.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="empty">交易经理正在准备简介。Your deal manager is preparing the teaser.</p>
+  {% endif %}
+</section>
+
+<div class="cols" id="listing">
 <section class="panel">
   <h2>公开方式 Visibility</h2>
   {% if t.visibility == 'listed' %}
-  <p><b>已匿名公开挂牌 Listed publicly, anonymised.</b> 右侧卡片显示在公开网站上（不含公司名称、城市或准确数字）。<br>
-    <span class="small muted">The card on the right is on the public website: no name, no city, no exact figures.</span></p>
-  <form method="post" action="/s/{{ t.seller_token }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">改为私密 Make private</button></form>
+  <p><b>已匿名公开 Listed publicly, anonymised.</b> 右侧卡片显示在出售项目页（不含名称、城市或准确数字）。<br><span class="small muted">The card on the right is on the opportunities page: no name, city or exact figures.</span></p>
+  <form method="post" action="/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">改为不公开 Make private</button></form>
   {% else %}
-  <p><b>私密 Private.</b> 不挂牌；只有您批准的买方会收到匿名简介。<br>
-    <span class="small muted">Not listed. Only buyers you approve receive the anonymised teaser.</span></p>
-  <p class="small">匿名公开挂牌可让最多的买方看到您的项目。Listing anonymously reaches the most buyers.</p>
-  <form method="post" action="/s/{{ t.seller_token }}/visibility"><input type="hidden" name="visibility" value="listed"><button>匿名公开挂牌 List anonymously</button></form>
-  {% if not has_teaser %}<p class="small muted">您的顾问需先审核匿名简介。Your adviser must approve the teaser first.</p>{% endif %}
+  <p><b>不公开 Private.</b> 只有您批准的买方会收到匿名简介。<br><span class="small muted">Only buyers you approve receive the anonymous teaser.</span></p>
+  <p class="small">匿名公开可让最多的买方看到您的项目。Listing anonymously reaches the most buyers.</p>
+  <form method="post" action="/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="listed"><button>匿名公开 List anonymously</button></form>
   {% endif %}
 </section>
 <section class="panel">
-  <h2>您的项目信息 Your listing card</h2>
+  <h2>您的项目卡片 Your listing card</h2>
   {{ listing_card(card) }}
 </section>
 </div>
 
-<section class="panel" id="outreach">
-  <h2>推介 Outreach</h2>
+<section class="panel" id="buyers">
+  <h2>买方 Buyers</h2>
   {% if outreach %}
-  <p class="small muted">顾问根据买方公开的收购偏好推荐了以下买方。批准后对方将收到匿名简介；双方名称在签署保密协议并经您同意后才互相披露。<br>
-    Your adviser shortlisted these buyers from their stated criteria. Approving one sends them the anonymised teaser. Names are disclosed both ways only after an NDA and your approval.</p>
+  <p class="small muted">交易经理根据买方确认的收购方向推荐了以下买方。批准后对方收到匿名简介。Approving a buyer sends them the anonymous teaser.</p>
   {% for m in candidates %}
   <div class="card">
-    <div><b>{{ anon_buyer(m.buyer) }}</b>
-      <span class="muted small">匹配度 fit {{ '%.0f'|format(m.score * 100) }}%</span></div>
+    <div><b>{{ anon_buyer(m.buyer) }}</b></div>
     <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
     <div class="actions">
-      <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/approve"><button>批准并发送 Approve and send</button></form>
-      <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/decline"><button class="ghost">不发送 Skip</button></form>
+      <form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/approve"><button>批准并发送 Approve and send</button></form>
+      <form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/decline"><button class="ghost">不发送 Skip</button></form>
     </div>
   </div>
   {% else %}
-  <p class="empty">没有待批准的买方。No buyers waiting for your approval.</p>
+  <p class="empty">没有待您批准的买方。No buyers waiting for your approval.</p>
   {% endfor %}
-  {% elif t.visibility == 'private' %}
-  <p class="empty">您的顾问正在寻找合适的买方。Your adviser is looking for suitable buyers.</p>
   {% endif %}
-
   {% if sent %}
   <h3>进展 Progress</h3>
   <div class="tbl"><table>
-    <tr><th>买方 Buyer</th><th>来源</th><th>阶段 Stage</th><th></th></tr>
+    <tr><th>买方 Buyer</th><th>阶段 Stage</th><th></th></tr>
     {% for m in sent %}
     <tr>
       <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer) }}{% endif %}</td>
-      <td class="small">{{ '公开咨询 inquiry' if m.channel == 'listing' else '推介 outreach' }}</td>
-      <td>{{ STAGES[m.stage] }}</td>
-      <td>{% if m.stage in after_nda and not m.name_disclosed_at %}
-        <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/disclose"><button class="ghost">同意互相披露名称 Disclose names</button></form>
+      <td>{{ STAGES[m.stage] }}{% if m.data_room_granted_at %}<br><span class="pill">资料室已开放 data room open</span>{% endif %}</td>
+      <td class="actions">{% if m.stage in after_nda %}
+        {% if not m.data_room_granted_at %}<form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">开放资料室 Open data room</button></form>{% endif %}
+        {% if not m.name_disclosed_at %}<form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/disclose"><button class="ghost">互相披露名称 Disclose names</button></form>{% endif %}
         {% endif %}</td>
     </tr>
     {% endfor %}
   </table></div>
+  {% elif not outreach %}
+  <p class="empty">交易经理正在寻找合适的买方。Your deal manager is looking for suitable buyers.</p>
   {% endif %}
 </section>
 
 <section class="panel" id="data">
-  <h2>提交资料 Your data</h2>
-  <p class="small muted">资料仅供您的顾问核查和编写信息备忘录；买方只有在签署保密协议后才会看到备忘录，且不含公司名称。<br>
-    Used by your adviser for the data check and the info memo. Buyers see the memo only after signing an NDA, and without your company name.</p>
-  {{ data_form(t, '/s/%s/data'|format(t.seller_token)) }}
-  {% if t.data_checks %}
-  <h3>核查结果 Check results</h3>
-  {{ findings_list(t.data_checks[0]) }}
-  {% endif %}
+  <h2>补充问卷 Questions buyers will ask</h2>
+  {{ data_form(t, '/seller/%s/data'|format(t.id)) }}
+  {% if t.data_checks %}<h3>需要您说明的问题 Points to explain</h3>{{ findings_list(t.data_checks[0]) }}{% endif %}
 </section>
 
-{% if t.memos %}
+{% if memo %}
 <section class="panel" id="memo">
-  <h2>信息备忘录 Info memo <span class="pill">{{ '已审核 approved' if t.memos[0].status == 'approved' else '草稿 draft' }}</span></h2>
-  {{ memo_view(t.memos[0]) }}
+  <h2>信息备忘录 Info memo <span class="pill">{{ '已审核 approved' if memo.status == 'approved' else '草稿 draft' }}</span></h2>
+  {{ memo_view(memo) }}
 </section>
 {% endif %}
 {% endblock %}

@@ -96,6 +96,15 @@ TIMING = {
 }
 
 
+FUNDING_EVIDENCE = {
+    "bank_letter": "银行资信证明 Bank comfort letter",
+    "account_statement": "账户余额证明 Account statement",
+    "fund_commitment": "基金出资承诺 Fund commitment",
+    "listed_company": "上市公司定期报告 Listed-company reports",
+    "none": "暂未提供 Not yet provided",
+}
+
+
 def sector_label(code: str) -> str:
     zh, en, _ = SECTORS.get(code, (code, code, ""))
     return f"{zh} / {en}"

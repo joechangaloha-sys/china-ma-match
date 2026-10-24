@@ -54,6 +54,14 @@ class Buyer(Base):
     deal_size_min: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, enterprise value
     deal_size_max: Mapped[float | None] = mapped_column(Float, nullable=True)
     target_deal_types: Mapped[list[str]] = mapped_column(JSON, default=list)  # empty = any
+    # Acquisition thesis (buyer portal): free text, AI-structured into the fields above, confirmed by the buyer.
+    thesis_text: Mapped[str] = mapped_column(Text, default="")
+    excluded_sectors: Mapped[list[str]] = mapped_column(JSON, default=list)
+    earnings_min: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m net profit
+    funding_min: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m available for one deal
+    funding_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    funding_evidence: Mapped[str] = mapped_column(String(30), default="")  # see taxonomy.FUNDING_EVIDENCE
+    experience: Mapped[str] = mapped_column(Text, default="")  # relevant operating experience
     rationale: Mapped[str] = mapped_column(Text, default="")
     # Criteria above are inferred from announcements until the buyer confirms them; only
     # criteria confirmed within config.CRITERIA_TTL_DAYS count in demand statistics.
@@ -124,7 +132,13 @@ class Target(Base):
     seller_plan: Mapped[str] = mapped_column(String(20), default="free")  # free | paid (see plans.py)
     plan_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     plan_invoice_ref: Mapped[str] = mapped_column(String(50), default="")
-    seller_token: Mapped[str] = mapped_column(String(40), default="")  # seller's private link
+    seller_token: Mapped[str] = mapped_column(String(40), default="")  # one-time invite for the seller account
+    seller_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="draft")  # see dealstatus.STATUSES
+    contact_name: Mapped[str] = mapped_column(String(50), default="")  # from the public intake form
+    contact_info: Mapped[str] = mapped_column(String(100), default="")
+    normalized_earnings: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, adviser-approved
+    show_earnings: Mapped[bool] = mapped_column(default=False)  # seller approved showing the earnings band
     prep_pack_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Data the seller submits for the preparation pack. Exact figures: shown to the adviser and, in
@@ -146,6 +160,12 @@ class Target(Base):
                                                           order_by="desc(DataCheck.created_at)")
     memos: Mapped[list["InfoMemo"]] = relationship(back_populates="target", cascade="all, delete-orphan",
                                                    order_by="desc(InfoMemo.version)")
+    documents: Mapped[list["Document"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                       order_by="desc(Document.created_at)")
+    fields: Mapped[list["ExtractedField"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                          order_by="ExtractedField.id")
+    referrals: Mapped[list["ExpertReferral"]] = relationship(back_populates="target", cascade="all, delete-orphan",
+                                                             order_by="ExpertReferral.created_at")
 
 
 class Teaser(Base):
@@ -159,7 +179,8 @@ class Teaser(Base):
     reid_score: Mapped[float] = mapped_column(Float, default=0.0)  # 0 = safe, 1 = identifiable
     reid_findings: Mapped[list[dict]] = mapped_column(JSON, default=list)
     generated_by: Mapped[str] = mapped_column(String(40), default="offline")
-    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | approved
+    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | approved (by the analyst)
+    seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="teasers")
@@ -178,12 +199,17 @@ class Match(Base):
     channel: Mapped[str] = mapped_column(String(20), default="offer")  # offer (private outreach) | listing
     seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     name_disclosed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    nda_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    nda_version: Mapped[str] = mapped_column(String(20), default="")
+    data_room_granted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="matches")
     buyer: Mapped[Buyer] = relationship()
     events: Mapped[list["DealEvent"]] = relationship(back_populates="match", cascade="all, delete-orphan",
                                                      order_by="DealEvent.created_at")
+    feedback: Mapped[list["MatchFeedback"]] = relationship(back_populates="match", cascade="all, delete-orphan",
+                                                           order_by="MatchFeedback.created_at")
 
 
 class DealEvent(Base):
@@ -247,3 +273,129 @@ class InfoMemo(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="memos")
+
+
+class User(Base):
+    """A person who signs in: seller, buyer, deal manager (analyst/adviser)."""
+
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(200), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(200))
+    name: Mapped[str] = mapped_column(String(100), default="")
+    role: Mapped[str] = mapped_column(String(20))  # seller | buyer | deal_manager
+    organization: Mapped[str] = mapped_column(String(200), default="")
+    buyer_id: Mapped[int | None] = mapped_column(ForeignKey("buyers.id"), nullable=True)
+    active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    buyer: Mapped[Buyer | None] = relationship()
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    token: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[User] = relationship()
+
+
+class Document(Base):
+    """A file a seller (or the deal manager) uploaded. Shared in the data room only when flagged."""
+
+    __tablename__ = "documents"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    uploaded_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String(30))  # documents.CHECKLIST key
+    filename: Mapped[str] = mapped_column(String(200))
+    stored_path: Mapped[str] = mapped_column(String(300))
+    content_type: Mapped[str] = mapped_column(String(100), default="")
+    size: Mapped[int] = mapped_column(Integer, default=0)
+    sha256: Mapped[str] = mapped_column(String(64), default="")
+    text: Mapped[str] = mapped_column(Text, default="")  # "[page N]" markers between pages
+    in_data_room: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    target: Mapped[Target] = relationship(back_populates="documents")
+
+
+class ExtractedField(Base):
+    """One financial figure read from a document, kept with its source until an analyst confirms it."""
+
+    __tablename__ = "extracted_fields"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    period: Mapped[str] = mapped_column(String(10))  # fiscal year, e.g. "2025"
+    field: Mapped[str] = mapped_column(String(30))  # datacheck.FIN_FIELDS key
+    value: Mapped[float] = mapped_column(Float)  # RMB m
+    currency: Mapped[str] = mapped_column(String(5), default="CNY")
+    unit_in_source: Mapped[str] = mapped_column(String(10), default="")  # 元 | 万元 | 百万元
+    page: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    quote: Mapped[str] = mapped_column(String(300), default="")
+    confidence: Mapped[float] = mapped_column(Float, default=0.5)
+    method: Mapped[str] = mapped_column(String(40), default="rules")
+    status: Mapped[str] = mapped_column(String(20), default="proposed")  # proposed | confirmed | rejected
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    target: Mapped[Target] = relationship(back_populates="fields")
+    document: Mapped[Document] = relationship()
+
+
+class MatchFeedback(Base):
+    """Why the analyst accepted or rejected a recommended match: training data for better matching."""
+
+    __tablename__ = "match_feedback"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    match_id: Mapped[int] = mapped_column(ForeignKey("matches.id"))
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    decision: Mapped[str] = mapped_column(String(20))  # accept | reject
+    reason: Mapped[str] = mapped_column(String(40), default="")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    match: Mapped[Match] = relationship(back_populates="feedback")
+
+
+class ExpertReferral(Base):
+    """A lawyer, accountant, tax or diligence partner assigned to one matter."""
+
+    __tablename__ = "expert_referrals"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    kind: Mapped[str] = mapped_column(String(20))  # legal | accounting | tax | diligence | financing
+    partner: Mapped[str] = mapped_column(String(200))
+    contact: Mapped[str] = mapped_column(String(200), default="")
+    status: Mapped[str] = mapped_column(String(20), default="proposed")  # proposed | engaged | done
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    target: Mapped[Target] = relationship(back_populates="referrals")
+
+
+class AuditEvent(Base):
+    """Append-only record of who did what: sign-ins, publication, disclosure, every document view."""
+
+    __tablename__ = "audit_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    action: Mapped[str] = mapped_column(String(40))
+    target_id: Mapped[int | None] = mapped_column(ForeignKey("targets.id"), nullable=True)
+    match_id: Mapped[int | None] = mapped_column(ForeignKey("matches.id"), nullable=True)
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"), nullable=True)
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User | None] = relationship()

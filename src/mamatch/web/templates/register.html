@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}买方注册{% endblock %}
+{% block body %}
+<form class="panel narrow grid" method="post" action="/register">
+  <h1 class="wide">买方注册 Register as a buyer</h1>
+  <label class="wide">邮箱 Email <input name="email" type="email" autocomplete="username" required></label>
+  <label class="wide">密码（至少10位）Password, 10+ characters <input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+  <label>姓名 Your name <input name="name" required></label>
+  <label>公司或机构 Company or fund <input name="organization"></label>
+  <label class="wide">类型 You are <select name="kind">{% for k, v in BUYER_KINDS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label class="check wide"><input type="checkbox" name="consent" value="1" required> 同意服务条款与隐私说明：信息仅用于匹配与核验，不公开展示 · I accept the terms and privacy notice: my information is used for matching and verification, never shown publicly.</label>
+  <div class="wide"><button>注册 Register</button></div>
+</form>
+{% endblock %}

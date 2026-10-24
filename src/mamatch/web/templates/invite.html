@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}开通卖方账户{% endblock %}
+{% block body %}
+<form class="panel narrow grid" method="post" action="/invite/{{ token }}">
+  <h1 class="wide">开通您的卖方账户 Open your seller account</h1>
+  <p class="wide small">项目 {{ t.code_name }} · 您的交易经理已为您开通出售流程。Your deal manager has opened the sale process for you.</p>
+  <label class="wide">姓名 Your name <input name="name" required></label>
+  <label class="wide">邮箱 Email <input name="email" type="email" autocomplete="username" required></label>
+  <label class="wide">密码（至少10位）Password, 10+ characters <input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+  <div class="wide"><button>开通 Open account</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import memo_view %}
+{% block title %}我的收购{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ b.name }}</h1>
+  <p class="sub">{{ {'invited': '待填写收购方向 Thesis needed', 'registered': '审核中 Being verified', 'verified': '已认证 Verified'}.get(b.status, b.status) }}</p>
+</div>
+
+{% if b.status != 'verified' %}
+<p class="panel small">{% if b.status == 'invited' %}请先填写下方收购方向。Start by describing your acquisition thesis below.
+  {% else %}交易经理正在核对您的工商信息与资金证明，通过后即可接收引荐。We are checking your registration and funding evidence; introductions start after that.{% endif %}</p>
+{% endif %}
+
+<section class="panel" id="deals">
+  <h2>引荐与项目 Introductions</h2>
+  {% for m in deals %}
+  {% set tz = shared_teaser(m.target) %}
+  <div class="card">
+    <div class="small muted">{{ '卖方批准的引荐 Introduction approved by the seller' if m.channel == 'offer' else '您申请的引荐 Your request' }} · {{ STAGES[m.stage] }}</div>
+    {% if m.name_disclosed_at %}<div><b>{{ m.target.legal_name }}</b> <span class="pill">已披露名称 name disclosed</span></div>{% endif %}
+    {% if tz and (m.channel == 'offer' or nda_available(m) or m.stage in after_nda) %}
+      <h3>{{ tz.body.headline }}</h3><p>{{ tz.body.summary }}</p>
+      <ul>{% for h in tz.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
+    {% else %}<h3>{{ m.target.code_name }}</h3>{% endif %}
+
+    {% if m.stage == 'teaser_sent' %}
+    <div class="actions">
+      <form method="post" action="/buyer/deals/{{ m.id }}/interested"><button>有兴趣 Interested</button></form>
+      <form method="post" action="/buyer/deals/{{ m.id }}/decline"><button class="ghost">不考虑 Decline</button></form>
+    </div>
+    {% elif nda_available(m) %}
+    <details open><summary>保密承诺 Confidentiality undertaking</summary><p class="small nda">{{ nda_text }}</p></details>
+    <form method="post" action="/buyer/deals/{{ m.id }}/nda"><button>接受并签署 Accept and sign</button></form>
+    {% elif m.stage == 'interested' %}<p class="small muted">交易经理审核中。The deal manager is reviewing this.</p>
+    {% endif %}
+
+    {% if m.stage in after_nda %}
+      {% set im = shared_memo(m.target) %}
+      {% if im %}<details><summary>信息备忘录 Info memo</summary>{{ memo_view(im) }}</details>{% endif %}
+      {% if m.data_room_granted_at %}
+      <h4>资料室 Data room</h4>
+      <ul class="small">{% for d in m.target.documents if d.in_data_room %}<li><a href="/buyer/documents/{{ d.id }}">{{ d.filename }}</a> <span class="muted">{{ CHECKLIST[d.kind] }}</span></li>{% else %}<li class="muted">暂无文件 No documents yet</li>{% endfor %}</ul>
+      <p class="small muted">每次查看都会被记录。Every view is logged.</p>
+      {% else %}<p class="small muted">资料室待卖方开放。The seller has not opened the data room yet.</p>{% endif %}
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="empty">暂无。浏览 <a href="/opportunities">出售项目</a> 并申请引荐。None yet. Browse <a href="/opportunities">opportunities</a> and request an introduction.</p>
+  {% endfor %}
+</section>
+
+{% set p = proposal or {} %}
+<section class="panel" id="thesis">
+  <h2>收购方向 Acquisition thesis</h2>
+  <form method="post" action="/buyer/thesis/suggest" class="grid">
+    <label class="wide">用您自己的话描述想收购的企业 Describe what you want to buy, in your own words
+      <textarea name="thesis_text" placeholder="例如：我们是江苏的汽车零部件企业，想收购浙江、江苏年利润200万以上的精密加工厂，交易金额1000–3000万，不考虑食品行业。">{{ p.thesis_text if proposal else b.thesis_text }}</textarea></label>
+    <div class="wide"><button class="ghost">AI 帮我整理 Structure it for me</button>
+      {% if proposal %}<span class="small muted">由 {{ p.generated_by }} 预填，请核对 Pre-filled by {{ p.generated_by }}: please check</span>{% endif %}</div>
+  </form>
+
+  {% set sectors = p.target_sectors if proposal else b.target_sectors %}
+  {% set excluded = p.excluded_sectors if proposal else b.excluded_sectors %}
+  {% set regions = p.target_regions if proposal else b.target_regions %}
+  {% set dtypes = p.target_deal_types if proposal else b.target_deal_types %}
+  <form method="post" action="/buyer/thesis" class="grid thesis-form">
+    <input type="hidden" name="thesis_text" value="{{ p.thesis_text if proposal else b.thesis_text }}">
+    <label>机构名称 Organisation <input name="name" value="{{ b.name }}" required></label>
+    <label>类型 Type <select name="kind">{% for k, v2 in BUYER_KINDS.items() %}<option value="{{ k }}" {{ 'selected' if k == b.kind }}>{{ v2 }}</option>{% endfor %}</select></label>
+    <label>统一社会信用代码 USCC <input name="uscc" value="{{ b.uscc }}" maxlength="18"></label>
+    <label>联系人 Contact <input name="contact_name" value="{{ b.contact_name }}"></label>
+    {% for key, label in [('deal_size_min', '交易规模下限 Min deal size'), ('deal_size_max', '交易规模上限 Max deal size'), ('earnings_min', '最低年净利润 Min net profit'), ('funding_min', '可用资金下限 Funding from'), ('funding_max', '可用资金上限 Funding up to')] %}
+    {% set cur = p[key] if proposal else b[key] %}
+    <label>{{ label }} (RMB m) <input name="{{ key }}" inputmode="decimal" value="{{ '%g'|format(cur) if cur is not none }}"></label>
+    {% endfor %}
+    <label>资金证明 Funding evidence <select name="funding_evidence"><option value="">—</option>{% for k, v2 in FUNDING_EVIDENCE.items() %}<option value="{{ k }}" {{ 'selected' if k == b.funding_evidence }}>{{ v2 }}</option>{% endfor %}</select></label>
+    <fieldset class="wide"><legend>目标行业 Sectors</legend>
+      {% for code in SECTORS %}<label class="check"><input type="checkbox" name="target_sectors" value="{{ code }}" {{ 'checked' if code in sectors }}> {{ sector_label(code) }}</label>{% endfor %}</fieldset>
+    <fieldset class="wide"><legend>不考虑的行业 Excluded sectors</legend>
+      {% for code in SECTORS %}<label class="check"><input type="checkbox" name="excluded_sectors" value="{{ code }}" {{ 'checked' if code in excluded }}> {{ sector_label(code) }}</label>{% endfor %}</fieldset>
+    <fieldset class="wide"><legend>目标省市（不选=不限）Provinces (none = anywhere)</legend>
+      {% for pr in REGIONS %}<label class="check"><input type="checkbox" name="target_regions" value="{{ pr }}" {{ 'checked' if pr in regions }}> {{ pr }}</label>{% endfor %}</fieldset>
+    <fieldset class="wide"><legend>交易方式（不选=不限）Deal types (none = any)</legend>
+      {% for code, label in DEAL_TYPES.items() %}<label class="check"><input type="checkbox" name="target_deal_types" value="{{ code }}" {{ 'checked' if code in dtypes }}> {{ label }}</label>{% endfor %}</fieldset>
+    <label class="wide">相关经营经验 Relevant operating experience <textarea name="experience">{{ p.experience if proposal and p.experience else b.experience }}</textarea></label>
+    <label class="check wide"><input type="checkbox" name="consent" value="1" required> 我确认以上信息真实，并同意用于匹配与核验 · I confirm this is accurate and agree to its use for matching and verification.</label>
+    <div class="wide"><button>确认并提交 Confirm and submit</button></div>
+  </form>
+</section>
+{% endblock %}

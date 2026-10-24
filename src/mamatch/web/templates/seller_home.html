@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}我的出售{% endblock %}
+{% block body %}
+<h1>我的出售项目 My sales</h1>
+{% for t in rows %}<p><a href="/seller/{{ t.id }}">{{ t.code_name }}</a> · {{ STATUSES[t.status] }}</p>
+{% else %}<p class="empty">您的账户还没有关联项目。No sale is linked to your account yet; your deal manager will set it up.</p>{% endfor %}
+{% endblock %}

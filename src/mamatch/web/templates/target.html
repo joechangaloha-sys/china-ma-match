@@ -3,46 +3,98 @@
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
 <div>
-  <p class="small"><a href="{{ I }}">← 卖方项目 Sellers</a></p>
-  <h1>{{ t.code_name }} {% if t.is_example %}<span class="pill example">示例 example</span>{% endif %}</h1>
+  <p class="small"><a href="{{ I }}">← 卖方项目 Mandates</a> · <a href="{{ I }}/audit?target={{ t.id }}">审计记录 Audit log</a></p>
+  <h1>{{ t.code_name }} {% if t.is_example %}<span class="pill example">示例 example</span>{% endif %}
+    <span class="pill status-{{ t.status }}">{{ STATUSES[t.status] }}</span></h1>
   <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · {{ DEAL_TYPES.get(t.deal_type, t.deal_type) }}
-    · <b>{{ '公开挂牌 Listed' if t.visibility == 'listed' else '私密 Private' }}</b></p>
+    · <b>{{ '公开 Listed' if t.visibility == 'listed' else '不公开 Private' }}</b></p>
+  {% if next_statuses %}
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/status">
+    <label class="small">状态 Status
+    <select name="to">{% for st in next_statuses %}<option value="{{ st }}">→ {{ STATUSES[st] }}</option>{% endfor %}</select></label>
+    <input name="note" placeholder="备注 note" aria-label="Note">
+    <button class="ghost">更新 Update</button>
+  </form>
+  {% endif %}
 </div>
 
 <div class="cols">
 <section class="panel private">
-  <h2>项目信息（内部）Seller details, internal</h2>
+  <h2>委托信息（内部）Mandate details, internal</h2>
   <table class="small">
     <tr><th>公司 Legal name</th><td>{{ t.legal_name }}</td></tr>
     <tr><th>实控人 Owner</th><td>{{ t.owner_name or '—' }}</td></tr>
     <tr><th>城市 City</th><td>{{ t.city or '—' }}</td></tr>
+    {% if t.contact_info %}<tr><th>网站登记 Web intake</th><td>{{ t.contact_name }} · {{ t.contact_info }}</td></tr>{% endif %}
     <tr><th>收入 / 净利 RMB m</th><td class="num">{{ t.revenue if t.revenue is not none else '—' }} / {{ t.net_profit if t.net_profit is not none else '—' }}</td></tr>
     <tr><th>访谈记录 Notes</th><td>{{ t.description or '—' }}</td></tr>
+    <tr><th>卖方账户 Seller account</th><td>{% if seller %}{{ seller.name }} · {{ seller.email }}{% elif invite %}邀请链接 Invite link: <a href="{{ invite }}">{{ invite }}</a>{% else %}—{% endif %}</td></tr>
   </table>
-  <p class="small">卖方专属链接 Seller's private link: <a href="{{ link }}">{{ link }}</a></p>
 </section>
 
 <section class="panel" id="listing">
-  <h2>交易诉求与公开挂牌 The ask and public listing</h2>
+  <h2>交易诉求与公开 The ask and listing</h2>
   <form class="grid" method="post" action="{{ I }}/targets/{{ t.id }}/ask">
     <label>期望价格 Asking price (RMB m) <input name="asking_value" inputmode="decimal" value="{{ '%g'|format(t.asking_value) if t.asking_value is not none }}"></label>
-    <label>出让股权 Stake offered (%) <input name="stake_pct" inputmode="decimal" value="{{ '%g'|format(t.stake_pct) if t.stake_pct is not none }}" placeholder="100"></label>
+    <label>出让股权 Stake (%) <input name="stake_pct" inputmode="decimal" value="{{ '%g'|format(t.stake_pct) if t.stake_pct is not none }}" placeholder="100"></label>
     <label>付款方式 Payment <select name="payment_terms"><option value="">—</option>{% for k, v in PAYMENT_TERMS.items() %}<option value="{{ k }}" {{ 'selected' if k == t.payment_terms }}>{{ v }}</option>{% endfor %}</select></label>
     <label>创始人交接 Founder <select name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}" {{ 'selected' if k == t.founder_transition }}>{{ v }}</option>{% endfor %}</select></label>
     <label>保留员工 Keep all staff <select name="keep_employees"><option value="">—</option><option value="yes" {{ 'selected' if t.keep_employees is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if t.keep_employees is sameas false }}>可协商 Negotiable</option></select></label>
     <label>期望时间 Timing <select name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}" {{ 'selected' if k == t.timing }}>{{ v }}</option>{% endfor %}</select></label>
-    <div class="wide"><button class="ghost">保存诉求 Save the ask</button></div>
+    <label>调整后利润 Normalised earnings (RMB m) <input name="normalized_earnings" inputmode="decimal" value="{{ '%g'|format(t.normalized_earnings) if t.normalized_earnings is not none }}"></label>
+    <label class="check"><input type="checkbox" name="show_earnings" value="1" {{ 'checked' if t.show_earnings }}> 卖方同意公开利润区间 Seller approved showing the earnings range</label>
+    <div class="wide"><button class="ghost">保存 Save</button></div>
   </form>
-  <p class="small">{% if t.visibility == 'listed' %}已公开挂牌（匿名）Listed publicly since {{ t.listed_at.strftime('%Y-%m-%d') }} · <a href="/listings/{{ t.id }}" target="_blank" rel="noopener">查看 View ↗</a>
-    {% else %}私密：不公开，只向卖方批准的买方发送简介 Private: not listed; the teaser goes only to buyers the seller approves.{% endif %}</p>
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/visibility">
     <input type="hidden" name="visibility" value="{{ 'private' if t.visibility == 'listed' else 'listed' }}">
-    <button class="ghost">{{ '撤下 Unlist' if t.visibility == 'listed' else '匿名公开挂牌 List publicly (anonymised)' }}</button>
+    <button class="ghost">{{ '撤下 Unlist' if t.visibility == 'listed' else '匿名公开 List publicly (anonymised)' }}</button>
+    {% if t.visibility == 'listed' %}<a class="small" href="/opportunities/{{ t.id }}" target="_blank" rel="noopener">查看公开页 View ↗</a>{% endif %}
   </form>
   <h3 class="small">公开卡片预览 Public card preview</h3>
   {{ listing_card(card) }}
 </section>
 </div>
+
+<section class="panel" id="documents">
+  <h2>资料与提取 Documents and extraction</h2>
+  {% if missing %}<p class="small">缺少必需资料 Missing required: {% for k in missing %}<span class="pill medium">{{ CHECKLIST[k] }}</span> {% endfor %}</p>{% endif %}
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/documents" enctype="multipart/form-data">
+    <select name="kind" aria-label="Document type">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select>
+    <input type="file" name="file" required aria-label="File"><button class="ghost">上传 Upload</button>
+  </form>
+  {% if t.documents %}
+  <div class="tbl"><table class="small">
+    <tr><th>文件 File</th><th>类型 Type</th><th>上传 Uploaded</th><th>文字 Text</th><th></th></tr>
+    {% for d in t.documents %}
+    <tr><td><a href="{{ I }}/documents/{{ d.id }}">{{ d.filename }}</a></td><td>{{ CHECKLIST[d.kind] }}</td>
+      <td>{{ d.created_at.strftime('%Y-%m-%d') }}</td><td>{{ '可读 readable' if d.text else '无文字 no text' }}</td>
+      <td class="actions">
+        {% if d.text %}<form method="post" action="{{ I }}/documents/{{ d.id }}/extract"><button class="ghost">AI 提取 Extract</button></form>{% endif %}
+        <form method="post" action="{{ I }}/documents/{{ d.id }}/data-room"><button class="ghost">{{ '移出资料室 Remove from data room' if d.in_data_room else '放入资料室 Add to data room' }}</button></form>
+      </td></tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+  {% set proposed = t.fields|selectattr('status', 'equalto', 'proposed')|list %}
+  {% if proposed %}
+  <h3>待审核数字 Figures to review ({{ proposed|length }})</h3>
+  <div class="tbl"><table class="small">
+    <tr><th>期间 Period</th><th>项目 Field</th><th class="num">RMB m</th><th>来源 Source</th><th>置信度</th><th></th></tr>
+    {% for f in proposed %}
+    <tr><td>{{ f.period }}</td><td>{{ FIN_FIELDS[f.field] }}</td>
+      <td class="num">{{ '%g'|format(f.value) }}</td>
+      <td>{{ f.document.filename }}{% if f.page %} p.{{ f.page }}{% endif %} · {{ f.unit_in_source }}<br><code>{{ f.quote }}</code></td>
+      <td class="num">{{ '%.0f'|format(f.confidence * 100) }}% <span class="muted">{{ f.method }}</span></td>
+      <td><form class="inline" method="post" action="{{ I }}/fields/{{ f.id }}/review">
+        <input name="value" size="6" inputmode="decimal" placeholder="{{ '%g'|format(f.value) }}" aria-label="Corrected value">
+        <button name="decision" value="confirm" class="ghost">确认 Confirm</button>
+        <button name="decision" value="reject" class="ghost">驳回 Reject</button></form></td></tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+  {% set done = t.fields|rejectattr('status', 'equalto', 'proposed')|list %}
+  {% if done %}<p class="small muted">已审核 {{ done|length }} 个数字（{{ done|selectattr('status', 'equalto', 'confirmed')|list|length }} 确认）· {{ done|length }} figures reviewed</p>{% endif %}
+</section>
 
 <section class="panel" id="fees">
   <h2>费用 Fees <span class="muted small">内部 internal</span></h2>
@@ -91,7 +143,8 @@
   <div class="teaser">
     <div class="small muted">v{{ tz.version }} · {{ tz.language }} · {{ tz.generated_by }} · {{ tz.created_at.strftime('%Y-%m-%d %H:%M') }}
       · <span class="pill {{ risk }}">识别风险 re-ID risk: {{ risk }} ({{ '%.2f'|format(tz.reid_score) }})</span>
-      {% if tz.status == 'approved' %}<span class="pill">已批准 approved</span>{% endif %}</div>
+      {% if tz.status == 'approved' %}<span class="pill">已批准 approved</span>{% endif %}
+      {% if tz.seller_approved_at %}<span class="pill">卖方已确认 seller approved</span>{% elif tz.status == 'approved' %}<span class="pill medium">待卖方确认 waiting for seller</span>{% endif %}</div>
     <h3>{{ tz.body.headline }}</h3>
     <p>{{ tz.body.summary }}</p>
     <ul>{% for h in tz.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
@@ -109,31 +162,56 @@
 </section>
 
 <section class="panel" id="matches">
-  <h2>买方与咨询 Buyers and inquiries <span class="muted small">内部 internal</span></h2>
+  <h2>买方匹配与引荐 Matches and introductions <span class="muted small">先硬性条件，再 AI 排序，最后由您判断 · Hard gates, then ranking, then your judgement</span></h2>
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/match"><button>匹配已认证买方 Find matching buyers</button></form>
-  <p class="small muted">入围后由卖方在其页面逐一批准，批准即发送简介。Shortlisted buyers go to the seller, who approves each one; approval sends the teaser.</p>
   {% if t.matches %}
   <div class="tbl"><table>
-    <tr><th>分数 Score</th><th>买方 Buyer</th><th>理由 Why</th><th>来源 Channel</th><th>阶段 Stage</th></tr>
+    <tr><th>买方 Buyer</th><th>理由 Why</th><th>来源</th><th>阶段 Stage</th><th>决定 Decision</th></tr>
     {% for m in t.matches %}
     <tr>
-      <td class="num">{{ '%.2f'|format(m.score) }}</td>
       <td><b>{{ m.buyer.name }}</b> {% if m.buyer.is_example %}<span class="pill example">示例</span>{% endif %}
-        {% if m.buyer.contact_email %}<br><span class="small muted">{{ m.buyer.contact_name }} {{ m.buyer.contact_email }}</span>{% endif %}</td>
+        <br><span class="small muted">{{ BUYER_KINDS.get(m.buyer.kind, m.buyer.kind) }}{% if m.buyer.funding_max is not none %} · 资金≤{{ '%g'|format(m.buyer.funding_max) }}m{% endif %}{% if m.buyer.contact_email %} · {{ m.buyer.contact_email }}{% endif %}</span></td>
       <td><ul class="reasons">{% for r in m.reasons %}<li>{{ r }}</li>{% endfor %}</ul>
-        {% if m.channel == 'listing' and m.events %}<div class="small muted">{{ m.events[-1].note }}</div>{% endif %}</td>
-      <td class="small">{{ '公开咨询 inquiry' if m.channel == 'listing' else '推介 outreach' }}</td>
-      <td>{{ STAGES[m.stage] }}{% if m.stage == 'shortlisted' %}<br><span class="small muted">等待卖方批准 waiting for seller</span>{% endif %}
-        {% if m.name_disclosed_at %}<br><span class="pill">已互相披露名称 names disclosed</span>{% endif %}
-        {% if m.stage == 'suggested' %}
-        <form class="inline" method="post" action="{{ I }}/matches/{{ m.id }}/move"><input type="hidden" name="to_stage" value="shortlisted"><button class="ghost">入围 Shortlist</button></form>
-        {% endif %}
+        {% if m.channel == 'listing' and m.events %}<div class="small muted">{{ m.events[0].note }}</div>{% endif %}</td>
+      <td class="small">{{ '公开项目 listing' if m.channel == 'listing' else '推介 outreach' }}</td>
+      <td class="small">{{ STAGES[m.stage] }}
+        {% if m.stage == 'shortlisted' %}<br><span class="muted">等待卖方批准 waiting for seller</span>{% endif %}
+        {% if nda_available(m) %}<br><span class="pill">待买方签保密协议 awaiting NDA</span>{% endif %}
+        {% if m.nda_accepted_at %}<br>NDA {{ m.nda_accepted_at.strftime('%Y-%m-%d') }}{% endif %}
+        {% if m.data_room_granted_at %}<br><span class="pill">资料室 data room</span>{% endif %}
+        {% if m.name_disclosed_at %}<br><span class="pill">已披露名称 names disclosed</span>{% endif %}</td>
+      <td>
+        {% set decided = m.feedback|length > 0 %}
+        {% if m.stage == 'suggested' or (m.channel == 'listing' and m.stage == 'interested' and not decided) %}
+        <form class="inline small" method="post" action="{{ I }}/matches/{{ m.id }}/decision">
+          <button name="decision" value="accept" class="ghost">采纳 Accept</button>
+          <select name="reason" aria-label="Reject reason">{% for k, v in REJECT_REASONS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+          <button name="decision" value="reject" class="ghost">拒绝 Reject</button>
+        </form>
+        {% elif decided %}<span class="small muted">{{ '采纳' if m.feedback[-1].decision == 'accept' else '拒绝 · ' ~ REJECT_REASONS.get(m.feedback[-1].reason, '') }}</span>{% endif %}
       </td>
     </tr>
     {% endfor %}
   </table></div>
   {% else %}
-  <p class="empty">还没有买方。No buyers yet.</p>
+  <p class="empty">还没有匹配。No matches yet.</p>
   {% endif %}
+</section>
+
+<section class="panel" id="referrals">
+  <h2>合作专业机构 Expert referrals</h2>
+  {% for r in t.referrals %}
+  <div class="row small">{{ referral_kinds[r.kind] }} · <b>{{ r.partner }}</b> {{ r.contact }} · {{ r.note }}
+    <form class="inline" method="post" action="{{ I }}/referrals/{{ r.id }}/status">
+      <select name="status" aria-label="Referral status">{% for st in ['proposed', 'engaged', 'done'] %}<option {{ 'selected' if st == r.status }}>{{ st }}</option>{% endfor %}</select>
+      <button class="ghost">更新</button></form></div>
+  {% else %}<p class="empty">暂无。None.</p>{% endfor %}
+  <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/referrals">
+    <select name="kind" aria-label="Referral type">{% for k, v in referral_kinds.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+    <input name="partner" placeholder="机构 Firm" required aria-label="Partner firm">
+    <input name="contact" placeholder="联系人 Contact" aria-label="Contact">
+    <input name="note" placeholder="范围/报价 Scope, quote" aria-label="Note">
+    <button class="ghost">添加 Add</button>
+  </form>
 </section>
 {% endblock %}

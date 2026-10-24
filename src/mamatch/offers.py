@@ -60,11 +60,11 @@ def buyer_respond(session: Session, match: Match, interested: bool) -> DealEvent
 
 
 def express_interest(session: Session, target: Target, buyer: Buyer) -> Match:
-    """A verified buyer asks for more on a listed deal."""
-    now = datetime.now(timezone.utc)
-    visible = plans.visible_from(target, buyer)
-    if buyer.status != "verified" or visible is None or visible > now:
-        raise ValueError("This listing is not available to you.")
+    """A verified, signed-in buyer asks for an introduction to a listed seller."""
+    if buyer.status != "verified":
+        raise ValueError("您的买方资料尚未通过审核 Your buyer profile is not verified yet.")
+    if target.visibility != "listed":
+        raise ValueError("该项目已下架 This listing is not available.")
     m = session.scalar(select(Match).where(Match.target_id == target.id, Match.buyer_id == buyer.id))
     if m is not None and m.stage != "dropped":
         return m
@@ -116,3 +116,68 @@ def disclose_names(match: Match) -> None:
     if match.stage not in AFTER_NDA:
         raise ValueError("Names are disclosed only after an NDA is signed.")
     match.name_disclosed_at = datetime.now(timezone.utc)
+
+
+NDA_VERSION = "v1-2026-10"
+NDA_TEXT = (
+    "保密承诺（平台模板，正式使用前需经律师审核）：本人/本机构承诺对通过本平台获得的目标公司信息严格保密，"
+    "仅用于评估本次收购，不向第三方披露，不直接或间接绕开顾问与卖方、其员工、客户或供应商接触，"
+    "在双方同意披露名称前不尝试识别目标公司。本承诺自接受之日起有效期三年。\n"
+    "Confidentiality undertaking (platform template; have it reviewed by counsel before live use): I/we will keep "
+    "all information about the company received through this platform confidential, use it only to evaluate this "
+    "acquisition, not pass it to third parties, not approach the seller, its staff, customers or suppliers except "
+    "through the adviser, and not try to identify the company before names are disclosed. Valid for three years."
+)
+REJECT_REASONS = {
+    "sector": "行业不符 Sector fit", "size": "规模/价格 Size or price", "funding": "资金不足 Funding",
+    "geography": "地域 Geography", "conflict": "利益冲突 Conflict", "seller": "卖方限制 Seller restriction",
+    "quality": "买方资质 Buyer quality", "other": "其他 Other",
+}
+
+
+def analyst_decision(session: Session, match: Match, user, accept: bool, reason: str = "", note: str = "") -> None:
+    """Every recommendation the analyst accepts or rejects is recorded with the reason."""
+    from . import auth
+    from .models import MatchFeedback
+
+    match.feedback.append(MatchFeedback(user_id=user.id if user else None, decision="accept" if accept else "reject",
+                                        reason=reason if reason in REJECT_REASONS else ("" if accept else "other"),
+                                        note=note.strip()[:1000]))
+    if accept and match.stage == "suggested":
+        pipeline.move(session, match, "shortlisted", "Analyst accepted")
+    elif not accept and match.stage not in ("dropped", "closed"):
+        pipeline.move(session, match, "dropped", f"Analyst rejected: {REJECT_REASONS.get(reason, reason)}")
+    auth.log(session, user, "match_decision", target_id=match.target_id, match_id=match.id,
+             decision="accept" if accept else "reject", reason=reason)
+
+
+def nda_available(match: Match) -> bool:
+    """The buyer may sign once the introduction is approved: by the seller (outreach) or the analyst (inquiry)."""
+    return match.stage == "interested" and (match.seller_approved_at is not None
+                                            or any(f.decision == "accept" for f in match.feedback))
+
+
+def accept_nda(session: Session, match: Match, user) -> None:
+    from . import auth
+
+    if not nda_available(match):
+        raise ValueError("保密协议尚不可签署 The NDA is not available yet.")
+    match.nda_accepted_at = datetime.now(timezone.utc)
+    match.nda_version = NDA_VERSION
+    pipeline.move(session, match, "nda_signed", f"NDA {NDA_VERSION} accepted online")
+    auth.log(session, user, "nda_accept", target_id=match.target_id, match_id=match.id, version=NDA_VERSION)
+
+
+def grant_data_room(session: Session, match: Match, user) -> None:
+    """Seller-approved disclosure: this buyer may open the documents marked for the data room."""
+    from . import auth
+
+    if match.stage not in AFTER_NDA:
+        raise ValueError("Documents are shared only after an NDA.")
+    match.data_room_granted_at = datetime.now(timezone.utc)
+    auth.log(session, user, "data_room_grant", target_id=match.target_id, match_id=match.id)
+
+
+def can_view_document(match: Match | None, doc) -> bool:
+    return (match is not None and doc.in_data_room and match.target_id == doc.target_id
+            and match.data_room_granted_at is not None and match.stage in AFTER_NDA)

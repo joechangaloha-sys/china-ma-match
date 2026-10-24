@@ -121,3 +121,12 @@ def approve(teaser: Teaser) -> None:
     if reid.risk_label(teaser.reid_score) != "low":
         raise ValueError("Resolve the re-identification findings before approving this teaser.")
     teaser.status = "approved"
+
+
+def seller_approve(teaser: Teaser) -> None:
+    """The seller confirms the analyst-approved teaser; only then can it be published or sent."""
+    if teaser.status != "approved":
+        raise ValueError("The adviser has not approved this teaser yet.")
+    from datetime import datetime, timezone
+
+    teaser.seller_approved_at = datetime.now(timezone.utc)

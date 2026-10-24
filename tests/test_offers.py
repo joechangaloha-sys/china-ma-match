@@ -42,27 +42,26 @@ def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
     seeded.flush()
     with pytest.raises(ValueError, match="teaser"):
         listing.publish(t)
-    teaser.approve(teaser.draft(seeded, t, "zh"))
+    tz = teaser.draft(seeded, t, "zh")
+    teaser.approve(tz)
+    with pytest.raises(ValueError, match="seller must approve"):
+        listing.publish(t)
+    teaser.seller_approve(tz)
     listing.publish(t)
+    assert t.status == "in_market"
     card = listing.card(t)
     assert card["region"] == "长三角"
     assert "浙江" not in str(card) and "嘉兴" not in str(card) and "新公司" not in str(card)
 
 
-def test_priority_head_start_and_search(seeded):
+def test_verified_buyer_can_request_an_introduction(seeded):
     free = _verified(seeded, plan="free")
-    prio = _verified(seeded, plan="priority")
-    delta = _t(seeded, "Project Delta")  # listed 2 days ago
-    assert delta in listing.board(seeded, prio)
-    assert delta not in listing.board(seeded, free)
-    assert listing.hidden_count(seeded, free) >= 1
-    with pytest.raises(ValueError):
-        offers.express_interest(seeded, delta, free)
-    later = datetime.now(timezone.utc) + timedelta(days=config.PRIORITY_HEAD_START_DAYS)
-    assert delta in listing.board(seeded, free, now=later)
-    # Filters only apply on the priority plan.
-    assert listing.board(seeded, free, sector="food") == listing.board(seeded, free)
-    assert all(t.sector == "food" for t in listing.board(seeded, prio, sector="food"))
+    delta = _t(seeded, "Project Delta")
+    m = offers.express_interest(seeded, delta, free)
+    assert m.channel == "listing" and m.stage == "interested"
+    assert not offers.nda_available(m)  # the analyst approves the introduction first
+    offers.analyst_decision(seeded, m, None, accept=True)
+    assert offers.nda_available(m)
 
 
 def test_unverified_buyer_sees_nothing(seeded):

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}买方审核{% endblock %}
+{% block body %}
+<div>
+  <h1>买方审核 Buyer checks</h1>
+  <p class="sub">核对工商信息（统一社会信用代码）与资金证明后认证 · Verify after checking the registry code and funding evidence</p>
+</div>
+<nav class="tabs">
+  {% for code, label in [('registered', '待审核 To verify'), ('verified', '已认证 Verified'), ('invited', '未完成 Incomplete')] %}
+  <a href="{{ I }}/buyers?status={{ code }}" class="{{ 'on' if status == code }}">{{ label }} <span class="muted">{{ counts.get(code, 0) }}</span></a>
+  {% endfor %}
+</nav>
+{% for b in rows %}
+<section class="panel">
+  <h2>{{ b.name }} {% if b.is_example %}<span class="pill example">示例</span>{% endif %} <span class="muted small">{{ BUYER_KINDS.get(b.kind, b.kind) }} · {{ b.source }}</span></h2>
+  <div class="cols">
+    <table class="small">
+      <tr><th>信用代码 USCC</th><td>{{ b.uscc or '—' }}</td></tr>
+      <tr><th>联系人 Contact</th><td>{{ b.contact_name }} {{ b.contact_email }}</td></tr>
+      <tr><th>资金 Funding</th><td>{% if b.funding_max is not none %}RMB {{ '%g'|format(b.funding_min or 0) }}–{{ '%g'|format(b.funding_max) }}m{% else %}—{% endif %} · {{ FUNDING_EVIDENCE.get(b.funding_evidence, '无证明 none') }}</td></tr>
+      <tr><th>经验 Experience</th><td>{{ b.experience or '—' }}</td></tr>
+    </table>
+    <table class="small">
+      <tr><th>目标行业 Sectors</th><td>{% for c in b.target_sectors %}{{ SECTORS[c][0] if c in SECTORS else c }}{{ '、' if not loop.last }}{% else %}—{% endfor %}</td></tr>
+      <tr><th>不考虑 Excluded</th><td>{% for c in b.excluded_sectors %}{{ SECTORS[c][0] if c in SECTORS else c }}{{ '、' if not loop.last }}{% else %}—{% endfor %}</td></tr>
+      <tr><th>地区 Regions</th><td>{{ b.target_regions|join('、') or '不限 Anywhere' }}</td></tr>
+      <tr><th>规模 Size</th><td>{% if b.deal_size_max is not none %}RMB {{ '%g'|format(b.deal_size_min or 0) }}–{{ '%g'|format(b.deal_size_max) }}m{% else %}—{% endif %}{% if b.earnings_min is not none %} · 利润≥{{ '%g'|format(b.earnings_min) }}m{% endif %}</td></tr>
+      <tr><th>原话 Thesis</th><td>{{ b.thesis_text or '—' }}</td></tr>
+    </table>
+  </div>
+  {% if b.status == 'registered' %}
+  <form method="post" action="{{ I }}/buyers/{{ b.id }}/verify"><button>已核对，认证 Verify</button></form>
+  {% endif %}
+</section>
+{% else %}
+<p class="empty">没有。None.</p>
+{% endfor %}
+{% endblock %}

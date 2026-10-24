@@ -9,10 +9,10 @@
   </div>
   <table class="small">
     <tr><th>营业收入 Revenue</th><td>{{ c.revenue_band }}</td></tr>
-    <tr><th>净利润 Net profit</th><td>{{ c.net_profit_band }}</td></tr>
+    {% if c.earnings_band %}<tr><th>调整后利润 Normalised earnings</th><td>{{ c.earnings_band }}</td></tr>{% endif %}
     <tr><th>员工 Staff</th><td>{{ c.employees_band }}</td></tr>
     <tr><th>经营年限 Operating</th><td>{{ c.years_operating }}</td></tr>
-    <tr><th>交易方式 Deal</th><td>{{ c.deal_type }}</td></tr>
+    <tr><th>交易范围 Perimeter</th><td>{{ c.deal_type }}</td></tr>
     {% if c.payment_terms %}<tr><th>付款方式 Payment</th><td>{{ c.payment_terms }}</td></tr>{% endif %}
     {% if c.founder_transition %}<tr><th>创始人交接 Founder</th><td>{{ c.founder_transition }}</td></tr>{% endif %}
     {% if c.keep_employees %}<tr><th>员工安排 Staff</th><td>{{ c.keep_employees }}</td></tr>{% endif %}

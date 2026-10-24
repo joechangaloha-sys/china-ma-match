@@ -1,57 +1,45 @@
 {% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
 {% block body %}
-<div>
-  <h1>{{ firm.name }}</h1>
-  <p class="sub">邀请制试点 · Invitation-only pilot: seller mandates, registered buyers, aggregate demand</p>
+<section class="hero">
+  <h1>为长三角中小企业主提供保密、可靠的转让路径</h1>
+  <p class="lead">A confidential, trusted route to sell or buy a small operating business in the Shanghai–Suzhou–Hangzhou–Ningbo corridor.</p>
+  <div class="actions">
+    <a class="button" href="/sell">我想出售企业 I want to sell</a>
+    <a class="button ghost" href="/buy">我想收购企业 I want to buy</a>
+  </div>
+</section>
+
+<div class="cols three">
+  <section class="panel"><h2>经过核验的卖方 Verified sellers</h2>
+    <p class="small">每个项目都核实了委托人身份和授权，财务数字可追溯到原始文件。Every mandate has verified authority, and every figure traces back to a source document.</p></section>
+  <section class="panel"><h2>分阶段披露 Staged disclosure</h2>
+    <p class="small">公开只显示匿名区间；签署保密协议并经卖方同意后才开放详细资料。Publicly only ranges; details open after an NDA and the seller's consent.</p></section>
+  <section class="panel"><h2>人工把关的 AI Human-checked AI</h2>
+    <p class="small">AI 读取资料、发现缺口、起草简介、推荐买方；每一步都由交易经理审核。AI reads documents, finds gaps, drafts teasers and suggests buyers; a deal manager reviews every step.</p></section>
 </div>
 
-<section class="panel stats">
-  <div class="stat"><b>{{ counts.targets }}</b><span>卖方项目 Targets</span></div>
-  <div class="stat"><b>{{ counts.verified }}</b><span>已认证买方 Verified buyers</span></div>
-  <div class="stat"><b>{{ counts.candidates }}</b><span>待邀请/已邀请 To invite / invited</span></div>
-  <div class="stat"><b>{{ counts.active }}</b><span>推进中 Active deals</span></div>
-</section>
-
-<section class="panel">
-  <h2>卖方项目 Targets <a class="small" href="/targets/new">+ 新建 New</a></h2>
-  {% if targets %}
-  <div class="tbl"><table>
-    <tr><th>代号 Code name</th><th>行业 Sector</th><th>省份</th><th>公开方式 Visibility</th><th>方案 Plan</th><th>买方需求 Demand</th><th>匹配</th></tr>
-    {% for t in targets %}
-    <tr>
-      <td><a href="/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}</td>
-      <td>{{ sector_label(t.sector) }}</td>
-      <td>{{ t.province }}</td>
-      <td><span class="pill {{ 'listed' if t.visibility == 'listed' }}">{{ '公开挂牌 Listed' if t.visibility == 'listed' else '私密 Private' }}</span></td>
-      <td>{{ SELLER_PLANS[t.seller_plan] }}</td>
-      <td class="num">{{ totals[t.id] }}</td>
-      <td class="num">{{ t.matches|length }}</td>
-    </tr>
-    {% endfor %}
-  </table></div>
+<section>
+  <h2>最新出售项目 Latest opportunities <a class="small" href="/opportunities">全部 All →</a></h2>
+  <div class="cards">
+  {% for t in rows %}
+    {% call listing_card(cards[t.id], '/opportunities/%s'|format(t.id)) %}{% endcall %}
   {% else %}
-  <p class="empty">还没有项目。<a href="/targets/new">录入第一个卖方项目</a>，或运行 <code>uv run mamatch init-db --seed</code> 加载示例。</p>
-  {% endif %}
-</section>
-
-<div class="cols">
-<section class="panel">
-  <h2>待审核买方 Buyers to verify</h2>
-  {% for b in to_verify %}
-  <div class="row"><a href="/buyers/{{ b.id }}">{{ b.name }}</a> <span class="muted small">{{ BUYER_KINDS.get(b.kind, b.kind) }} · {{ b.uscc or '无信用代码 no USCC' }}</span></div>
-  {% else %}
-  <p class="empty">没有待审核的买方。Nobody waiting.</p>
+    <p class="empty">暂无公开项目。No public listings yet.</p>
   {% endfor %}
+  </div>
 </section>
 
 <section class="panel">
-  <h2>挂牌项目的买方意向 Interest from the board</h2>
-  {% for m in interests %}
-  <div class="row"><a href="/targets/{{ m.target_id }}#matches">{{ m.target.code_name }}</a> ← <a href="/buyers/{{ m.buyer_id }}">{{ m.buyer.name }}</a>
-    {% if m.buyer.plan == 'priority' %}<span class="pill">优先 priority</span>{% endif %}</div>
-  {% else %}
-  <p class="empty">暂无。None yet.</p>
-  {% endfor %}
+  <h2>流程 How it works</h2>
+  <ol class="steps small">
+    <li>卖方访谈与委托核验 Owner interview, mandate and identity check</li>
+    <li>上传资料，AI 提取财务数据并提示缺口 Documents uploaded; AI extracts figures and flags gaps</li>
+    <li>交易经理与卖方确认匿名简介 Deal manager and seller approve an anonymous teaser</li>
+    <li>买方提交收购方向与资金证明并通过审核 Buyers submit a thesis and funding evidence, and are verified</li>
+    <li>筛选与 AI 辅助匹配，经审核后引荐 Filtering and AI-assisted matching; introductions after review</li>
+    <li>保密协议、卖方同意后开放资料室 NDA, then the data room with the seller's consent</li>
+    <li>尽调、意向书、交割与交接，由合作律师、会计师支持 Diligence, LOI, closing and handover with partner professionals</li>
+  </ol>
 </section>
-</div>
 {% endblock %}

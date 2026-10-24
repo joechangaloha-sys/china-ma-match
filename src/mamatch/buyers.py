@@ -28,7 +28,10 @@ def invite(buyer: Buyer) -> str:
 
 def register(buyer: Buyer, *, name: str, kind: str, uscc: str, contact_name: str, contact_email: str,
              target_sectors: list[str], target_regions: list[str], deal_size_min: float | None,
-             deal_size_max: float | None, target_deal_types: list[str], consent: bool) -> None:
+             deal_size_max: float | None, target_deal_types: list[str], consent: bool,
+             thesis_text: str = "", excluded_sectors: list[str] | None = None, earnings_min: float | None = None,
+             funding_min: float | None = None, funding_max: float | None = None, funding_evidence: str = "",
+             experience: str = "") -> None:
     if buyer.status not in ("invited", "registered", "verified"):
         raise ValueError("Registration is by invitation.")
     if not consent:
@@ -47,6 +50,10 @@ def register(buyer: Buyer, *, name: str, kind: str, uscc: str, contact_name: str
     buyer.target_sectors, buyer.target_regions = target_sectors, target_regions
     buyer.deal_size_min, buyer.deal_size_max = deal_size_min, deal_size_max
     buyer.target_deal_types = target_deal_types
+    buyer.thesis_text, buyer.experience = thesis_text.strip(), experience.strip()
+    buyer.excluded_sectors = [x for x in (excluded_sectors or []) if x not in target_sectors]
+    buyer.earnings_min, buyer.funding_min, buyer.funding_max = earnings_min, funding_min, funding_max
+    buyer.funding_evidence = funding_evidence
     buyer.criteria_confirmed_at = now
     if buyer.status == "invited":
         buyer.status, buyer.registered_at = "registered", now
@@ -58,4 +65,6 @@ def verify(buyer: Buyer) -> None:
         raise ValueError("Only registered buyers can be verified.")
     if buyer.kind != "individual" and not _USCC.match(buyer.uscc or ""):
         raise ValueError("A valid 18-character unified social credit code is required.")
+    if buyer.funding_evidence in ("", "none") and buyer.source != "example":
+        raise ValueError("Funding evidence is required before verification.")
     buyer.status, buyer.verified_at = "verified", datetime.now(timezone.utc)
