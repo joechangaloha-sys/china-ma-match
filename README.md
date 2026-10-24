@@ -5,8 +5,7 @@ businesses, in Chinese and English. Pilot deals: about RMB 2–20m. It follows
 Joe's pilot plan (`~/Documents/kimi/tasks/2026-10-24/.../china_small_ma_pilot_and_ai_website_plan.md`):
 a secure operating system for a concierge pilot, not an open marketplace.
 
-Background: [docs/research.md](docs/research.md), [docs/design-v2.md](docs/design-v2.md) (pricing and
-earlier decisions). Current status and next steps: [handoff.md](handoff.md).
+Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
 ## Who sees what
 

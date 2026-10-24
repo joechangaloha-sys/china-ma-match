@@ -6,3 +6,6 @@ data/*.db
 .env
 data/uploads/
 static-demo/
+# Design notes are kept locally, not published
+docs/research.md
+docs/design-v2.md
