@@ -44,17 +44,17 @@ EXAMPLE_BUYERS = [
          signal=("关于购买资产暨收购某食品公司股权的公告", 800)),
 ]
 
-# Registered buyers with no announcement history, so the demand statistics have realistic numbers.
-# (count, kind, target_sectors, target_regions, size range, deal types, plan)
+# Verified buyers with no announcement history, so matching has realistic candidates.
+# (count, kind, target_sectors, target_regions, size range, deal types)
 GENERATED_BUYERS = [
-    (4, "listed", ["auto_parts"], ["江苏", "浙江"], (20, 100), [], "free"),
-    (5, "private", ["auto_parts", "metal_fab"], ["浙江"], (10, 60), ["full_sale", "majority"], "free"),
-    (3, "listed", ["auto_parts"], [], (50, 300), ["full_sale", "majority"], "priority"),
-    (5, "pe", ["chemicals", "plastics"], ["江苏", "上海"], (30, 150), ["majority"], "free"),
-    (6, "listed", ["machinery", "electronics"], ["江苏", "上海", "浙江"], (30, 200), [], "free"),
-    (2, "private", ["machinery"], ["安徽"], (10, 40), ["full_sale"], "free"),
-    (4, "private", ["food", "consumer_goods"], ["安徽", "江苏"], (10, 50), ["full_sale"], "free"),
-    (3, "pe", ["industrial_services"], [], (20, 80), [], "free"),
+    (4, "listed", ["auto_parts"], ["江苏", "浙江"], (20, 100), []),
+    (5, "private", ["auto_parts", "metal_fab"], ["浙江"], (10, 60), ["full_sale", "majority"]),
+    (3, "listed", ["auto_parts"], [], (50, 300), ["full_sale", "majority"]),
+    (5, "pe", ["chemicals", "plastics"], ["江苏", "上海"], (30, 150), ["majority"]),
+    (6, "listed", ["machinery", "electronics"], ["江苏", "上海", "浙江"], (30, 200), []),
+    (2, "private", ["machinery"], ["安徽"], (10, 40), ["full_sale"]),
+    (4, "private", ["food", "consumer_goods"], ["安徽", "江苏"], (10, 50), ["full_sale"]),
+    (3, "pe", ["industrial_services"], [], (20, 80), []),
 ]
 
 EXAMPLE_TARGETS = [
@@ -138,7 +138,7 @@ def seed(session: Session) -> None:
             _make_verified(buyer, i)
 
     n = 0
-    for count, kind, sectors, regions, (lo, hi), deal_types, plan in GENERATED_BUYERS:
+    for count, kind, sectors, regions, (lo, hi), deal_types in GENERATED_BUYERS:
         for _ in range(count):
             n += 1
             ext = f"EXG{n:03d}"
@@ -149,8 +149,6 @@ def seed(session: Session) -> None:
                           target_deal_types=deal_types)
             session.add(buyer)
             _make_verified(buyer, 100 + n)
-            if plan == "priority":
-                plans.mark_buyer_priority(buyer)
 
     # Two buyers part-way through registration, to show the operator's queue.
     for ext, name, status in (("EXP001", "示例·待审核买方A", "registered"), ("EXP002", "示例·已邀请买方B", "invited")):

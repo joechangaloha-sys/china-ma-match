@@ -2,7 +2,7 @@
 
 CNINFO announcements suggest listed companies worth inviting and pre-fill their criteria; the
 buyer confirms or corrects them when registering. Nothing about a buyer reaches a seller except
-as part of a k-suppressed count (demand.py) until both sides agree to disclose names.
+until both sides agree to disclose names.
 """
 
 import re

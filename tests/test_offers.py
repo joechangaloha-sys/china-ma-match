@@ -11,7 +11,7 @@ def _t(s, code):
 
 
 def _verified(s, **kw):
-    return s.scalar(select(Buyer).where(Buyer.status == "verified", Buyer.plan == kw.get("plan", "free")))
+    return s.scalar(select(Buyer).where(Buyer.status == "verified", Buyer.source == "example"))
 
 
 def test_free_private_seller_cannot_send_offers(seeded):
@@ -29,7 +29,7 @@ def test_free_private_seller_cannot_send_offers(seeded):
 def test_listed_target_cannot_send_offers_even_when_paid(seeded):
     kiln = _t(seeded, "Project Kiln")
     plans.mark_seller_paid(kiln, "INV-2")
-    assert plans.seller_detailed_stats(kiln) and not plans.seller_outreach(kiln)
+    assert not plans.seller_outreach(kiln)
 
 
 def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
@@ -63,9 +63,8 @@ def test_verified_buyer_can_request_an_introduction(seeded):
     assert offers.nda_available(m)
 
 
-def test_unverified_buyer_sees_nothing(seeded):
+def test_unverified_buyer_cannot_request_an_introduction(seeded):
     pending = seeded.scalar(select(Buyer).where(Buyer.status == "registered"))
-    assert listing.board(seeded, pending) == []
     with pytest.raises(ValueError):
         offers.express_interest(seeded, _t(seeded, "Project Kiln"), pending)
 
@@ -83,12 +82,9 @@ def test_interest_from_board_and_name_disclosure(seeded):
     assert m.name_disclosed_at is not None
 
 
-def test_outreach_candidates_put_priority_first_among_equal_fits(seeded):
-    jade = _t(seeded, "Project Jade")
-    cands = offers.outreach_candidates(jade)
-    assert cands
-    for a, b in zip(cands, cands[1:]):
-        assert round(a.score, 1) >= round(b.score, 1)
+def test_outreach_candidates_are_best_fit_first(seeded):
+    cands = offers.outreach_candidates(_t(seeded, "Project Jade"))
+    assert cands and [m.score for m in cands] == sorted((m.score for m in cands), reverse=True)
 
 
 def test_registration_flow(seeded):

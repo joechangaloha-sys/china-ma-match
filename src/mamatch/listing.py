@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import plans, reid, teaser
-from .models import Buyer, Target
+from . import reid, teaser
+from .models import Target
 from .taxonomy import FOUNDER_TRANSITION, PAYMENT_TERMS, TIMING, macro_region
 
 CARD_FIELDS = ("sector_zh", "sector_en", "revenue_band", "net_profit_band", "employees_band",
@@ -84,29 +84,3 @@ def publish(target: Target) -> None:
 def unpublish(target: Target) -> None:
     target.visibility = "private"
     target.listed_at = None
-
-
-def board(session: Session, buyer: Buyer, sector: str = "", macro: str = "",
-          now: datetime | None = None) -> list[Target]:
-    """Listings this buyer may see now. Filters only apply for buyers whose plan includes search."""
-    if buyer.status != "verified":
-        return []
-    now = now or datetime.now(timezone.utc)
-    rows = session.scalars(select(Target).where(Target.visibility == "listed")
-                           .order_by(Target.listed_at.desc())).all()
-    rows = [t for t in rows if (v := plans.visible_from(t, buyer)) is not None and v <= now]
-    if plans.can_search(buyer):
-        if sector:
-            rows = [t for t in rows if t.sector == sector]
-        if macro:
-            rows = [t for t in rows if macro_region(t.province) == macro]
-    return rows
-
-
-def hidden_count(session: Session, buyer: Buyer, now: datetime | None = None) -> int:
-    """Listings still inside the priority head start for this buyer (shown as an upsell)."""
-    if buyer.status != "verified":
-        return 0
-    now = now or datetime.now(timezone.utc)
-    rows = session.scalars(select(Target).where(Target.visibility == "listed")).all()
-    return sum(1 for t in rows if (v := plans.visible_from(t, buyer)) is not None and v > now)

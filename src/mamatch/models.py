@@ -40,7 +40,6 @@ class Buyer(Base):
     source: Mapped[str] = mapped_column(String(20), default="manual")  # cninfo | manual | example
     # suggested (found, not contacted) -> invited -> registered (criteria stated) -> verified (counts, sees deals)
     status: Mapped[str] = mapped_column(String(20), default="suggested")
-    plan: Mapped[str] = mapped_column(String(20), default="free")  # free | priority (see plans.py)
     invite_token: Mapped[str] = mapped_column(String(40), default="")
     uscc: Mapped[str] = mapped_column(String(18), default="")
     contact_name: Mapped[str] = mapped_column(String(50), default="")
@@ -64,11 +63,9 @@ class Buyer(Base):
     experience: Mapped[str] = mapped_column(Text, default="")  # relevant operating experience
     rationale: Mapped[str] = mapped_column(Text, default="")
     # Criteria above are inferred from announcements until the buyer confirms them; only
-    # criteria confirmed within config.CRITERIA_TTL_DAYS count in demand statistics.
     criteria_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     registered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    plan_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_example: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
@@ -125,7 +122,7 @@ class Target(Base):
     keep_employees: Mapped[bool | None] = mapped_column(nullable=True)
     timing: Mapped[str] = mapped_column(String(20), default="")
 
-    # private: not listed; the seller sees demand statistics and approves outreach buyer by buyer.
+    # private: not listed; the seller approves outreach buyer by buyer.
     # listed: an anonymised card on the board that verified buyers browse.
     visibility: Mapped[str] = mapped_column(String(20), default="private")
     listed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

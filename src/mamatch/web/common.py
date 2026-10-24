@@ -10,10 +10,10 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, config, datacheck, db, dealstatus, demand, documents, fees, offers, pipeline, reid
+from .. import auth, config, datacheck, db, dealstatus, documents, fees, offers, pipeline, reid
 from ..models import AdviserFirm, Buyer, Match, Target, User
-from ..taxonomy import (DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, PAYMENT_TERMS, REGIONS, SALE_REASONS,
-                        SECTORS, TIMING, macro_region, sector_label)
+from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, MACRO_REGIONS, PAYMENT_TERMS, REGIONS,
+                        SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
 
 HERE = Path(__file__).parent
 COOKIE = "mm_session"
@@ -23,8 +23,8 @@ templates = Jinja2Templates(directory=HERE / "templates")
 templates.env.globals.update(
     SECTORS=SECTORS, REGIONS=REGIONS, DEAL_TYPES=DEAL_TYPES, SALE_REASONS=SALE_REASONS, PAYMENT_TERMS=PAYMENT_TERMS,
     FOUNDER_TRANSITION=FOUNDER_TRANSITION, TIMING=TIMING, FUNDING_EVIDENCE=FUNDING_EVIDENCE,
-    STAGES=pipeline.STAGES, STATUSES=dealstatus.STATUSES, BUYER_KINDS=demand.BUYER_KINDS,
-    MACRO_REGIONS=demand.MACRO_REGIONS, CHECKLIST=documents.CHECKLIST, ROLES=auth.ROLES,
+    STAGES=pipeline.STAGES, STATUSES=dealstatus.STATUSES, BUYER_KINDS=BUYER_KINDS,
+    MACRO_REGIONS=MACRO_REGIONS, CHECKLIST=documents.CHECKLIST, ROLES=auth.ROLES,
     REJECT_REASONS=offers.REJECT_REASONS, sector_label=sector_label, risk_label=reid.risk_label,
     macro_region=macro_region, FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES,
     SEVERITY=datacheck.SEVERITY, CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees, cfg=config,
@@ -94,7 +94,7 @@ SELLER_SAFE_REASONS = ("Stated interest", "Same business", "Adjacent sector", "N
 
 
 def anon_buyer(b: Buyer) -> str:
-    kind = demand.BUYER_KINDS.get(b.kind, b.kind)
+    kind = BUYER_KINDS.get(b.kind, b.kind)
     region = macro_region(b.province) if b.province else ""
     return kind + (f" · 总部{region}" if region else "")
 

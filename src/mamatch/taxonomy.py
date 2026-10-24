@@ -37,6 +37,8 @@ REGIONS: dict[str, str] = {
     "陕西": "西北", "辽宁": "东北", "吉林": "东北", "黑龙江": "东北",
 }
 
+MACRO_REGIONS = list(dict.fromkeys(REGIONS.values()))
+
 # Simple keyword map for the offline extractor (announcement titles and summaries).
 SECTOR_KEYWORDS: dict[str, list[str]] = {
     "auto_parts": ["汽车零部件", "汽配", "新能源汽车", "底盘", "热管理"],
@@ -95,6 +97,9 @@ TIMING = {
     "flexible": "不急 No fixed timing",
 }
 
+
+BUYER_KINDS = {"listed": "上市公司 Listed company", "pe": "投资机构 Fund", "private": "非上市企业 Private company",
+               "individual": "个人 Individual"}
 
 FUNDING_EVIDENCE = {
     "bank_letter": "银行资信证明 Bank comfort letter",

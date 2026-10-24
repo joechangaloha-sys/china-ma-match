@@ -21,4 +21,4 @@ def test_init_db_adds_new_columns_to_an_old_database(tmp_path):
     db.init_db(url)
     with db.session_scope(url) as s:
         b = s.scalar(select(Buyer))
-        assert b.status == "suggested" and b.plan == "free" and b.target_deal_types == []
+        assert b.status == "suggested" and b.target_deal_types == [] and b.excluded_sectors == []

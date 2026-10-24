@@ -56,7 +56,7 @@ def test_outreach_expires_after_one_period(seeded):
     later = datetime.now(timezone.utc) + timedelta(days=config.OUTREACH_PERIOD_DAYS + 1)
     assert not fees.outreach_active(jade, now=later)
     jade.plan_paid_at = datetime.now(timezone.utc) - timedelta(days=config.OUTREACH_PERIOD_DAYS + 1)
-    assert not plans.seller_outreach(jade) and not plans.seller_detailed_stats(jade)
+    assert not plans.seller_outreach(jade)
     fees.record_outreach(jade, "INV-RENEW")
     assert plans.seller_outreach(jade)
 

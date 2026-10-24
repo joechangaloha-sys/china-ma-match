@@ -8,10 +8,10 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, demand, listing, offers
+from .. import auth, listing, offers
 from ..buyers import new_token
 from ..models import Buyer, Target, User
-from ..taxonomy import DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
+from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
 from .common import COOKIE, I, back, current_user, firm, get_session, not_found, num, render
 
 router = APIRouter()
@@ -59,7 +59,7 @@ def opportunity_inquiry(target_id: int, s: Session = Depends(get_session), name:
                         message: str = Form(""), consent: str = Form("")):
     t = _listed(s, target_id)
     try:
-        offers.public_inquiry(s, t, name=name, company=company, kind=kind if kind in demand.BUYER_KINDS else "private",
+        offers.public_inquiry(s, t, name=name, company=company, kind=kind if kind in BUYER_KINDS else "private",
                               contact=contact, message=message, consent=bool(consent))
     except ValueError as exc:
         return back(f"/opportunities/{t.id}#inquiry", str(exc))
@@ -145,7 +145,7 @@ def register(request: Request, s: Session = Depends(get_session), email: str = F
              name: str = Form(""), organization: str = Form(""), kind: str = Form("private"), consent: str = Form("")):
     if not consent:
         return back("/register", "请同意服务条款与隐私说明 Please accept the terms and privacy notice.")
-    buyer = Buyer(name=(organization or name).strip()[:200] or "Buyer", kind=kind if kind in demand.BUYER_KINDS else "private",
+    buyer = Buyer(name=(organization or name).strip()[:200] or "Buyer", kind=kind if kind in BUYER_KINDS else "private",
                   source="self", status="invited", contact_name=name.strip()[:50], contact_email=email.strip()[:200],
                   invite_token=new_token())
     s.add(buyer)

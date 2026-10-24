@@ -64,8 +64,6 @@ legend { font-size: 13px; padding: 0 6px; }
 .tabs a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
 .row { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
-.demand { display: flex; gap: 16px; align-items: center; }
-.demand .big { font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--accent); min-width: 72px; }
 .breakdowns, .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
 .upsell { background: var(--warn-soft); color: var(--fg); border-radius: 4px; padding: 8px 12px; margin-top: 12px; }
 .pill.listed { background: var(--accent); color: var(--surface); }

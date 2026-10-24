@@ -27,7 +27,7 @@
 {% set est = fees.estimate(t) %}
 <div class="tbl"><table class="small">
   <tr><th>项目 Item</th><th>价格 Price (RMB, ex VAT)</th><th>状态 Status</th></tr>
-  <tr><td>匿名简介、需求总数、匿名挂牌 Teaser, demand total, anonymous listing</td><td>免费 Free</td><td>—</td></tr>
+  <tr><td>匿名简介与匿名挂牌 Teaser and anonymous listing</td><td>免费 Free</td><td>—</td></tr>
   <tr><td>出售准备包：资料核查 + 信息备忘录 Preparation pack: data check + info memo</td><td class="num">{{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}</td>
     <td>{% if fees.prep_pack_paid(t) %}<span class="pill">已付 paid {{ t.prep_pack_paid_at.strftime('%Y-%m-%d') }}</span>{% else %}未购买 not bought{% endif %}</td></tr>
   <tr><td>推介服务：需求细分 + 逐一推介（每{{ cfg.OUTREACH_PERIOD_DAYS }}天）Outreach retainer per {{ cfg.OUTREACH_PERIOD_DAYS }} days</td><td class="num">{{ '{:,}'.format(cfg.SELLER_PLAN_FEE_RMB) }}</td>

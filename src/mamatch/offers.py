@@ -21,10 +21,10 @@ AFTER_NDA = {"nda_signed", "im_sent", "loi", "closing", "closed"}
 
 
 def outreach_candidates(target: Target) -> list[Match]:
-    """Shortlisted buyers awaiting the seller's decision: priority members first among equal fits."""
+    """Shortlisted buyers awaiting the seller's decision, best fit first."""
     rows = [m for m in target.matches if m.channel == "offer" and m.stage == "shortlisted"
             and m.seller_approved_at is None]
-    return sorted(rows, key=lambda m: (-round(m.score, 1), not plans.is_priority(m.buyer), -m.score))
+    return sorted(rows, key=lambda m: -m.score)
 
 
 def shared_teaser(target: Target, language: str = "zh") -> Teaser | None:

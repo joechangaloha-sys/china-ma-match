@@ -1,9 +1,9 @@
 """What a private seller pays, and how the success fee is worked out.
 
-- Teaser and headline demand count: free (listing needs an approved teaser, so it stays free).
+- Teaser and anonymous listing: free (listing needs an approved teaser, so it stays free).
 - Preparation pack, one-off: data check of what the seller submits plus an info memo draft,
   both reviewed by the adviser before anything goes out.
-- Outreach retainer, per period: detailed demand breakdown and seller-approved outreach.
+- Outreach retainer, per period: the teaser sent to matching buyers, each approved by the seller.
 - Success fee at closing, only for sellers who bought the outreach retainer: rate x final deal
   value, with a minimum, less everything already paid (prep pack and retainers are credited).
 

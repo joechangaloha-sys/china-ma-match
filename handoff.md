@@ -32,10 +32,8 @@ in the browser. See README.md for the structure.
 
 1. Click through the internal mandate page and buyer portal in the browser as the deal manager and the demo
    buyer (tests cover them, but they have not been looked at visually).
-2. Candidates for deletion, unused since the restructure **(ask Joe first)**: templates `buyers.html`,
-   `buyer.html`, `buyer_portal.html`, `demand.html`; the buyer-priority parts of `plans.py` and
-   `listing.board` / `listing.hidden_count`; `demand.py` (move `BUYER_KINDS` and `MACRO_REGIONS` to
-   `taxonomy.py` first) and `tests/test_demand.py`.
+2. Done 25 Oct: the unused buyer-demand statistics, buyer-priority plan and their pages/tests were deleted
+   with Joe's approval (`BUYER_KINDS` and `MACRO_REGIONS` now live in `taxonomy.py`).
 3. From the plan, not built: MFA for deal managers, watermarks, malware scanning, sign-in rate limiting, CSRF
    tokens, semantic matching (pgvector), WeChat, PostgreSQL deployment, saved searches for buyers.
 4. Pricing is placeholder (`config.py`); the NDA text in `offers.py` needs counsel review.
