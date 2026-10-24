@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mamatch",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--directory", "/Users/joechang/Documents/china-ma-match", "mamatch", "serve", "--port", "8600"],
+      "port": 8600
+    }
+  ]
+}

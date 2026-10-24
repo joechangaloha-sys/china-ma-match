@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}并购撮合工作台{% endblock %} · mamatch</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="bar"><div class="in">
+  <a class="brand" href="/">mamatch 并购撮合工作台</a>
+  <nav>
+    <a href="/" class="{{ 'on' if request.url.path == '/' }}">项目 Targets</a>
+    <a href="/buyers" class="{{ 'on' if request.url.path.startswith('/buyers') }}">买方库 Buyer index</a>
+    <a href="/pipeline" class="{{ 'on' if request.url.path.startswith('/pipeline') }}">进度 Pipeline</a>
+  </nav>
+  <span class="region" title="Production deal data must be hosted in mainland China">{{ region_flag }}</span>
+</div></header>
+<main>
+{% block body %}{% endblock %}
+</main>
+</body>
+</html>

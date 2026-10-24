@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}进度{% endblock %}
+{% block body %}
+<div>
+  <h1>交易进度 Pipeline</h1>
+  <p class="sub">已入围的买方及每一步记录 · Shortlisted buyers and every stage change</p>
+</div>
+<section class="board">
+  {% for stage, matches in by_stage.items() %}
+  <div class="panel">
+    <h2>{{ STAGES[stage] }} <span class="muted small">{{ matches|length }}</span></h2>
+    {% for m in matches %}
+    <div class="card">
+      <div><a href="/targets/{{ m.target_id }}">{{ m.target.code_name }}</a> → <a href="/buyers/{{ m.buyer_id }}">{{ m.buyer.name }}</a></div>
+      {% if m.events %}<div class="small muted">{{ m.events[-1].created_at.strftime('%Y-%m-%d') }}{% if m.events[-1].note %} · {{ m.events[-1].note }}{% endif %}</div>{% endif %}
+      {% set nexts = allowed_next(m.stage) %}
+      {% if nexts %}
+      <form class="inline small" method="post" action="/matches/{{ m.id }}/move">
+        <input type="hidden" name="back" value="/pipeline">
+        <select name="to_stage" aria-label="Next stage">{% for n in nexts %}<option value="{{ n }}">{{ STAGES[n] }}</option>{% endfor %}</select>
+        <input name="note" placeholder="备注 note" aria-label="Note">
+        <button class="ghost">更新</button>
+      </form>
+      {% endif %}
+    </div>
+    {% else %}
+    <p class="empty">—</p>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

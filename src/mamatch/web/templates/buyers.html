@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}买方库{% endblock %}
+{% block body %}
+<div>
+  <h1>买方库 Buyer index</h1>
+  <p class="sub">上市公司收购公告与投资机构偏好 · Acquisition appetite from listed-company announcements and funds</p>
+</div>
+
+<form class="panel inline" method="get">
+  <label>搜索 Search <input id="q" name="q" value="{{ q }}" placeholder="名称 / 代码 / 理由"></label>
+  <label>目标行业 Sector
+    <select id="sector" name="sector"><option value="">全部 All</option>
+      {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ sector_label(code) }}</option>{% endfor %}
+    </select></label>
+  <label>目标省份 Province
+    <select id="province" name="province"><option value="">全部 All</option>
+      {% for p in REGIONS %}<option {{ 'selected' if p == province }}>{{ p }}</option>{% endfor %}
+    </select></label>
+  <button>筛选 Filter</button>
+</form>
+
+<section class="panel tbl">
+  <table>
+    <tr><th>买方 Buyer</th><th>类型</th><th>目标行业 Wants</th><th>目标地区</th><th>规模 RMB m</th><th>信号</th></tr>
+    {% for b in buyers %}
+    <tr>
+      <td><a href="/buyers/{{ b.id }}">{{ b.name }}</a> <span class="muted small">{{ b.external_id if b.source == 'cninfo' }}</span>
+        {% if b.is_example %}<span class="pill example">示例</span>{% endif %}</td>
+      <td>{{ b.kind }}</td>
+      <td class="small">{% for c in b.target_sectors %}{{ SECTORS[c][0] if c in SECTORS else c }}{{ '、' if not loop.last }}{% endfor %}</td>
+      <td class="small">{{ b.target_regions|join('、') or '不限' }}</td>
+      <td class="num">{% if b.deal_size_min is not none %}{{ '%g'|format(b.deal_size_min) }}–{{ '%g'|format(b.deal_size_max) }}{% else %}—{% endif %}</td>
+      <td class="num">{{ b.signals|length }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty">没有符合条件的买方。</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

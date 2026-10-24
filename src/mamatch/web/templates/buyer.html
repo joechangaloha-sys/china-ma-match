@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ buyer.name }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ buyer.name }} {% if buyer.is_example %}<span class="pill example">示例 example</span>{% endif %}</h1>
+  <p class="sub">{{ buyer.kind }}{% if buyer.external_id and buyer.source == 'cninfo' %} · {{ buyer.external_id }}{% endif %}{% if buyer.province %} · {{ buyer.province }}{% endif %}</p>
+</div>
+
+<div class="cols">
+<section class="panel">
+  <h2>收购偏好 Acquisition profile</h2>
+  <table>
+    <tr><th>目标行业 Wants</th><td>{% for c in buyer.target_sectors %}{{ sector_label(c) }}<br>{% else %}—{% endfor %}</td></tr>
+    <tr><th>自身行业 Own business</th><td>{% for c in buyer.sectors %}{{ sector_label(c) }}<br>{% else %}—{% endfor %}</td></tr>
+    <tr><th>目标地区 Regions</th><td>{{ buyer.target_regions|join('、') or '不限 Anywhere' }}</td></tr>
+    <tr><th>交易规模 Deal size</th><td class="num">{% if buyer.deal_size_min is not none %}RMB {{ '%g'|format(buyer.deal_size_min) }}–{{ '%g'|format(buyer.deal_size_max) }}m{% else %}未知 Unknown{% endif %}</td></tr>
+    <tr><th>理由 Rationale</th><td>{{ buyer.rationale or '—' }}</td></tr>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>依据 Evidence ({{ buyer.signals|length }})</h2>
+  {% for sig in buyer.signals %}
+  <div class="card" style="margin-bottom:8px">
+    <div class="small muted">{{ sig.published_at.strftime('%Y-%m-%d') if sig.published_at }} · {{ sig.kind }} · {{ sig.extracted.get('generated_by', '') }}</div>
+    <div>{% if sig.url.startswith('http') %}<a href="{{ sig.url }}" target="_blank" rel="noopener">{{ sig.title }}</a>{% else %}{{ sig.title }}{% endif %}</div>
+    {% if sig.extracted.get('is_related_party') %}<span class="pill medium">关联交易 related party</span>{% endif %}
+    {% if sig.extracted.get('is_cross_border') %}<span class="pill medium">跨境 cross-border</span>{% endif %}
+  </div>
+  {% else %}
+  <p class="empty">没有公告依据。No announcements on file.</p>
+  {% endfor %}
+</section>
+</div>
+{% endblock %}

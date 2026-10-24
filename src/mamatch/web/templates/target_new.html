@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}新建项目{% endblock %}
+{% block body %}
+<div>
+  <h1>新建卖方项目 New target</h1>
+  <p class="sub">识别信息只保存在本工作台，用于检查简介是否泄露身份 · Identifying details stay here and are used to check teasers for leaks</p>
+</div>
+
+<form class="panel grid" method="post" action="/targets">
+  <label>项目代号 Code name <input id="code_name" name="code_name" required placeholder="Project Jade"></label>
+  <label>行业 Sector
+    <select id="sector" name="sector" required>{% for code in SECTORS %}<option value="{{ code }}">{{ sector_label(code) }}</option>{% endfor %}</select></label>
+  <label>省份 Province
+    <select id="province" name="province" required>{% for p in REGIONS %}<option>{{ p }}</option>{% endfor %}</select></label>
+  <label>交易方式 Deal type
+    <select id="deal_type" name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label>出售原因 Reason
+    <select id="sale_reason" name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+
+  <fieldset class="wide private">
+    <legend>识别信息（不对外）Identifying details, never shared</legend>
+    <label>公司全称 Legal name <input id="legal_name" name="legal_name" required></label>
+    <label>简称 Short name <input id="short_name" name="short_name"></label>
+    <label>实控人 Owner <input id="owner_name" name="owner_name"></label>
+    <label>城市 City <input id="city" name="city"></label>
+    <label>统一社会信用代码 USCC <input id="uscc" name="uscc" maxlength="18"></label>
+    <label>品牌（逗号分隔）Brands <input id="brands" name="brands"></label>
+  </fieldset>
+
+  <label>成立年份 Founded <input id="founded_year" name="founded_year" inputmode="numeric"></label>
+  <label>员工人数 Employees <input id="employees" name="employees" inputmode="numeric"></label>
+  <label>营业收入 Revenue (RMB m) <input id="revenue" name="revenue" inputmode="decimal"></label>
+  <label>净利润 Net profit (RMB m) <input id="net_profit" name="net_profit" inputmode="decimal"></label>
+  <label>期望估值 Asking EV (RMB m) <input id="asking_value" name="asking_value" inputmode="decimal"></label>
+  <label class="wide">访谈记录 Intake notes <textarea id="description" name="description" placeholder="业务、客户、优势、卖方诉求……"></textarea></label>
+  <div class="wide"><button>保存 Save target</button></div>
+</form>
+{% endblock %}

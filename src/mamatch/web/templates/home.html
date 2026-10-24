@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block body %}
+<div>
+  <h1>{{ firm.name }}</h1>
+  <p class="sub">卖方项目、匿名简介与买方匹配 · Seller mandates, anonymised teasers and buyer matches</p>
+</div>
+
+<section class="panel stats">
+  <div class="stat"><b>{{ counts.targets }}</b><span>卖方项目 Targets</span></div>
+  <div class="stat"><b>{{ counts.buyers }}</b><span>买方 Buyers indexed</span></div>
+  <div class="stat"><b>{{ counts.active }}</b><span>推进中 Active matches</span></div>
+</section>
+
+<div class="cols">
+<section class="panel">
+  <h2>卖方项目 Targets <a class="small" href="/targets/new">+ 新建 New</a></h2>
+  {% if targets %}
+  <div class="tbl"><table>
+    <tr><th>代号 Code name</th><th>行业 Sector</th><th>省份</th><th>估值 EV (RMB m)</th><th>匹配</th></tr>
+    {% for t in targets %}
+    <tr>
+      <td><a href="/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}</td>
+      <td>{{ sector_label(t.sector) }}</td>
+      <td>{{ t.province }}</td>
+      <td class="num">{{ '%g'|format(t.asking_value) if t.asking_value is not none else '—' }}</td>
+      <td class="num">{{ t.matches|length }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}
+  <p class="empty">还没有项目。<a href="/targets/new">录入第一个卖方项目</a>，或运行 <code>uv run mamatch init-db --seed</code> 加载示例。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>最新买方信号 Latest buyer signals</h2>
+  {% if signals %}
+  <div class="tbl"><table>
+    {% for sig in signals %}
+    <tr>
+      <td class="num small muted">{{ sig.published_at.strftime('%Y-%m-%d') if sig.published_at }}</td>
+      <td><a href="/buyers/{{ sig.buyer_id }}">{{ sig.buyer.name }}</a><br><span class="small">{{ sig.title }}</span></td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}
+  <p class="empty">买方库为空。运行 <code>uv run mamatch ingest-cninfo</code> 从巨潮资讯抓取收购公告。</p>
+  {% endif %}
+</section>
+</div>
+{% endblock %}
