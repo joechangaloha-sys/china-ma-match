@@ -369,9 +369,9 @@ def test_faq_and_why_section_in_both_languages(app):
     home = en.get("/en/").text
     assert "Why we built this" in home and "Joe Chang" in home and "bulge-bracket" in home
     faq = en.get("/en/faq").text
-    assert "Frequently asked questions" in faq and "Does this affect my fees?" in faq
+    assert "Frequently asked questions" in faq and "How do fees work for advisers?" in faq and "25%" in faq and "unaffected" not in home
     zh = client(app).get("/zh/faq").text
-    assert "常见问题" in zh and "这会影响我的收费吗" in zh
+    assert "常见问题" in zh and "顾问的收费如何安排" in zh
 
 
 def test_adviser_can_submit_for_a_client(app, db_url):
