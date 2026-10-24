@@ -1,23 +1,23 @@
 {% macro listing_card(c, link='') %}
 <div class="card listing">
   <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ c.code_name }}</a>{% else %}{{ c.code_name }}{% endif %}</b>
-    <span class="muted small">{{ c.region }} · {{ c.sector_zh }} / {{ c.sector_en }}</span></div>
+    <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span></div>
   <div class="ask">
-    <div><span class="muted small">期望价格 Asking price</span><b>{{ c.price_band }}</b></div>
-    <div><span class="muted small">出让股权 Stake</span><b>{{ c.stake }}</b></div>
-    {% if c.implied_ev_band %}<div><span class="muted small">对应整体估值 Implied 100% value</span><b>{{ c.implied_ev_band }}</b></div>{% endif %}
+    <div><span class="muted small">{{ T('期望价格', 'Asking price') }}</span><b>{{ V(c.price_band) }}</b></div>
+    <div><span class="muted small">{{ T('出让股权', 'Stake') }}</span><b>{{ V(c.stake) }}</b></div>
+    {% if c.implied_ev_band %}<div><span class="muted small">{{ T('对应整体估值', 'Implied 100% value') }}</span><b>{{ V(c.implied_ev_band) }}</b></div>{% endif %}
   </div>
   <table class="small">
-    <tr><th>营业收入 Revenue</th><td>{{ c.revenue_band }}</td></tr>
-    {% if c.earnings_band %}<tr><th>调整后利润 Normalised earnings</th><td>{{ c.earnings_band }}</td></tr>{% endif %}
-    <tr><th>员工 Staff</th><td>{{ c.employees_band }}</td></tr>
-    <tr><th>经营年限 Operating</th><td>{{ c.years_operating }}</td></tr>
-    <tr><th>交易范围 Perimeter</th><td>{{ c.deal_type }}</td></tr>
-    {% if c.payment_terms %}<tr><th>付款方式 Payment</th><td>{{ c.payment_terms }}</td></tr>{% endif %}
-    {% if c.founder_transition %}<tr><th>创始人交接 Founder</th><td>{{ c.founder_transition }}</td></tr>{% endif %}
-    {% if c.keep_employees %}<tr><th>员工安排 Staff</th><td>{{ c.keep_employees }}</td></tr>{% endif %}
-    {% if c.timing %}<tr><th>期望时间 Timing</th><td>{{ c.timing }}</td></tr>{% endif %}
-    <tr><th>出售原因 Reason</th><td>{{ c.sale_reason }}</td></tr>
+    <tr><th>{{ T('营业收入', 'Revenue') }}</th><td>{{ V(c.revenue_band) }}</td></tr>
+    {% if c.earnings_band %}<tr><th>{{ T('调整后利润', 'Normalised earnings') }}</th><td>{{ V(c.earnings_band) }}</td></tr>{% endif %}
+    <tr><th>{{ T('员工', 'Staff') }}</th><td>{{ V(c.employees_band) }}</td></tr>
+    <tr><th>{{ T('经营年限', 'Operating') }}</th><td>{{ V(c.years_operating) }}</td></tr>
+    <tr><th>{{ T('交易范围', 'Perimeter') }}</th><td>{{ L(c.deal_type) }}</td></tr>
+    {% if c.payment_terms %}<tr><th>{{ T('付款方式', 'Payment') }}</th><td>{{ L(c.payment_terms) }}</td></tr>{% endif %}
+    {% if c.founder_transition %}<tr><th>{{ T('创始人交接', 'Founder handover') }}</th><td>{{ L(c.founder_transition) }}</td></tr>{% endif %}
+    {% if c.keep_employees %}<tr><th>{{ T('员工安排', 'Employees') }}</th><td>{{ L(c.keep_employees) }}</td></tr>{% endif %}
+    {% if c.timing %}<tr><th>{{ T('期望时间', 'Timing') }}</th><td>{{ L(c.timing) }}</td></tr>{% endif %}
+    <tr><th>{{ T('出售原因', 'Reason for sale') }}</th><td>{{ L(c.sale_reason) }}</td></tr>
   </table>
   {{ caller() if caller }}
 </div>
@@ -71,26 +71,26 @@
 {% endif %}
 {% endmacro %}
 
-{% macro data_form(t, action) %}
+{% macro data_form(target, action) %}
 <form method="post" action="{{ action }}" class="dataform">
   <div class="tbl"><table class="small">
-    <tr><th>百万元 RMB m</th>{% for y in fin_years() %}<th>{{ y }}</th>{% endfor %}</tr>
+    <tr><th>{{ T('百万元', 'RMB m') }}</th>{% for y in fin_years() %}<th>{{ y }}</th>{% endfor %}</tr>
     {% for key, label in FIN_FIELDS.items() %}
-    <tr><td>{{ label }}</td>
-      {% for y in fin_years() %}{% set v = (t.financials or {}).get(y, {}).get(key) %}
-      <td><input name="fin_{{ y }}_{{ key }}" inputmode="decimal" size="7" value="{{ '%g'|format(v) if v is not none }}" aria-label="{{ label }} {{ y }}"></td>
+    <tr><td>{{ L(label) }}</td>
+      {% for y in fin_years() %}{% set v = (target.financials or {}).get(y, {}).get(key) %}
+      <td><input name="fin_{{ y }}_{{ key }}" inputmode="decimal" size="7" value="{{ '%g'|format(v) if v is not none }}" aria-label="{{ L(label) }} {{ y }}"></td>
       {% endfor %}</tr>
     {% endfor %}
   </table></div>
   <div class="grid">
   {% for key, (label, kind) in DISCLOSURES.items() %}
-    {% set v = (t.disclosures or {}).get(key) %}
-    <label class="{{ 'wide' if kind == 'text' }}">{{ label }}
+    {% set v = (target.disclosures or {}).get(key) %}
+    <label class="{{ 'wide' if kind == 'text' }}">{{ L(label) }}
     {% if kind == 'bool' %}
-      <select name="d_{{ key }}"><option value="">—</option><option value="yes" {{ 'selected' if v is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if v is sameas false }}>否 No</option></select>
+      <select name="d_{{ key }}"><option value="">—</option><option value="yes" {{ 'selected' if v is sameas true }}>{{ T('是', 'Yes') }}</option><option value="no" {{ 'selected' if v is sameas false }}>{{ T('否', 'No') }}</option></select>
     {% elif kind.startswith('choice:') %}
       <select name="d_{{ key }}"><option value="">—</option>
-        {% for pair in kind[7:].split(',') %}{% set code, text = pair.split('=') %}<option value="{{ code }}" {{ 'selected' if v == code }}>{{ text }}</option>{% endfor %}</select>
+        {% for pair in kind[7:].split(',') %}{% set code, text = pair.split('=') %}<option value="{{ code }}" {{ 'selected' if v == code }}>{{ L(text) }}</option>{% endfor %}</select>
     {% elif kind == 'text' %}
       <textarea name="d_{{ key }}">{{ v or '' }}</textarea>
     {% else %}
@@ -98,19 +98,19 @@
     {% endif %}</label>
   {% endfor %}
   </div>
-  <button>保存资料 Save data</button>
+  <button>{{ T('保存资料', 'Save') }}</button>
 </form>
 {% endmacro %}
 
 {% macro findings_list(dc) %}
-<div class="small muted">{{ dc.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ dc.generated_by }} · {{ dc.findings|length }} 项 findings</div>
+<div class="small muted">{{ dc.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ dc.generated_by }} · {{ dc.findings|length }} {{ T('项', 'findings') }}</div>
 {% for f in dc.findings %}
 <div class="finding {{ f.severity }}">
-  <span class="pill {{ 'high' if f.severity == 'high' else 'medium' if f.severity == 'medium' else 'low' }}">{{ SEVERITY[f.severity] }}</span>
-  {{ f.message }}<br><span class="small muted">→ {{ f.question }}</span>
+  <span class="pill {{ 'high' if f.severity == 'high' else 'medium' if f.severity == 'medium' else 'low' }}">{{ L(SEVERITY[f.severity]) }}</span>
+  {{ L(f.message) }}<br><span class="small muted">→ {{ L(f.question) }}</span>
 </div>
 {% else %}
-<p class="empty">没有发现问题。No issues found.</p>
+<p class="empty">{{ T('没有发现问题。', 'No issues found.') }}</p>
 {% endfor %}
 {% endmacro %}
 

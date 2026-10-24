@@ -1,29 +1,29 @@
 {% extends "base.html" %}
-{% block title %}收购企业{% endblock %}
+{% block title %}{{ T('收购企业', 'Buy a business') }}{% endblock %}
 {% block body %}
 <div>
-  <h1>收购企业 Buying a business</h1>
-  <p class="sub">面向有明确经营逻辑和资金来源的产业方、行业创业者、管理团队与收购型创业者 · For operating companies, industry entrepreneurs, management teams and acquisition entrepreneurs with credible funding</p>
+  <h1>{{ T('收购企业', 'Buying a business') }}</h1>
+  <p class="sub">{{ T('面向有明确经营逻辑和资金来源的产业方、行业创业者、管理团队与收购型创业者', 'For operating companies, industry entrepreneurs, management teams and acquisition entrepreneurs with credible funding') }}</p>
 </div>
 <div class="cols">
 <section class="panel">
-  <h2>流程 How it works</h2>
+  <h2>{{ T('流程', 'How it works') }}</h2>
   <ol class="steps small">
-    <li><b>注册并描述收购方向</b>：用几句话写下您想买什么，AI 帮您整理成行业、地区、规模和资金条件，由您确认。<i>Describe what you want; AI structures it and you confirm.</i></li>
-    <li><b>身份与资金核验</b>：交易经理核对工商信息和资金证明。<i>We check your registration and funding evidence.</i></li>
-    <li><b>匹配与引荐</b>：先按硬性条件筛选，再由交易经理审核推荐，并说明理由。<i>Hard filters first, then reviewed recommendations with reasons.</i></li>
-    <li><b>保密协议与资料室</b>：签署后查看信息备忘录；卖方同意后开放资料。<i>Sign the NDA for the info memo; the seller opens the data room.</i></li>
+    <li><b>{{ T('注册并描述收购方向', 'Register and describe your thesis') }}</b>: {{ T('用几句话写下您想买什么，AI 帮您整理成行业、地区、规模和资金条件，由您确认。', 'write what you want to buy in a few sentences; AI turns it into sectors, regions, size and funding, and you confirm.') }}</li>
+    <li><b>{{ T('身份与资金核验', 'Identity and funding checks') }}</b>: {{ T('交易经理核对工商信息和资金证明。', 'a deal manager checks your registration and funding evidence.') }}</li>
+    <li><b>{{ T('匹配与引荐', 'Matching and introductions') }}</b>: {{ T('先按硬性条件筛选，再由交易经理审核推荐，并说明理由。', 'hard filters first, then reviewed recommendations with reasons.') }}</li>
+    <li><b>{{ T('保密协议与资料室', 'NDA and data room') }}</b>: {{ T('签署后查看信息备忘录；卖方同意后开放资料。', 'sign the NDA for the info memo; the seller opens the data room.') }}</li>
   </ol>
-  <p><a class="button" href="/register">注册买方账户 Register as a buyer</a> <a href="/opportunities" class="small">先看公开项目 Browse opportunities</a></p>
+  <p><a class="button" href="{{ P }}/register">{{ T('注册买方账户', 'Register as a buyer') }}</a> <a href="{{ P }}/opportunities" class="small">{{ T('先看公开项目', 'Browse opportunities') }}</a></p>
 </section>
 <section class="panel">
-  <h2>我们需要的信息 What we ask for</h2>
+  <h2>{{ T('我们需要的信息', 'What we ask for') }}</h2>
   <ul class="small">
-    <li>收购方向：行业、地区、交易规模、最低利润、不考虑的行业 Thesis: sectors, regions, size, minimum earnings, exclusions</li>
-    <li>资金范围与证明（银行资信、账户证明、基金承诺等）Funding range and evidence</li>
-    <li>相关经营经验 Relevant operating experience</li>
+    <li>{{ T('收购方向：行业、地区、交易规模、最低利润、不考虑的行业', 'Thesis: sectors, regions, size, minimum earnings, exclusions') }}</li>
+    <li>{{ T('资金范围与证明（银行资信、账户证明、基金承诺等）', 'Funding range and evidence (bank letter, account statement, fund commitment)') }}</li>
+    <li>{{ T('相关经营经验', 'Relevant operating experience') }}</li>
   </ul>
-  <p class="small muted">您的信息不会公开展示，也不会提供给卖方，直到双方同意披露名称。Your details are never public and are not shown to sellers until both sides agree to disclose names.</p>
+  <p class="small muted">{{ T('您的信息不会公开展示，也不会提供给卖方，直到双方同意披露名称。', 'Your details are never public and are not shown to sellers until both sides agree to disclose names.') }}</p>
 </section>
 </div>
 {% endblock %}

@@ -39,6 +39,16 @@ REGIONS: dict[str, str] = {
 
 MACRO_REGIONS = list(dict.fromkeys(REGIONS.values()))
 
+REGION_EN = {
+    "长三角": "Yangtze River Delta", "珠三角": "Pearl River Delta", "东南": "Southeast", "京津冀": "Beijing–Tianjin–Hebei",
+    "华北": "North China", "华中": "Central China", "西南": "Southwest", "西北": "Northwest", "东北": "Northeast",
+    "中国": "China",
+    "上海": "Shanghai", "江苏": "Jiangsu", "浙江": "Zhejiang", "安徽": "Anhui", "广东": "Guangdong", "福建": "Fujian",
+    "北京": "Beijing", "天津": "Tianjin", "河北": "Hebei", "山东": "Shandong", "河南": "Henan", "湖北": "Hubei",
+    "湖南": "Hunan", "江西": "Jiangxi", "四川": "Sichuan", "重庆": "Chongqing", "云南": "Yunnan", "贵州": "Guizhou",
+    "陕西": "Shaanxi", "辽宁": "Liaoning", "吉林": "Jilin", "黑龙江": "Heilongjiang",
+}
+
 # Simple keyword map for the offline extractor (announcement titles and summaries).
 SECTOR_KEYWORDS: dict[str, list[str]] = {
     "auto_parts": ["汽车零部件", "汽配", "新能源汽车", "底盘", "热管理"],

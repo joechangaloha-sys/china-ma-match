@@ -10,13 +10,14 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, config, datacheck, db, dealstatus, documents, fees, offers, pipeline, reid
+from .. import auth, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid
 from ..models import AdviserFirm, Buyer, Match, Target, User
 from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, MACRO_REGIONS, PAYMENT_TERMS, REGIONS,
                         SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
 
 HERE = Path(__file__).parent
 COOKIE = "mm_session"
+LANG_COOKIE = "mm_lang"
 I = "/internal"
 
 templates = Jinja2Templates(directory=HERE / "templates")
@@ -57,8 +58,39 @@ def require(role: str):
     return dep
 
 
+def browser_lang(accept_language: str) -> str | None:
+    """First supported language in the browser's list, by preference order (q values respected)."""
+    tags = []
+    for i, part in enumerate(accept_language.split(",")):
+        tag, _, q = part.strip().partition(";q=")
+        try:
+            weight = float(q) if q else 1.0
+        except ValueError:
+            weight = 0.0
+        tags.append((-weight, i, tag.strip().lower().split("-")[0]))
+    return next((code for _, _, code in sorted(tags) if code in i18n.LANGS), None)
+
+
+def get_lang(request: Request) -> str:
+    """The edition in the URL wins; otherwise the remembered switch choice, then the browser, then English."""
+    edition = getattr(request.state, "lang", None)
+    if edition in i18n.LANGS:
+        return edition
+    saved = request.cookies.get(LANG_COOKIE)
+    if saved in i18n.LANGS:
+        return saved
+    return browser_lang(request.headers.get("accept-language", "")) or "en"
+
+
 def render(request: Request, name: str, user: User | None = None, **ctx) -> HTMLResponse:
-    return templates.TemplateResponse(request, name, {"msg": request.query_params.get("msg", ""), "user": user, **ctx})
+    lang = get_lang(request)
+    path = request.url.path
+    query = f"?{request.url.query}" if request.url.query else ""
+    ctx = {"msg": request.query_params.get("msg", ""), "user": user, "lang": lang, "P": f"/{lang}",
+           "edition_path": path + query, "here": path,
+           "T": lambda zh, en: zh if lang == "zh" else en,
+           "L": lambda s: i18n.tr(s, lang), "V": lambda s: i18n.val(s, lang), **ctx}
+    return templates.TemplateResponse(request, name, ctx)
 
 
 def back(url: str, msg: str = "") -> RedirectResponse:
@@ -93,10 +125,12 @@ SELLER_SAFE_REASONS = ("Stated interest", "Same business", "Adjacent sector", "N
                        "Public inquiry")
 
 
-def anon_buyer(b: Buyer) -> str:
-    kind = BUYER_KINDS.get(b.kind, b.kind)
+def anon_buyer(b: Buyer, lang: str = "zh") -> str:
+    kind = i18n.tr(BUYER_KINDS.get(b.kind, b.kind), lang)
     region = macro_region(b.province) if b.province else ""
-    return kind + (f" · 总部{region}" if region else "")
+    if not region:
+        return kind
+    return kind + (f" · 总部{region}" if lang == "zh" else f" · based in {i18n.val(region, 'en')}")
 
 
 def seller_reasons(m: Match) -> list[str]:

@@ -28,6 +28,15 @@ The rebuild toward Joe's plan is done and tested: 73 tests pass, including permi
 requested on the live app as each role (all 200), and the public home, listing and seller portal were checked
 in the browser. See README.md for the structure.
 
+## Added 25 Oct (later)
+
+- Japan IR Index house style (colours, type, masthead, footer) applied in `static/style.css`; read from
+  `~/Documents/japan-ir-index/site/assets/theme.css` without changing that project.
+- English edition: `/zh/` and `/en/` with the Japan IR Index language rules (see README, Languages). Public
+  pages and both portals are single-language; internal pages stay bilingual. No geography in titles or the hero.
+- Not translated yet: matching reasons shown to sellers (English only), AI-drafted teaser/memo text (shown in the
+  language it was drafted in; buyers get an English version if one was drafted and approved).
+
 ## Next steps
 
 1. Click through the internal mandate page and buyer portal in the browser as the deal manager and the demo

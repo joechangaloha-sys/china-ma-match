@@ -12,7 +12,7 @@ from .. import auth, listing, offers
 from ..buyers import new_token
 from ..models import Buyer, Target, User
 from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
-from .common import COOKIE, I, back, current_user, firm, get_session, not_found, num, render
+from .common import COOKIE, I, back, current_user, firm, get_lang, get_session, not_found, num, render
 
 router = APIRouter()
 PAGES = {"sell": "page_sell.html", "buy": "page_buy.html", "fees": "page_fees.html", "security": "page_security.html"}
@@ -24,6 +24,10 @@ def _home_for(user: User | None) -> str:
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, user: User | None = Depends(current_user), s: Session = Depends(get_session)):
+    if getattr(request.state, "lang", None) is None:
+        # The neutral homepage opens an edition: remembered switch choice, else the browser's language.
+        query = f"?{request.url.query}" if request.url.query else ""
+        return RedirectResponse(f"/{get_lang(request)}/{query}", status_code=302)
     rows = listing.public_board(s)[:3]
     return render(request, "home.html", user, portal="public", rows=rows, cards={t.id: listing.card(t) for t in rows})
 

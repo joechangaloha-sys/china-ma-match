@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% block title %}费用{% endblock %}
+{% block title %}{{ T('费用', 'Fees') }}{% endblock %}
 {% block body %}
 <div>
-  <h1>费用与利益冲突 Fees and conflicts</h1>
-  <p class="sub">试点期价格，均为不含税参考价 · Pilot prices, before VAT</p>
+  <h1>{{ T('费用与利益冲突', 'Fees and conflicts') }}</h1>
+  <p class="sub">{{ T('试点期价格，不含税', 'Pilot prices, before VAT') }}</p>
 </div>
 <section class="panel tbl">
   <table>
-    <tr><th>服务 Service</th><th>卖方 Seller</th><th>买方 Buyer</th></tr>
-    <tr><td>匿名挂牌与浏览 Anonymous listing and browsing</td><td>免费 Free</td><td>免费 Free</td></tr>
-    <tr><td>出售准备包：资料核查 + 信息备忘录 Sale preparation: data check + info memo</td><td>RMB {{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}（可选 optional）</td><td>—</td></tr>
-    <tr><td>主动推介服务 Active outreach</td><td>RMB {{ '{:,}'.format(cfg.SELLER_PLAN_FEE_RMB) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} 天 days</td><td>—</td></tr>
-    <tr><td>成交费 Completion fee</td><td>推介服务客户：成交价 {{ '%g'|format(cfg.SUCCESS_FEE_RATE * 100) }}%，最低 RMB {{ '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB) }}，已付费用抵扣 · Outreach clients only, earlier fees credited</td><td>试点中测试 Being tested in the pilot</td></tr>
-    <tr><td>律师、会计、税务、尽调 Legal, accounting, tax, diligence</td><td colspan="2">合作专业机构固定报价，单独签约 Fixed prices from partner firms, contracted separately</td></tr>
+    <tr><th>{{ T('服务', 'Service') }}</th><th>{{ T('卖方', 'Seller') }}</th><th>{{ T('买方', 'Buyer') }}</th></tr>
+    <tr><td>{{ T('匿名挂牌与浏览', 'Anonymous listing and browsing') }}</td><td>{{ T('免费', 'Free') }}</td><td>{{ T('免费', 'Free') }}</td></tr>
+    <tr><td>{{ T('出售准备包：资料核查 + 信息备忘录', 'Sale preparation: data check and info memo') }}</td><td class="num">RMB {{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}</td><td>—</td></tr>
+    <tr><td>{{ T('主动推介服务', 'Active outreach') }}</td><td class="num">RMB {{ '{:,}'.format(cfg.SELLER_PLAN_FEE_RMB) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} {{ T('天', 'days') }}</td><td>—</td></tr>
+    <tr><td>{{ T('成交费', 'Completion fee') }}</td><td>{{ T('推介服务客户：成交价 %g%%，最低 RMB %s，已付费用抵扣', 'Outreach clients: %g%% of the deal value, minimum RMB %s, earlier fees credited')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</td><td>{{ T('试点中测试', 'Being tested in the pilot') }}</td></tr>
+    <tr><td>{{ T('律师、会计、税务、尽调', 'Legal, accounting, tax, diligence') }}</td><td colspan="2">{{ T('合作专业机构固定报价，单独签约', 'Fixed prices from partner firms, contracted separately') }}</td></tr>
   </table>
 </section>
 <section class="panel small">
-  <h2>利益冲突 Conflicts</h2>
-  <p>平台撮合买卖双方，可能同时与双方有服务关系。我们会在引荐前披露收费安排；交易经理不得持有所推介项目的权益；合作专业机构的转介关系会事先告知。<br>
-  We work with both sides and disclose fee arrangements before any introduction. Deal managers may not hold interests in mandates they handle, and referral relationships with partner firms are disclosed in advance.</p>
+  <h2>{{ T('利益冲突', 'Conflicts') }}</h2>
+  <p>{{ T('平台撮合买卖双方，可能同时与双方有服务关系。我们会在引荐前披露收费安排；交易经理不得持有所推介项目的权益；合作专业机构的转介关系会事先告知。',
+          'We work with both sides and disclose fee arrangements before any introduction. Deal managers may not hold interests in mandates they handle, and referral relationships with partner firms are disclosed in advance.') }}</p>
 </section>
 {% endblock %}

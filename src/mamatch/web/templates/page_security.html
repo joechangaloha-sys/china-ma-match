@@ -1,24 +1,24 @@
 {% extends "base.html" %}
-{% block title %}保密与安全{% endblock %}
+{% block title %}{{ T('保密与安全', 'Confidentiality') }}{% endblock %}
 {% block body %}
-<div><h1>保密与安全 Confidentiality and security</h1></div>
+<div><h1>{{ T('保密与安全', 'Confidentiality and security') }}</h1></div>
 <div class="cols">
 <section class="panel small">
-  <h2>分阶段披露 Staged disclosure</h2>
+  <h2>{{ T('分阶段披露', 'Staged disclosure') }}</h2>
   <ol>
-    <li>公开：只有卖方确认的匿名区间，不含名称、地址、客户名称或图片。Public: only seller-approved ranges.</li>
-    <li>引荐：卖方批准后，买方收到匿名简介。Introduction: anonymous teaser after seller approval.</li>
-    <li>保密协议后：信息备忘录（仍不含公司名称）。After NDA: info memo, still without the name.</li>
-    <li>卖方同意后：资料室文件与公司名称。With seller consent: data room and the company name.</li>
+    <li>{{ T('公开：只有卖方确认的匿名区间，不含名称、地址、客户名称或图片。', 'Public: only seller-approved ranges, with no name, address, customer names or images.') }}</li>
+    <li>{{ T('引荐：卖方批准后，买方收到匿名简介。', 'Introduction: an anonymous teaser, after the seller approves the buyer.') }}</li>
+    <li>{{ T('保密协议后：信息备忘录（仍不含公司名称）。', 'After an NDA: the info memo, still without the company name.') }}</li>
+    <li>{{ T('卖方同意后：资料室文件与公司名称。', "With the seller's consent: the data room and the company name.") }}</li>
   </ol>
 </section>
 <section class="panel small">
-  <h2>技术措施 Controls</h2>
+  <h2>{{ T('技术措施', 'Controls') }}</h2>
   <ul>
-    <li>每次访问资料都在服务器端检查权限，并记录查看和下载。Every document request is permission-checked and logged.</li>
-    <li>按角色分权：卖方、买方、交易经理只能看到各自的事项。Role-based access per matter.</li>
-    <li>上传文件视为不可信数据处理，AI 仅接收当前任务所需的最少信息。Uploads are treated as untrusted; AI gets only what a task needs.</li>
-    <li>平台核验不代表对盈利、估值或产权的保证。Verification is not a guarantee of earnings, value or title.</li>
+    <li>{{ T('每次访问资料都在服务器端检查权限，并记录查看和下载。', 'Every document request is permission-checked on the server, and every view is logged.') }}</li>
+    <li>{{ T('按角色分权：卖方、买方、交易经理只能看到各自的事项。', 'Role-based access: sellers, buyers and deal managers see only their own matters.') }}</li>
+    <li>{{ T('上传文件视为不可信数据处理，AI 仅接收当前任务所需的最少信息。', 'Uploads are treated as untrusted data; AI receives only what each task needs.') }}</li>
+    <li>{{ T('平台核验不代表对盈利、估值或产权的保证。', 'Verification is not a guarantee of earnings, value or title.') }}</li>
   </ul>
 </section>
 </div>

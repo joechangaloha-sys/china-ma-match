@@ -1,52 +1,68 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}中小企业转让 · 长三角{% endblock %} · mamatch</title>
+<title>{% block title %}{{ T('中小企业转让', 'Small-business sales') }}{% endblock %} · mamatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 <link rel="stylesheet" href="/static/style.css?v={{ css_version }}">
+<link rel="alternate" hreflang="zh" href="/zh{{ edition_path }}">
+<link rel="alternate" hreflang="en" href="/en{{ edition_path }}">
+<link rel="alternate" hreflang="x-default" href="{{ edition_path }}">
+<script src="/static/language.js" defer></script>
 </head>
 <body class="{{ portal or 'public' }}">
+<div class="util"><div class="in">
+  <span>{% if portal == 'internal' %}{{ T('内部 · 交易经理', 'Internal · deal managers') }}{% else %}{{ T('中小企业转让与收购', 'Selling and buying small businesses') }}{% endif %}</span>
+  <nav class="langs" aria-label="Language" data-language-switch>
+    {% for code, label in [('zh', '中文'), ('en', 'English')] %}<a href="/{{ code }}{{ edition_path }}" lang="{{ code }}" hreflang="{{ code }}" {{ 'aria-current="true"'|safe if lang == code }} class="{{ 'on' if lang == code }}">{{ label }}</a>{% endfor %}
+  </nav>
+</div></div>
 <header class="bar"><div class="in">
   {% if portal == 'internal' %}
-  <a class="brand" href="{{ I }}">mamatch <span class="pill internal-pill">内部 INTERNAL</span></a>
-  <nav>
-    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">卖方项目 Mandates</a>
-    <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">买方审核 Buyer checks</a>
-    <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">交易进度 Pipeline</a>
-    <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">试点数据 Pilot metrics</a>
-    <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">审计 Audit</a>
-  </nav>
+  <a class="brand" href="{{ I }}">mamatch <span class="pill internal-pill">{{ T('内部', 'INTERNAL') }}</span></a>
   {% else %}
-  <a class="brand" href="/">mamatch <span class="muted small">长三角中小企业转让 Small-business sales, Yangtze River Delta</span></a>
-  <nav>
-    {% if portal == 'seller' %}<a href="/seller" class="on">我的出售 My sale</a>
-    {% elif portal == 'buyer' %}<a href="/buyer" class="on">我的收购 My acquisitions</a>{% endif %}
-    <a href="/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">出售项目 Opportunities</a>
-    <a href="/sell" class="{{ 'on' if request.url.path == '/sell' }}">出售企业 Sell</a>
-    <a href="/buy" class="{{ 'on' if request.url.path == '/buy' }}">收购企业 Buy</a>
-    <a href="/fees" class="{{ 'on' if request.url.path == '/fees' }}">费用 Fees</a>
-    <a href="/security" class="{{ 'on' if request.url.path == '/security' }}">保密 Confidentiality</a>
-  </nav>
+  <a class="brand" href="{{ P }}/">mamatch <small>{{ T('中小企业并购', 'Small-company M&A') }}</small></a>
   {% endif %}
   <span class="who">
-    {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ ROLES[user.role] }}</span>
-      {% if portal not in ('seller', 'buyer', 'internal') %}<a class="small" href="{{ {'seller': '/seller', 'buyer': '/buyer', 'deal_manager': I}[user.role] }}">我的页面 My page</a>{% endif %}
-      <form method="post" action="/logout" class="inline"><button class="ghost small">退出 Sign out</button></form>
-    {% else %}<a href="/login">登录 Sign in</a>{% endif %}
+    {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ L(ROLES[user.role]) }}</span>
+      {% if portal not in ('seller', 'buyer', 'internal') %}<a class="small" href="{{ P ~ {'seller': '/seller', 'buyer': '/buyer', 'deal_manager': I}[user.role] }}">{{ T('我的页面', 'My page') }}</a>{% endif %}
+      <form method="post" action="{{ P }}/logout" class="inline"><button class="ghost small">{{ T('退出', 'Sign out') }}</button></form>
+    {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
+  <nav>
+  {% if portal == 'internal' %}
+    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
+    <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
+    <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
+    <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
+    <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
+  {% else %}
+    {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
+    {% elif portal == 'buyer' %}<a href="{{ P }}/buyer" class="on">{{ T('我的收购', 'My acquisitions') }}</a>{% endif %}
+    <a href="{{ P }}/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">{{ T('出售项目', 'Opportunities') }}</a>
+    <a href="{{ P }}/sell" class="{{ 'on' if request.url.path == '/sell' }}">{{ T('出售企业', 'Sell') }}</a>
+    <a href="{{ P }}/buy" class="{{ 'on' if request.url.path == '/buy' }}">{{ T('收购企业', 'Buy') }}</a>
+    <a href="{{ P }}/fees" class="{{ 'on' if request.url.path == '/fees' }}">{{ T('费用', 'Fees') }}</a>
+    <a href="{{ P }}/security" class="{{ 'on' if request.url.path == '/security' }}">{{ T('保密', 'Confidentiality') }}</a>
+  {% endif %}
+  </nav>
 </div></header>
 {% if portal == 'internal' %}
 <div class="internal-banner" role="note">内部页面：仅限交易经理使用，不对卖方、买方或公众开放 · Internal page for deal managers only, not visible to sellers, buyers or the public</div>
 {% endif %}
 <main>
-{% if msg %}<p class="flash" role="status">{{ msg }}</p>{% endif %}
+{% if msg %}<p class="flash" role="status">{{ L(msg) }}</p>{% endif %}
 {% block body %}{% endblock %}
 </main>
-{% if portal not in ('internal',) %}
-<footer class="foot"><div class="in small muted">
-  平台核验身份与资料来源，但不保证盈利、估值、产权或未来业绩；AI 生成内容均经人工审核。不提供法律、税务、会计或投资意见。<br>
-  We verify identity and document sources, but do not guarantee earnings, valuation, title or future performance. AI-drafted content is reviewed by people. Not legal, tax, accounting or investment advice.
+{% if portal != 'internal' %}
+<footer class="foot"><div class="in small">
+  <span class="fbrand">mamatch</span>
+  <p>{{ T('平台核验身份与资料来源，但不保证盈利、估值、产权或未来业绩；AI 生成内容均经人工审核。不提供法律、税务、会计或投资意见。',
+          'We verify identity and document sources, but do not guarantee earnings, valuation, title or future performance. AI-drafted content is reviewed by people. Not legal, tax, accounting or investment advice.') }}</p>
+  <p><a href="{{ P }}/fees">{{ T('费用与利益冲突', 'Fees and conflicts') }}</a> · <a href="{{ P }}/security">{{ T('保密与安全', 'Confidentiality and security') }}</a></p>
 </div></footer>
 {% endif %}
 </body>

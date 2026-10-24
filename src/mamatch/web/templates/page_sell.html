@@ -1,37 +1,37 @@
 {% extends "base.html" %}
-{% block title %}出售企业{% endblock %}
+{% block title %}{{ T('出售企业', 'Sell your business') }}{% endblock %}
 {% block body %}
 <div>
-  <h1>出售您的企业 Selling your business</h1>
-  <p class="sub">适合有三年以上经营历史、盈利、交易金额约 200万–2000万元的企业主 · For profitable owner-managed businesses with 3+ years of history, roughly RMB 2–20m in deal value</p>
+  <h1>{{ T('出售您的企业', 'Selling your business') }}</h1>
+  <p class="sub">{{ T('适合有三年以上经营历史、盈利、交易金额约 200万–2000万元的企业主', 'For profitable owner-managed businesses with three or more years of history, roughly RMB 2–20m in deal value') }}</p>
 </div>
 <div class="cols">
 <section class="panel">
-  <h2>流程 What happens</h2>
+  <h2>{{ T('流程', 'What happens') }}</h2>
   <ol class="steps small">
-    <li><b>保密访谈</b>：交易经理了解您的企业和诉求。<i>A confidential call about your business and what you want.</i></li>
-    <li><b>委托与核验</b>：确认您有权出售。<i>We confirm you are authorised to sell.</i></li>
-    <li><b>出售准备</b>：上传资料，AI 提取数字并提示买方会问的问题。<i>Upload documents; AI extracts figures and flags what buyers will ask.</i></li>
-    <li><b>匿名简介</b>：您确认后才会公开或发给买方；不出现名称、城市或准确数字。<i>Nothing goes out until you approve it; no name, city or exact figures.</i></li>
-    <li><b>引荐与披露</b>：每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。<i>You decide on each buyer; details open only after an NDA and your consent.</i></li>
-    <li><b>交易与交接</b>：合作律师、会计师和税务师按项目固定价格提供支持。<i>Partner lawyers, accountants and tax advisers at fixed prices.</i></li>
+    <li><b>{{ T('保密访谈', 'A confidential call') }}</b>: {{ T('交易经理了解您的企业和诉求。', 'a deal manager learns about your business and what you want.') }}</li>
+    <li><b>{{ T('委托与核验', 'Mandate and checks') }}</b>: {{ T('确认您有权出售。', 'we confirm you are authorised to sell.') }}</li>
+    <li><b>{{ T('出售准备', 'Preparation') }}</b>: {{ T('上传资料，AI 提取数字并提示买方会问的问题。', 'upload documents; AI extracts figures and flags what buyers will ask.') }}</li>
+    <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>: {{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, with no name, city or exact figures.') }}</li>
+    <li><b>{{ T('引荐与披露', 'Introductions and disclosure') }}</b>: {{ T('每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。', 'you decide on each buyer; details open only after an NDA and your consent.') }}</li>
+    <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>: {{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers at fixed prices.') }}</li>
   </ol>
-  <p class="small"><a href="/fees">费用说明 Fees</a> · <a href="/security">保密措施 Confidentiality</a></p>
+  <p class="small"><a href="{{ P }}/fees">{{ T('费用说明', 'Fees') }}</a> · <a href="{{ P }}/security">{{ T('保密措施', 'Confidentiality') }}</a></p>
 </section>
-<form class="panel grid" id="intake" method="post" action="/sell">
-  <h2 class="wide">预约保密访谈 Request a confidential call</h2>
-  <label>公司名称 Company <input name="company" required></label>
-  <label>您的姓名 Your name <input name="name" required></label>
-  <label class="wide">电话或邮箱 Phone or email <input name="contact" required></label>
-  <label>行业 Sector <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ sector_label(code) }}</option>{% endfor %}</select></label>
-  <label>省市 Province <select name="province">{% for p in REGIONS %}<option>{{ p }}</option>{% endfor %}</select></label>
-  <label>年收入（百万元）Revenue, RMB m <input name="revenue" inputmode="decimal"></label>
-  <label>年净利润（百万元）Net profit, RMB m <input name="net_profit" inputmode="decimal"></label>
-  <label>交易方式 Deal <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>出售原因 Reason <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label class="wide">补充说明 Anything else <textarea name="notes"></textarea></label>
-  <label class="check wide"><input type="checkbox" name="consent" value="1" required> 同意交易经理就出售事宜与我联系，信息仅用于本次评估 · I agree to be contacted; the information is used only for this assessment.</label>
-  <div class="wide"><button>提交 Send</button></div>
+<form class="panel grid" id="intake" method="post" action="{{ P }}/sell">
+  <h2 class="wide">{{ T('预约保密访谈', 'Request a confidential call') }}</h2>
+  <label>{{ T('公司名称', 'Company') }} <input name="company" required></label>
+  <label>{{ T('您的姓名', 'Your name') }} <input name="name" required></label>
+  <label class="wide">{{ T('电话或邮箱', 'Phone or email') }} <input name="contact" required></label>
+  <label>{{ T('行业', 'Sector') }} <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
+  <label>{{ T('省市', 'Province') }} <select name="province">{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
+  <label>{{ T('年收入（百万元）', 'Revenue, RMB m') }} <input name="revenue" inputmode="decimal"></label>
+  <label>{{ T('年净利润（百万元）', 'Net profit, RMB m') }} <input name="net_profit" inputmode="decimal"></label>
+  <label>{{ T('交易方式', 'Deal') }} <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T('出售原因', 'Reason') }} <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label class="wide">{{ T('补充说明', 'Anything else') }} <textarea name="notes"></textarea></label>
+  <label class="check wide"><input type="checkbox" name="consent" value="1" required> {{ T('同意交易经理就出售事宜与我联系，信息仅用于本次评估', 'I agree to be contacted; the information is used only for this assessment.') }}</label>
+  <div class="wide"><button>{{ T('提交', 'Send') }}</button></div>
 </form>
 </div>
 {% endblock %}

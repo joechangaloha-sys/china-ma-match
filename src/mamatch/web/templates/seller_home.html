@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}我的出售{% endblock %}
+{% block title %}{{ T('我的出售', 'My sale') }}{% endblock %}
 {% block body %}
-<h1>我的出售项目 My sales</h1>
-{% for t in rows %}<p><a href="/seller/{{ t.id }}">{{ t.code_name }}</a> · {{ STATUSES[t.status] }}</p>
-{% else %}<p class="empty">您的账户还没有关联项目。No sale is linked to your account yet; your deal manager will set it up.</p>{% endfor %}
+<h1>{{ T('我的出售项目', 'My sales') }}</h1>
+{% for r in rows %}<p><a href="{{ P }}/seller/{{ r.id }}">{{ r.code_name }}</a> · {{ L(STATUSES[r.status]) }}</p>
+{% else %}<p class="empty">{{ T('您的账户还没有关联项目，交易经理会为您设置。', 'No sale is linked to your account yet; your deal manager will set it up.') }}</p>{% endfor %}
 {% endblock %}

@@ -1,7 +1,7 @@
 # china-ma-match (mamatch)
 
-A curated, AI-assisted marketplace and deal workspace for selling small private operating businesses in
-China. Pilot focus: the Shanghai–Suzhou–Hangzhou–Ningbo corridor, deals of about RMB 2–20m. It follows
+A curated, AI-assisted marketplace and deal workspace for selling and buying small private operating
+businesses, in Chinese and English. Pilot deals: about RMB 2–20m. It follows
 Joe's pilot plan (`~/Documents/kimi/tasks/2026-10-24/.../china_small_ma_pilot_and_ai_website_plan.md`):
 a secure operating system for a concierge pilot, not an open marketplace.
 
@@ -19,6 +19,16 @@ earlier decisions). Current status and next steps: [handoff.md](handoff.md).
 
 Disclosure is staged: public ranges → seller-approved teaser → NDA and info memo (still no name) → seller-granted
 data room → names disclosed both ways with the seller's consent.
+
+## Languages and look
+
+Two editions, `/zh/...` and `/en/...`, following the Japan IR Index rules: the neutral homepage `/` opens the
+edition the visitor last chose with the header switch (remembered in localStorage and the `mm_lang` cookie),
+otherwise the first supported browser language, otherwise English. Direct edition links never redirect; query
+strings are kept, and redirects inside an edition stay in it (`LanguageEditions` in `web/app.py`). Labels are
+written bilingually in code and `i18n.tr` / `i18n.val` pick the reader's side; public pages and both portals show
+one language, internal pages stay bilingual for deal managers. The visual style (navy masthead over a brass rule,
+serif headlines, IBM Plex, light only) matches the Japan IR Index house theme.
 
 ## AI with human control
 

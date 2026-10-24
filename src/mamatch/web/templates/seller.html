@@ -1,123 +1,123 @@
 {% extends "base.html" %}
-{% from "_macros.html" import listing_card, data_form, findings_list, memo_view %}
+{% from "_macros.html" import listing_card, data_form, findings_list, memo_view with context %}
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
 <div>
   <h1>{{ t.code_name }}</h1>
-  <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · 交易经理 Deal manager: {{ t.firm.name }}</p>
+  <p class="sub">{{ L(sector_label(t.sector)) }} · {{ V(t.province) }} · {{ T('交易经理', 'Deal manager') }}: {{ t.firm.name }}</p>
 </div>
 
 <section class="panel">
-  <h2>进度 Where your sale stands</h2>
+  <h2>{{ T('进度', 'Where your sale stands') }}</h2>
   <ol class="progress">
     {% set order = ['draft','documents_requested','extraction_review','seller_approval','in_market','introduction','nda','disclosure','diligence','loi','closing','closed'] %}
     {% set cur = order.index(t.status) if t.status in order else -1 %}
-    {% for st in order %}<li class="{{ 'done' if loop.index0 < cur else 'now' if loop.index0 == cur }}">{{ STATUSES[st].split(' ')[0] }}</li>{% endfor %}
+    {% for st in order %}<li class="{{ 'done' if loop.index0 < cur else 'now' if loop.index0 == cur }}">{{ L(STATUSES[st]) }}</li>{% endfor %}
   </ol>
-  {% if t.status not in order %}<p><b>{{ STATUSES[t.status] }}</b></p>{% endif %}
+  {% if t.status not in order %}<p><b>{{ L(STATUSES[t.status]) }}</b></p>{% endif %}
 </section>
 
 <section class="panel" id="documents">
-  <h2>资料清单 Document checklist</h2>
-  <p class="small muted">文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为"资料室"的文件。<br>
-    Only you and your deal manager can see these. A buyer sees data-room documents only after an NDA and your consent.</p>
+  <h2>{{ T('资料清单', 'Document checklist') }}</h2>
+  <p class="small muted">{{ T('文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为“资料室”的文件。',
+                             'Only you and your deal manager can see these. A buyer sees data-room documents only after an NDA and your consent.') }}</p>
   <div class="tbl"><table class="small">
-    <tr><th>资料 Item</th><th>已上传 Uploaded</th></tr>
+    <tr><th>{{ T('资料', 'Item') }}</th><th>{{ T('已上传', 'Uploaded') }}</th></tr>
     {% for k, label in CHECKLIST.items() %}
     {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}
-    <tr><td>{{ label }}{% if k in missing %} <span class="pill medium">必需 required</span>{% endif %}</td>
+    <tr><td>{{ L(label) }}{% if k in missing %} <span class="pill medium">{{ T('必需', 'required') }}</span>{% endif %}</td>
       <td>{% for d in docs %}{{ d.filename }}{{ ' · ' if not loop.last }}{% else %}—{% endfor %}</td></tr>
     {% endfor %}
   </table></div>
-  <form class="inline" method="post" action="/seller/{{ t.id }}/documents" enctype="multipart/form-data">
-    <select name="kind" aria-label="Document type">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select>
-    <input type="file" name="file" required aria-label="File">
-    <button>上传 Upload</button>
+  <form class="inline" method="post" action="{{ P }}/seller/{{ t.id }}/documents" enctype="multipart/form-data">
+    <select name="kind" aria-label="{{ T('资料类型', 'Document type') }}">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ L(label) }}</option>{% endfor %}</select>
+    <input type="file" name="file" required aria-label="{{ T('文件', 'File') }}">
+    <button>{{ T('上传', 'Upload') }}</button>
   </form>
 </section>
 
 <section class="panel" id="teaser">
-  <h2>匿名简介 Your anonymous teaser</h2>
+  <h2>{{ T('匿名简介', 'Your anonymous teaser') }}</h2>
   {% if latest_teaser %}
   <div class="teaser">
     <h3>{{ latest_teaser.body.headline }}</h3>
     <p>{{ latest_teaser.body.summary }}</p>
     <ul>{% for h in latest_teaser.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
-    {% if latest_teaser.seller_approved_at %}<span class="pill">您已确认 You approved this ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
+    {% if latest_teaser.seller_approved_at %}<span class="pill">{{ T('您已确认', 'You approved this') }} ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
     {% else %}
-    <form method="post" action="/seller/{{ t.id }}/teasers/{{ latest_teaser.id }}/approve"><button>确认此简介 Approve this teaser</button></form>
-    <p class="small muted">确认前不会公开或发送给任何买方。Nothing is published or sent before you approve.</p>
+    <form method="post" action="{{ P }}/seller/{{ t.id }}/teasers/{{ latest_teaser.id }}/approve"><button>{{ T('确认此简介', 'Approve this teaser') }}</button></form>
+    <p class="small muted">{{ T('确认前不会公开或发送给任何买方。', 'Nothing is published or sent before you approve.') }}</p>
     {% endif %}
   </div>
   {% else %}
-  <p class="empty">交易经理正在准备简介。Your deal manager is preparing the teaser.</p>
+  <p class="empty">{{ T('交易经理正在准备简介。', 'Your deal manager is preparing the teaser.') }}</p>
   {% endif %}
 </section>
 
 <div class="cols" id="listing">
 <section class="panel">
-  <h2>公开方式 Visibility</h2>
+  <h2>{{ T('公开方式', 'Visibility') }}</h2>
   {% if t.visibility == 'listed' %}
-  <p><b>已匿名公开 Listed publicly, anonymised.</b> 右侧卡片显示在出售项目页（不含名称、城市或准确数字）。<br><span class="small muted">The card on the right is on the opportunities page: no name, city or exact figures.</span></p>
-  <form method="post" action="/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">改为不公开 Make private</button></form>
+  <p><b>{{ T('已匿名公开。', 'Listed publicly, anonymised.') }}</b> {{ T('右侧卡片显示在出售项目页（不含名称、城市或准确数字）。', 'The card on the right is on the opportunities page, with no name, city or exact figures.') }}</p>
+  <form method="post" action="{{ P }}/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">{{ T('改为不公开', 'Make private') }}</button></form>
   {% else %}
-  <p><b>不公开 Private.</b> 只有您批准的买方会收到匿名简介。<br><span class="small muted">Only buyers you approve receive the anonymous teaser.</span></p>
-  <p class="small">匿名公开可让最多的买方看到您的项目。Listing anonymously reaches the most buyers.</p>
-  <form method="post" action="/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="listed"><button>匿名公开 List anonymously</button></form>
+  <p><b>{{ T('不公开。', 'Private.') }}</b> {{ T('只有您批准的买方会收到匿名简介。', 'Only buyers you approve receive the anonymous teaser.') }}</p>
+  <p class="small">{{ T('匿名公开可让最多的买方看到您的项目。', 'Listing anonymously reaches the most buyers.') }}</p>
+  <form method="post" action="{{ P }}/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="listed"><button>{{ T('匿名公开', 'List anonymously') }}</button></form>
   {% endif %}
 </section>
 <section class="panel">
-  <h2>您的项目卡片 Your listing card</h2>
+  <h2>{{ T('您的项目卡片', 'Your listing card') }}</h2>
   {{ listing_card(card) }}
 </section>
 </div>
 
 <section class="panel" id="buyers">
-  <h2>买方 Buyers</h2>
+  <h2>{{ T('买方', 'Buyers') }}</h2>
   {% if outreach %}
-  <p class="small muted">交易经理根据买方确认的收购方向推荐了以下买方。批准后对方收到匿名简介。Approving a buyer sends them the anonymous teaser.</p>
+  <p class="small muted">{{ T('交易经理根据买方确认的收购方向推荐了以下买方。批准后对方收到匿名简介。', "Your deal manager suggested these buyers from their confirmed criteria. Approving one sends them the anonymous teaser.") }}</p>
   {% for m in candidates %}
   <div class="card">
-    <div><b>{{ anon_buyer(m.buyer) }}</b></div>
+    <div><b>{{ anon_buyer(m.buyer, lang) }}</b></div>
     <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
     <div class="actions">
-      <form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/approve"><button>批准并发送 Approve and send</button></form>
-      <form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/decline"><button class="ghost">不发送 Skip</button></form>
+      <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/approve"><button>{{ T('批准并发送', 'Approve and send') }}</button></form>
+      <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/decline"><button class="ghost">{{ T('不发送', 'Skip') }}</button></form>
     </div>
   </div>
   {% else %}
-  <p class="empty">没有待您批准的买方。No buyers waiting for your approval.</p>
+  <p class="empty">{{ T('没有待您批准的买方。', 'No buyers waiting for your approval.') }}</p>
   {% endfor %}
   {% endif %}
   {% if sent %}
-  <h3>进展 Progress</h3>
+  <h3>{{ T('进展', 'Progress') }}</h3>
   <div class="tbl"><table>
-    <tr><th>买方 Buyer</th><th>阶段 Stage</th><th></th></tr>
+    <tr><th>{{ T('买方', 'Buyer') }}</th><th>{{ T('阶段', 'Stage') }}</th><th></th></tr>
     {% for m in sent %}
     <tr>
-      <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer) }}{% endif %}</td>
-      <td>{{ STAGES[m.stage] }}{% if m.data_room_granted_at %}<br><span class="pill">资料室已开放 data room open</span>{% endif %}</td>
+      <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer, lang) }}{% endif %}</td>
+      <td>{{ L(STAGES[m.stage]) }}{% if m.data_room_granted_at %}<br><span class="pill">{{ T('资料室已开放', 'data room open') }}</span>{% endif %}</td>
       <td class="actions">{% if m.stage in after_nda %}
-        {% if not m.data_room_granted_at %}<form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">开放资料室 Open data room</button></form>{% endif %}
-        {% if not m.name_disclosed_at %}<form method="post" action="/seller/{{ t.id }}/matches/{{ m.id }}/disclose"><button class="ghost">互相披露名称 Disclose names</button></form>{% endif %}
+        {% if not m.data_room_granted_at %}<form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">{{ T('开放资料室', 'Open data room') }}</button></form>{% endif %}
+        {% if not m.name_disclosed_at %}<form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/disclose"><button class="ghost">{{ T('互相披露名称', 'Disclose names') }}</button></form>{% endif %}
         {% endif %}</td>
     </tr>
     {% endfor %}
   </table></div>
   {% elif not outreach %}
-  <p class="empty">交易经理正在寻找合适的买方。Your deal manager is looking for suitable buyers.</p>
+  <p class="empty">{{ T('交易经理正在寻找合适的买方。', 'Your deal manager is looking for suitable buyers.') }}</p>
   {% endif %}
 </section>
 
 <section class="panel" id="data">
-  <h2>补充问卷 Questions buyers will ask</h2>
-  {{ data_form(t, '/seller/%s/data'|format(t.id)) }}
-  {% if t.data_checks %}<h3>需要您说明的问题 Points to explain</h3>{{ findings_list(t.data_checks[0]) }}{% endif %}
+  <h2>{{ T('补充问卷', 'Questions buyers will ask') }}</h2>
+  {{ data_form(t, P ~ '/seller/' ~ t.id ~ '/data') }}
+  {% if t.data_checks %}<h3>{{ T('需要您说明的问题', 'Points to explain') }}</h3>{{ findings_list(t.data_checks[0]) }}{% endif %}
 </section>
 
 {% if memo %}
 <section class="panel" id="memo">
-  <h2>信息备忘录 Info memo <span class="pill">{{ '已审核 approved' if memo.status == 'approved' else '草稿 draft' }}</span></h2>
+  <h2>{{ T('信息备忘录', 'Info memo') }} <span class="pill">{{ T('已审核', 'approved') if memo.status == 'approved' else T('草稿', 'draft') }}</span></h2>
   {{ memo_view(memo) }}
 </section>
 {% endif %}

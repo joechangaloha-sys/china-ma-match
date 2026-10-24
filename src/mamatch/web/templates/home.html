@@ -1,45 +1,47 @@
 {% extends "base.html" %}
-{% from "_macros.html" import listing_card %}
+{% from "_macros.html" import listing_card with context %}
 {% block body %}
 <section class="hero">
-  <h1>为长三角中小企业主提供保密、可靠的转让路径</h1>
-  <p class="lead">A confidential, trusted route to sell or buy a small operating business in the Shanghai–Suzhou–Hangzhou–Ningbo corridor.</p>
+  <span class="eyebrow">{{ T('中小企业并购', 'Small-company M&A') }}</span>
+  <h1>{{ T('保密、可靠地出售或收购中小企业', 'A confidential, trusted way to sell or buy a small business') }}</h1>
+  <p class="lead">{{ T('经过核验的卖方、分阶段披露、人工把关的 AI，帮助企业主准备出售，帮助合格买方找到、评估并完成收购。',
+                     'Verified sellers, staged disclosure and human-checked AI help owners prepare a confidential sale, and help qualified buyers find, evaluate and complete acquisitions.') }}</p>
   <div class="actions">
-    <a class="button" href="/sell">我想出售企业 I want to sell</a>
-    <a class="button ghost" href="/buy">我想收购企业 I want to buy</a>
+    <a class="button" href="{{ P }}/sell">{{ T('我想出售企业', 'I want to sell') }}</a>
+    <a class="button ghost" href="{{ P }}/buy">{{ T('我想收购企业', 'I want to buy') }}</a>
   </div>
 </section>
 
 <div class="cols three">
-  <section class="panel"><h2>经过核验的卖方 Verified sellers</h2>
-    <p class="small">每个项目都核实了委托人身份和授权，财务数字可追溯到原始文件。Every mandate has verified authority, and every figure traces back to a source document.</p></section>
-  <section class="panel"><h2>分阶段披露 Staged disclosure</h2>
-    <p class="small">公开只显示匿名区间；签署保密协议并经卖方同意后才开放详细资料。Publicly only ranges; details open after an NDA and the seller's consent.</p></section>
-  <section class="panel"><h2>人工把关的 AI Human-checked AI</h2>
-    <p class="small">AI 读取资料、发现缺口、起草简介、推荐买方；每一步都由交易经理审核。AI reads documents, finds gaps, drafts teasers and suggests buyers; a deal manager reviews every step.</p></section>
+  <section class="panel"><h2>{{ T('经过核验的卖方', 'Verified sellers') }}</h2>
+    <p class="small">{{ T('每个项目都核实了委托人身份和授权，财务数字可追溯到原始文件。', 'Every mandate has verified authority, and every figure traces back to a source document.') }}</p></section>
+  <section class="panel"><h2>{{ T('分阶段披露', 'Staged disclosure') }}</h2>
+    <p class="small">{{ T('公开只显示匿名区间；签署保密协议并经卖方同意后才开放详细资料。', "Publicly, only ranges. Details open after an NDA and with the seller's consent.") }}</p></section>
+  <section class="panel"><h2>{{ T('人工把关的 AI', 'Human-checked AI') }}</h2>
+    <p class="small">{{ T('AI 读取资料、发现缺口、起草简介、推荐买方；每一步都由交易经理审核。', 'AI reads documents, finds gaps, drafts teasers and suggests buyers; a deal manager reviews every step.') }}</p></section>
 </div>
 
 <section>
-  <h2>最新出售项目 Latest opportunities <a class="small" href="/opportunities">全部 All →</a></h2>
+  <h2>{{ T('最新出售项目', 'Latest opportunities') }} · <a class="small" href="{{ P }}/opportunities">{{ T('全部', 'All') }} →</a></h2>
   <div class="cards">
-  {% for t in rows %}
-    {% call listing_card(cards[t.id], '/opportunities/%s'|format(t.id)) %}{% endcall %}
+  {% for r in rows %}
+    {% call listing_card(cards[r.id], P ~ '/opportunities/' ~ r.id) %}{% endcall %}
   {% else %}
-    <p class="empty">暂无公开项目。No public listings yet.</p>
+    <p class="empty">{{ T('暂无公开项目。', 'No public listings yet.') }}</p>
   {% endfor %}
   </div>
 </section>
 
 <section class="panel">
-  <h2>流程 How it works</h2>
+  <h2>{{ T('流程', 'How it works') }}</h2>
   <ol class="steps small">
-    <li>卖方访谈与委托核验 Owner interview, mandate and identity check</li>
-    <li>上传资料，AI 提取财务数据并提示缺口 Documents uploaded; AI extracts figures and flags gaps</li>
-    <li>交易经理与卖方确认匿名简介 Deal manager and seller approve an anonymous teaser</li>
-    <li>买方提交收购方向与资金证明并通过审核 Buyers submit a thesis and funding evidence, and are verified</li>
-    <li>筛选与 AI 辅助匹配，经审核后引荐 Filtering and AI-assisted matching; introductions after review</li>
-    <li>保密协议、卖方同意后开放资料室 NDA, then the data room with the seller's consent</li>
-    <li>尽调、意向书、交割与交接，由合作律师、会计师支持 Diligence, LOI, closing and handover with partner professionals</li>
+    <li>{{ T('卖方访谈与委托核验', 'Owner interview, mandate and identity check') }}</li>
+    <li>{{ T('上传资料，AI 提取财务数据并提示缺口', 'Documents uploaded; AI extracts figures and flags gaps') }}</li>
+    <li>{{ T('交易经理与卖方确认匿名简介', 'Deal manager and seller approve an anonymous teaser') }}</li>
+    <li>{{ T('买方提交收购方向与资金证明并通过审核', 'Buyers submit a thesis and funding evidence, and are verified') }}</li>
+    <li>{{ T('筛选与 AI 辅助匹配，经审核后引荐', 'Filtering and AI-assisted matching; introductions after review') }}</li>
+    <li>{{ T('签署保密协议，经卖方同意后开放资料室', "NDA, then the data room with the seller's consent") }}</li>
+    <li>{{ T('尽调、意向书、交割与交接，由合作律师、会计师支持', 'Diligence, LOI, closing and handover with partner professionals') }}</li>
   </ol>
 </section>
 {% endblock %}

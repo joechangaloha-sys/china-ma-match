@@ -24,8 +24,8 @@ def app(db_url, monkeypatch, tmp_path):
     return app
 
 
-def client(app, email: str | None = None) -> TestClient:
-    c = TestClient(app)
+def client(app, email: str | None = None, lang: str = "zh-CN") -> TestClient:
+    c = TestClient(app, headers={"Accept-Language": lang})
     if email:
         r = c.post("/login", data={"email": email, "password": DEMO_PASSWORD})
         assert r.status_code == 200, r.text
@@ -114,7 +114,7 @@ def test_seller_cannot_open_another_mandate(app, db_url):
 
 def test_wrong_password_is_refused_and_logged(app, db_url):
     r = client(app).post("/login", data={"email": DM, "password": "wrong-password"})
-    assert "Wrong email or password" in r.text
+    assert "邮箱或密码不正确" in r.text
     assert _get(db_url, AuditEvent, action="sign_in_failed") is not None
 
 
@@ -158,7 +158,7 @@ def test_seller_uploads_and_deal_manager_extracts(app, db_url):
     doc = _get(db_url, Document, filename="fs.csv")
     dm = client(app, DM)
     r = dm.post(f"{I}/documents/{doc.id}/extract")
-    assert "figures to review" in r.text and "营业收入,10400" in r.text
+    assert "个数字待审核" in r.text and "营业收入,10400" in r.text
     with db.session_scope(db_url) as s:
         f = next(f for f in s.get(Target, jade.id).fields if f.field == "revenue" and f.period == "2025")
         assert f.value == 126.0 and f.unit_in_source == "万元"
@@ -171,7 +171,7 @@ def test_upload_rejects_unsupported_files(app, db_url):
     jade = _get(db_url, Target, code_name="Project Jade")
     r = client(app, SELLER).post(f"/seller/{jade.id}/documents", data={"kind": "other"},
                                  files={"file": ("run.exe", b"MZ", "application/octet-stream")})
-    assert "Unsupported file type" in r.text
+    assert "仅支持" in r.text
 
 
 def test_seller_saves_questionnaire(app, db_url):
@@ -204,17 +204,18 @@ def test_buyer_registers_and_structures_a_thesis(app, db_url):
 
 def test_unverified_buyer_cannot_request_an_introduction(app, db_url):
     kiln = _get(db_url, Target, code_name="Project Kiln")
-    assert "not verified" in client(app, PENDING).post(f"/opportunities/{kiln.id}/request").text
+    assert "尚未通过审核" in client(app, PENDING).post(f"/opportunities/{kiln.id}/request").text
 
 
 def test_buyer_request_then_analyst_approval_then_nda(app, db_url):
     delta = _get(db_url, Target, code_name="Project Delta")
     buyer = client(app, BUYER)
-    assert "Request sent" in buyer.post(f"/opportunities/{delta.id}/request").text
+    assert "已提交引荐申请" in buyer.post(f"/opportunities/{delta.id}/request").text
     m = _get(db_url, Match, target_id=delta.id, buyer_id=_get(db_url, Buyer, external_id="EX000").id)
-    assert "Accept and sign" not in buyer.get("/buyer").text
+    assert "接受并签署" not in buyer.get("/buyer").text
     client(app, DM).post(f"{I}/matches/{m.id}/decision", data={"decision": "accept"})
-    assert "Accept and sign" in buyer.get("/buyer").text
+    assert "接受并签署" in buyer.get("/buyer").text
+    assert "Accept and sign" in buyer.get("/en/buyer").text
     buyer.post(f"/buyer/deals/{m.id}/nda")
     m = _get(db_url, Match, id=m.id)
     assert m.stage == "nda_signed" and m.nda_version
@@ -300,3 +301,55 @@ def test_status_changes_are_audited(app, db_url):
     t = _get(db_url, Target, id=delta.id)
     assert t.status == "matching_paused" and t.visibility == "private"  # paused mandates leave the public site
     assert "seller on holiday" in dm.get(f"{I}/audit?target={delta.id}").text
+
+
+# ---------------------------------------------------------------- languages (same rules as the Japan IR Index)
+
+@pytest.mark.parametrize("accept, expected", [("zh-CN,zh;q=0.9,en;q=0.8", "/zh/"), ("en-GB,en;q=0.9", "/en/"),
+                                              ("ja-JP,ja;q=0.9", "/en/"), ("de-DE,en;q=0.5,zh;q=0.8", "/zh/"), ("", "/en/")])
+def test_neutral_homepage_follows_the_browser(app, accept, expected):
+    r = client(app, lang=accept).get("/?ref=x", follow_redirects=False)
+    assert r.status_code == 302 and r.headers["location"] == expected + "?ref=x"
+
+
+def test_remembered_switch_wins_and_editions_never_redirect(app):
+    c = client(app, lang="en-US")
+    c.cookies.set("mm_lang", "zh")
+    assert c.get("/", follow_redirects=False).headers["location"] == "/zh/"
+    r = c.get("/en/opportunities", follow_redirects=False)
+    assert r.status_code == 200 and '<html lang="en">' in r.text  # a direct edition link is never redirected
+
+
+def test_english_edition_has_no_chinese_interface_text(app, db_url):
+    import re as _re
+
+    c = client(app, lang="zh-CN")
+    data_names = _buyer_names(db_url)
+    with db.session_scope(db_url) as s:
+        data_names += [t.code_name for t in s.scalars(select(Target))] + ["示例·长三角并购顾问事务所"]
+    for url in ("/en/", "/en/opportunities", "/en/sell", "/en/buy", "/en/fees", "/en/security", "/en/login", "/en/register"):
+        text = _re.sub(r"<[^>]+>", " ", c.get(url).text)
+        for name in data_names:
+            text = text.replace(name, "")
+        text = text.replace("中文", "")  # the language switch names itself
+        assert not _re.search(r"[\u4e00-\u9fff]", text), (url, _re.findall(r".{20}[\u4e00-\u9fff]+.{20}", text)[:3])
+
+
+def test_links_and_redirects_stay_in_the_edition(app, db_url):
+    c = client(app, lang="zh-CN")
+    page = c.get("/en/opportunities").text
+    assert 'href="/en/opportunities/' in page and 'href="/zh/opportunities"' in page  # cards, switch
+    kiln = _get(db_url, Target, code_name="Project Kiln")
+    r = c.post(f"/en/opportunities/{kiln.id}/inquiry", data={"name": "Li"}, follow_redirects=False)
+    assert r.headers["location"].startswith(f"/en/opportunities/{kiln.id}")
+    r = client(app, lang="zh-CN").get("/en/seller", follow_redirects=False)
+    assert r.headers["location"].startswith("/en/login")
+
+
+def test_portals_in_english(app):
+    seller = client(app, SELLER, lang="en-US").get("/seller").text
+    for words in ("Where your sale stands", "Document checklist", "Your listing card", "Questions buyers will ask"):
+        assert words in seller
+    assert "资料清单" not in seller and "补充问卷" not in seller
+    buyer = client(app, BUYER, lang="en-US").get("/buyer").text
+    assert "Acquisition thesis" in buyer and "收购方向" not in buyer
