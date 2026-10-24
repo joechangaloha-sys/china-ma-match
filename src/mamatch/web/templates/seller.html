@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import demand_panel, listing_card %}
+{% block title %}{{ t.code_name }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ t.code_name }}</h1>
+  <p class="sub">{{ sector_label(t.sector) }} · {{ t.province }} · 您的顾问：{{ t.firm.name }}</p>
+</div>
+
+<section class="panel">
+  <h2>有多少买方在找像您这样的企业 How many buyers want a company like yours</h2>
+  {{ demand_panel(demand, t.seller_plan == 'paid',
+     '按规模、买方类型、交易方式和省份的细分，以及向匹配买方逐一推介，属于私密推介方案（RMB %s/项目）。请联系您的顾问。 The breakdown by size, buyer type, deal type and province, and outreach to matching buyers, come with the private outreach plan (RMB %s per mandate). Ask your adviser.'|format(cfg.SELLER_PLAN_FEE_RMB, cfg.SELLER_PLAN_FEE_RMB)) }}
+</section>
+
+<div class="cols">
+<section class="panel">
+  <h2>公开方式 Visibility</h2>
+  {% if t.visibility == 'listed' %}
+  <p><b>已匿名挂牌 Listed anonymously.</b> 所有已认证买方都可看到右侧卡片（不含公司名称、城市或准确数字）。免费。<br>
+    <span class="small muted">Every verified buyer can see the card on the right: no name, no city, no exact figures. Free.</span></p>
+  <form method="post" action="/s/{{ t.seller_token }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">改为私密 Make private</button></form>
+  {% else %}
+  <p><b>私密 Private.</b> 不挂牌；只有您批准的买方会收到匿名简介。<br>
+    <span class="small muted">Not listed. Only buyers you approve receive the anonymised teaser.</span></p>
+  <p class="small">选择匿名挂牌可获得最广的买方覆盖，且免费。Listing anonymously reaches the most buyers and is free.</p>
+  <form method="post" action="/s/{{ t.seller_token }}/visibility"><input type="hidden" name="visibility" value="listed"><button>匿名挂牌 List anonymously</button></form>
+  {% if not has_teaser %}<p class="small muted">您的顾问需先审核匿名简介。Your adviser must approve the teaser first.</p>{% endif %}
+  {% endif %}
+</section>
+<section class="panel">
+  <h2>买方看到的卡片 What buyers see</h2>
+  {{ listing_card(card) }}
+</section>
+</div>
+
+<section class="panel" id="outreach">
+  <h2>推介 Outreach</h2>
+  {% if t.visibility == 'private' and t.seller_plan == 'paid' %}
+  <p class="small muted">顾问根据买方公开的收购偏好推荐了以下买方。批准后对方将收到匿名简介；双方名称在签署保密协议并经您同意后才互相披露。<br>
+    Your adviser shortlisted these buyers from their stated criteria. Approving one sends them the anonymised teaser. Names are disclosed both ways only after an NDA and your approval.</p>
+  {% for m in candidates %}
+  <div class="card">
+    <div><b>{{ anon_buyer(m.buyer) }}</b> {% if is_priority(m.buyer) %}<span class="pill">优先会员 priority member</span>{% endif %}
+      <span class="muted small">匹配度 fit {{ '%.0f'|format(m.score * 100) }}%</span></div>
+    <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
+    <div class="actions">
+      <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/approve"><button>批准并发送 Approve and send</button></form>
+      <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/decline"><button class="ghost">不发送 Skip</button></form>
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">没有待批准的买方。No buyers waiting for your approval.</p>
+  {% endfor %}
+  {% elif t.visibility == 'private' %}
+  <p class="upsell small">向匹配买方逐一推介属于私密推介方案。Outreach to matching buyers comes with the private outreach plan.</p>
+  {% endif %}
+
+  {% if sent %}
+  <h3>进展 Progress</h3>
+  <div class="tbl"><table>
+    <tr><th>买方 Buyer</th><th>来源</th><th>阶段 Stage</th><th></th></tr>
+    {% for m in sent %}
+    <tr>
+      <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer) }}{% endif %}</td>
+      <td class="small">{{ '挂牌 board' if m.channel == 'listing' else '推介 offer' }}</td>
+      <td>{{ STAGES[m.stage] }}</td>
+      <td>{% if m.stage in after_nda and not m.name_disclosed_at %}
+        <form method="post" action="/s/{{ t.seller_token }}/matches/{{ m.id }}/disclose"><button class="ghost">同意互相披露名称 Disclose names</button></form>
+        {% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+</section>
+{% endblock %}

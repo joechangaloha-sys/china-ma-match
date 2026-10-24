@@ -12,12 +12,13 @@
     {% for m in matches %}
     <div class="card">
       <div><a href="/targets/{{ m.target_id }}">{{ m.target.code_name }}</a> → <a href="/buyers/{{ m.buyer_id }}">{{ m.buyer.name }}</a></div>
+      <div class="small muted">{{ '挂牌意向 board' if m.channel == 'listing' else '推介 offer' }}{% if m.name_disclosed_at %} · 已披露名称{% endif %}</div>
       {% if m.events %}<div class="small muted">{{ m.events[-1].created_at.strftime('%Y-%m-%d') }}{% if m.events[-1].note %} · {{ m.events[-1].note }}{% endif %}</div>{% endif %}
       {% set nexts = allowed_next(m.stage) %}
       {% if nexts %}
       <form class="inline small" method="post" action="/matches/{{ m.id }}/move">
         <input type="hidden" name="back" value="/pipeline">
-        <select name="to_stage" aria-label="Next stage">{% for n in nexts %}<option value="{{ n }}">{{ STAGES[n] }}</option>{% endfor %}</select>
+        <select name="to_stage" aria-label="Next stage">{% for n in nexts if n != 'teaser_sent' %}<option value="{{ n }}">{{ STAGES[n] }}</option>{% endfor %}</select>
         <input name="note" placeholder="备注 note" aria-label="Note">
         <button class="ghost">更新</button>
       </form>

@@ -2,27 +2,29 @@
 {% block body %}
 <div>
   <h1>{{ firm.name }}</h1>
-  <p class="sub">卖方项目、匿名简介与买方匹配 · Seller mandates, anonymised teasers and buyer matches</p>
+  <p class="sub">邀请制试点 · Invitation-only pilot: seller mandates, registered buyers, aggregate demand</p>
 </div>
 
 <section class="panel stats">
   <div class="stat"><b>{{ counts.targets }}</b><span>卖方项目 Targets</span></div>
-  <div class="stat"><b>{{ counts.buyers }}</b><span>买方 Buyers indexed</span></div>
-  <div class="stat"><b>{{ counts.active }}</b><span>推进中 Active matches</span></div>
+  <div class="stat"><b>{{ counts.verified }}</b><span>已认证买方 Verified buyers</span></div>
+  <div class="stat"><b>{{ counts.candidates }}</b><span>待邀请/已邀请 To invite / invited</span></div>
+  <div class="stat"><b>{{ counts.active }}</b><span>推进中 Active deals</span></div>
 </section>
 
-<div class="cols">
 <section class="panel">
   <h2>卖方项目 Targets <a class="small" href="/targets/new">+ 新建 New</a></h2>
   {% if targets %}
   <div class="tbl"><table>
-    <tr><th>代号 Code name</th><th>行业 Sector</th><th>省份</th><th>估值 EV (RMB m)</th><th>匹配</th></tr>
+    <tr><th>代号 Code name</th><th>行业 Sector</th><th>省份</th><th>公开方式 Visibility</th><th>方案 Plan</th><th>买方需求 Demand</th><th>匹配</th></tr>
     {% for t in targets %}
     <tr>
       <td><a href="/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}</td>
       <td>{{ sector_label(t.sector) }}</td>
       <td>{{ t.province }}</td>
-      <td class="num">{{ '%g'|format(t.asking_value) if t.asking_value is not none else '—' }}</td>
+      <td><span class="pill {{ 'listed' if t.visibility == 'listed' }}">{{ '公开挂牌 Listed' if t.visibility == 'listed' else '私密 Private' }}</span></td>
+      <td>{{ SELLER_PLANS[t.seller_plan] }}</td>
+      <td class="num">{{ totals[t.id] }}</td>
       <td class="num">{{ t.matches|length }}</td>
     </tr>
     {% endfor %}
@@ -32,20 +34,24 @@
   {% endif %}
 </section>
 
+<div class="cols">
 <section class="panel">
-  <h2>最新买方信号 Latest buyer signals</h2>
-  {% if signals %}
-  <div class="tbl"><table>
-    {% for sig in signals %}
-    <tr>
-      <td class="num small muted">{{ sig.published_at.strftime('%Y-%m-%d') if sig.published_at }}</td>
-      <td><a href="/buyers/{{ sig.buyer_id }}">{{ sig.buyer.name }}</a><br><span class="small">{{ sig.title }}</span></td>
-    </tr>
-    {% endfor %}
-  </table></div>
+  <h2>待审核买方 Buyers to verify</h2>
+  {% for b in to_verify %}
+  <div class="row"><a href="/buyers/{{ b.id }}">{{ b.name }}</a> <span class="muted small">{{ BUYER_KINDS.get(b.kind, b.kind) }} · {{ b.uscc or '无信用代码 no USCC' }}</span></div>
   {% else %}
-  <p class="empty">买方库为空。运行 <code>uv run mamatch ingest-cninfo</code> 从巨潮资讯抓取收购公告。</p>
-  {% endif %}
+  <p class="empty">没有待审核的买方。Nobody waiting.</p>
+  {% endfor %}
+</section>
+
+<section class="panel">
+  <h2>挂牌项目的买方意向 Interest from the board</h2>
+  {% for m in interests %}
+  <div class="row"><a href="/targets/{{ m.target_id }}#matches">{{ m.target.code_name }}</a> ← <a href="/buyers/{{ m.buyer_id }}">{{ m.buyer.name }}</a>
+    {% if m.buyer.plan == 'priority' %}<span class="pill">优先 priority</span>{% endif %}</div>
+  {% else %}
+  <p class="empty">暂无。None yet.</p>
+  {% endfor %}
 </section>
 </div>
 {% endblock %}

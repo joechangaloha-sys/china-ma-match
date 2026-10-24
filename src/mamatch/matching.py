@@ -1,7 +1,9 @@
 """Rank buyers for a target, with reasons an adviser can check before sending a teaser.
 
 Scoring is transparent on purpose: advisers need to defend every name on a shortlist to the
-seller. Weights sum to 1.0; a buyer with no sector fit is never suggested.
+seller. Weights sum to 1.0; a buyer with no sector fit, or that excludes the deal type, is never
+suggested. Only verified buyers become matches; suggested and invited buyers (mostly from CNINFO)
+are ranked separately as people to invite.
 """
 
 from dataclasses import dataclass, field
@@ -44,6 +46,8 @@ def score(target: Target, buyer: Buyer, now: datetime | None = None) -> Scored:
         reasons.append(f"Adjacent sector in the same family ({sector_family(target.sector)})")
     else:
         return Scored(buyer, 0.0, ["No sector fit"])
+    if buyer.target_deal_types and target.deal_type not in buyer.target_deal_types:
+        return Scored(buyer, 0.0, ["Deal type not wanted"])
 
     regions = set(buyer.target_regions or [])
     if not regions:
@@ -65,9 +69,9 @@ def score(target: Target, buyer: Buyer, now: datetime | None = None) -> Scored:
         s += W_SIZE * 0.4
     elif (lo is None or value >= lo * 0.5) and (hi is None or value <= hi * 2):
         s += W_SIZE
-        reasons.append(f"Deal size fits past range (RMB {lo or 0:g}–{hi or 0:g}m)")
+        reasons.append(f"Deal size fits stated range (RMB {lo or 0:g}–{hi or 0:g}m)")
     else:
-        reasons.append("Deal size outside past range")
+        reasons.append("Deal size outside stated range")
 
     latest = max((_as_aware(sig.published_at) for sig in buyer.signals if sig.published_at), default=None)
     if latest is not None:
@@ -82,16 +86,22 @@ def score(target: Target, buyer: Buyer, now: datetime | None = None) -> Scored:
     return Scored(buyer, round(min(s, 1.0), 3), reasons)
 
 
-def rank(session: Session, target: Target, limit: int = 20, min_score: float = 0.3) -> list[Scored]:
-    buyers = session.scalars(select(Buyer)).all()
+def rank(session: Session, target: Target, limit: int = 20, min_score: float = 0.3,
+         statuses: tuple[str, ...] = ("verified",)) -> list[Scored]:
+    buyers = session.scalars(select(Buyer).where(Buyer.status.in_(statuses))).all()
     scored = [score(target, b) for b in buyers]
     scored = [x for x in scored if x.score >= min_score]
     scored.sort(key=lambda x: x.score, reverse=True)
     return scored[:limit]
 
 
+def invite_candidates(session: Session, target: Target, limit: int = 10) -> list[Scored]:
+    """Buyers not yet on the platform who look like a fit: worth inviting for this target."""
+    return rank(session, target, limit, statuses=("suggested", "invited"))
+
+
 def refresh(session: Session, target: Target, limit: int = 20) -> list[Match]:
-    """Recompute suggestions. Matches already in the pipeline keep their stage."""
+    """Recompute suggestions among verified buyers. Matches already in the pipeline keep their stage."""
     existing = {m.buyer_id: m for m in target.matches}
     for x in rank(session, target, limit):
         m = existing.get(x.buyer.id)

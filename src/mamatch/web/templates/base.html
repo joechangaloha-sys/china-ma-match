@@ -8,15 +8,23 @@
 </head>
 <body>
 <header class="bar"><div class="in">
+  {% if portal == 'seller' %}
+  <span class="brand">mamatch 卖方页面 <span class="muted small">Seller page</span></span>
+  {% elif portal == 'buyer' %}
+  <span class="brand">mamatch 买方页面 <span class="muted small">Buyer page</span></span>
+  {% else %}
   <a class="brand" href="/">mamatch 并购撮合工作台</a>
   <nav>
     <a href="/" class="{{ 'on' if request.url.path == '/' }}">项目 Targets</a>
-    <a href="/buyers" class="{{ 'on' if request.url.path.startswith('/buyers') }}">买方库 Buyer index</a>
+    <a href="/buyers" class="{{ 'on' if request.url.path.startswith('/buyers') }}">买方 Buyers</a>
+    <a href="/demand" class="{{ 'on' if request.url.path.startswith('/demand') }}">需求统计 Demand</a>
     <a href="/pipeline" class="{{ 'on' if request.url.path.startswith('/pipeline') }}">进度 Pipeline</a>
   </nav>
+  {% endif %}
   <span class="region" title="Production deal data must be hosted in mainland China">{{ region_flag }}</span>
 </div></header>
 <main>
+{% if msg %}<p class="flash" role="status">{{ msg }}</p>{% endif %}
 {% block body %}{% endblock %}
 </main>
 </body>

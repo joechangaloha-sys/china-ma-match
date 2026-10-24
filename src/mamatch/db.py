@@ -22,7 +22,38 @@ def get_engine(url: str | None = None):
 
 
 def init_db(url: str | None = None) -> None:
-    Base.metadata.create_all(get_engine(url))
+    engine = get_engine(url)
+    Base.metadata.create_all(engine)
+    _add_missing_columns(engine)
+
+
+def _add_missing_columns(engine) -> None:
+    """Additive migration for local databases: new model columns are added with their defaults.
+
+    Enough for the MVP's SQLite files; switch to Alembic before any production deployment.
+    """
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name in existing:
+                    continue
+                default = col.default.arg if col.default is not None else None
+                if callable(default):  # e.g. JSON list columns default to list()
+                    literal = "'[]'" if col.type.__class__.__name__ == "JSON" else "NULL"
+                elif isinstance(default, bool):
+                    literal = "1" if default else "0"
+                elif isinstance(default, (int, float)):
+                    literal = str(default)
+                elif isinstance(default, str):
+                    literal = "'" + default.replace("'", "''") + "'"
+                else:
+                    literal = "NULL"
+                coltype = col.type.compile(dialect=engine.dialect)
+                conn.execute(text(f'ALTER TABLE {table.name} ADD COLUMN {col.name} {coltype} DEFAULT {literal}'))
 
 
 def session_factory(url: str | None = None) -> sessionmaker[Session]:

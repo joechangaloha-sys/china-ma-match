@@ -29,21 +29,38 @@ def test_no_sector_fit_scores_zero(seeded):
     assert matching.score(jade, food).score == 0
 
 
+def test_only_verified_buyers_are_matched(seeded):
+    ranked = matching.rank(seeded, _target(seeded, "Project Jade"), min_score=0)
+    assert ranked and all(x.buyer.status == "verified" for x in ranked)
+    pending = seeded.scalar(select(Buyer).where(Buyer.status == "registered"))
+    invited = seeded.scalar(select(Buyer).where(Buyer.status == "invited"))
+    assert pending.id not in {x.buyer.id for x in ranked} and invited.id not in {x.buyer.id for x in ranked}
+    assert invited.id in {x.buyer.id for x in matching.invite_candidates(seeded, _target(seeded, "Project Jade"))}
+
+
+def test_unwanted_deal_type_scores_zero(seeded):
+    kiln = _target(seeded, "Project Kiln")  # majority stake
+    buyer = seeded.scalar(select(Buyer).where(Buyer.name == "示例·浙东新材料"))
+    assert matching.score(kiln, buyer).score > 0
+    buyer.target_deal_types = ["full_sale"]
+    assert matching.score(kiln, buyer).score == 0
+
+
 def test_refresh_keeps_pipeline_stage(seeded):
-    jade = _target(seeded, "Project Jade")
-    matches = matching.refresh(seeded, jade)
+    delta = _target(seeded, "Project Delta")
+    matches = matching.refresh(seeded, delta)
     first = matches[0]
     pipeline.move(seeded, first, "shortlisted", "call booked")
-    matching.refresh(seeded, jade)
+    matching.refresh(seeded, delta)
     assert first.stage == "shortlisted"
-    assert len({m.buyer_id for m in jade.matches}) == len(jade.matches)
+    assert len({m.buyer_id for m in delta.matches}) == len(delta.matches)
 
 
 def test_pipeline_rules(seeded):
-    m = matching.refresh(seeded, _target(seeded, "Project Jade"))[0]
+    m = matching.refresh(seeded, _target(seeded, "Project Delta"))[0]
     with pytest.raises(ValueError):
         pipeline.move(seeded, m, "loi")
-    for stage in ["shortlisted", "teaser_sent", "nda_signed", "im_sent", "loi", "closing", "closed"]:
+    for stage in ["shortlisted", "teaser_sent", "interested", "nda_signed", "im_sent", "loi", "closing", "closed"]:
         pipeline.move(seeded, m, stage)
     assert pipeline.allowed_next("closed") == []
     assert [e.to_stage for e in m.events][-1] == "closed"

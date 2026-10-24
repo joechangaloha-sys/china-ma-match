@@ -1,4 +1,9 @@
-"""Deal stages for a target–buyer pair, from suggestion to closing."""
+"""Deal stages for a target–buyer pair, from suggestion to closing.
+
+Private outreach: suggested -> shortlisted (adviser) -> teaser_sent (only via offers.send, after
+the seller approves this buyer) -> interested (buyer's answer) -> nda_signed -> ...
+Listed deals: a verified buyer's interest on the board creates the pair at "interested".
+"""
 
 from sqlalchemy.orm import Session
 
@@ -8,6 +13,7 @@ STAGES: dict[str, str] = {
     "suggested": "推荐 / Suggested",
     "shortlisted": "入围 / Shortlisted",
     "teaser_sent": "已发简介 / Teaser sent",
+    "interested": "买方有意向 / Buyer interested",
     "nda_signed": "已签保密协议 / NDA signed",
     "im_sent": "已发信息备忘录 / IM sent",
     "loi": "意向书 / LOI",

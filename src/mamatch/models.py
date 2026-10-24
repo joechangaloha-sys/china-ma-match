@@ -1,10 +1,12 @@
 """Database models.
 
-Buyers come from the buyer-intent index (listed companies, PE funds, added by hand).
-Targets are seller mandates held by an adviser firm; their identifying fields never leave
-the adviser workspace. Teasers are the anonymised text that may be shared with buyers.
+Buyers are invited by the operator (often a listed company found through CNINFO announcements),
+register, state what they want to buy and are verified before they count anywhere. Targets are
+seller mandates held by an adviser firm; their identifying fields never leave the workspace until
+the seller approves name disclosure to one buyer. Teasers are the anonymised text shared with buyers.
 """
 
+import secrets
 from datetime import datetime, timezone
 
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
@@ -34,16 +36,31 @@ class Buyer(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
-    kind: Mapped[str] = mapped_column(String(20), default="listed")  # listed | pe | private
+    kind: Mapped[str] = mapped_column(String(20), default="listed")  # listed | pe | private | individual
     source: Mapped[str] = mapped_column(String(20), default="manual")  # cninfo | manual | example
-    external_id: Mapped[str] = mapped_column(String(40), default="")  # stock code for listed buyers
+    # suggested (found, not contacted) -> invited -> registered (criteria stated) -> verified (counts, sees deals)
+    status: Mapped[str] = mapped_column(String(20), default="suggested")
+    plan: Mapped[str] = mapped_column(String(20), default="free")  # free | priority (see plans.py)
+    invite_token: Mapped[str] = mapped_column(String(40), default="")
+    uscc: Mapped[str] = mapped_column(String(18), default="")
+    contact_name: Mapped[str] = mapped_column(String(50), default="")
+    contact_email: Mapped[str] = mapped_column(String(200), default="")
+    # Stock code for CNINFO buyers; a random id for buyers added by hand (unique per source).
+    external_id: Mapped[str] = mapped_column(String(40), default=lambda: "M-" + secrets.token_hex(6))
     province: Mapped[str] = mapped_column(String(20), default="")
     sectors: Mapped[list[str]] = mapped_column(JSON, default=list)  # own business
     target_sectors: Mapped[list[str]] = mapped_column(JSON, default=list)  # what it wants to buy
     target_regions: Mapped[list[str]] = mapped_column(JSON, default=list)  # provinces; empty = anywhere
     deal_size_min: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, enterprise value
     deal_size_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    target_deal_types: Mapped[list[str]] = mapped_column(JSON, default=list)  # empty = any
     rationale: Mapped[str] = mapped_column(Text, default="")
+    # Criteria above are inferred from announcements until the buyer confirms them; only
+    # criteria confirmed within config.CRITERIA_TTL_DAYS count in demand statistics.
+    criteria_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    registered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    plan_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_example: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
@@ -92,6 +109,15 @@ class Target(Base):
     asking_value: Mapped[float | None] = mapped_column(Float, nullable=True)  # RMB m, enterprise value
     deal_type: Mapped[str] = mapped_column(String(20), default="full_sale")
     sale_reason: Mapped[str] = mapped_column(String(20), default="succession")
+
+    # private: not listed; the seller sees demand statistics and approves outreach buyer by buyer.
+    # listed: an anonymised card on the board that verified buyers browse.
+    visibility: Mapped[str] = mapped_column(String(20), default="private")
+    listed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    seller_plan: Mapped[str] = mapped_column(String(20), default="free")  # free | paid (see plans.py)
+    plan_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    plan_invoice_ref: Mapped[str] = mapped_column(String(50), default="")
+    seller_token: Mapped[str] = mapped_column(String(40), default="")  # seller's private link
     is_example: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -129,6 +155,9 @@ class Match(Base):
     score: Mapped[float] = mapped_column(Float)
     reasons: Mapped[list[str]] = mapped_column(JSON, default=list)
     stage: Mapped[str] = mapped_column(String(20), default="suggested")
+    channel: Mapped[str] = mapped_column(String(20), default="offer")  # offer (private outreach) | listing
+    seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    name_disclosed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="matches")

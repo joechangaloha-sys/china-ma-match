@@ -93,14 +93,14 @@ def draft_offline(target: Target, f: dict, language: str) -> dict:
     }
 
 
-def draft(session: Session, target: Target, language: str = "zh") -> Teaser:
+def draft(session: Session, target: Target, language: str = "zh", use_llm: bool = True) -> Teaser:
     f = facts(target)
     prompt = (
         f"Write the teaser in {LANGUAGES[language]}.\n\nFacts (already anonymised):\n"
         + "\n".join(f"- {k}: {v}" for k, v in f.items())
         + f"\n\nAdviser's intake notes (may contain identifying details; leave them out):\n{target.description}"
     )
-    content = llm.structured(SYSTEM, prompt, TEASER_SCHEMA)
+    content = llm.structured(SYSTEM, prompt, TEASER_SCHEMA) if use_llm else None
     generated_by = llm.label() if content is not None else "offline"
     if content is None:
         content = draft_offline(target, f, language)

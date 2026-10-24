@@ -1,13 +1,21 @@
 {% extends "base.html" %}
-{% block title %}买方库{% endblock %}
+{% block title %}买方{% endblock %}
 {% block body %}
 <div>
-  <h1>买方库 Buyer index</h1>
-  <p class="sub">上市公司收购公告与投资机构偏好 · Acquisition appetite from listed-company announcements and funds</p>
+  <h1>买方 Buyers</h1>
+  <p class="sub">邀请 → 注册 → 认证。巨潮资讯公告只用于发现候选买方并预填偏好 · Invite → register → verify. CNINFO announcements only suggest whom to invite.</p>
 </div>
 
+<nav class="tabs">
+  {% for code, label in BUYER_STATUSES.items() %}
+  <a href="/buyers?status={{ code }}" class="{{ 'on' if status == code }}">{{ label }} <span class="muted">{{ by_status.get(code, 0) }}</span></a>
+  {% endfor %}
+</nav>
+
+<div class="cols">
 <form class="panel inline" method="get">
-  <label>搜索 Search <input id="q" name="q" value="{{ q }}" placeholder="名称 / 代码 / 理由"></label>
+  <input type="hidden" name="status" value="{{ status }}">
+  <label>搜索 Search <input id="q" name="q" value="{{ q }}" placeholder="名称 / 代码"></label>
   <label>目标行业 Sector
     <select id="sector" name="sector"><option value="">全部 All</option>
       {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ sector_label(code) }}</option>{% endfor %}
@@ -19,21 +27,29 @@
   <button>筛选 Filter</button>
 </form>
 
+<form class="panel inline" method="post" action="/buyers">
+  <label>邀请新买方 Invite a buyer <input id="new_name" name="name" required placeholder="公司或机构名称"></label>
+  <label>类型 Type <select id="new_kind" name="kind">{% for k, v in BUYER_KINDS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <button>生成邀请链接 Create invite</button>
+</form>
+</div>
+
 <section class="panel tbl">
   <table>
-    <tr><th>买方 Buyer</th><th>类型</th><th>目标行业 Wants</th><th>目标地区</th><th>规模 RMB m</th><th>信号</th></tr>
+    <tr><th>买方 Buyer</th><th>类型</th><th>方案</th><th>目标行业 Wants</th><th>目标地区</th><th>规模 RMB m</th><th>来源</th></tr>
     {% for b in buyers %}
     <tr>
       <td><a href="/buyers/{{ b.id }}">{{ b.name }}</a> <span class="muted small">{{ b.external_id if b.source == 'cninfo' }}</span>
         {% if b.is_example %}<span class="pill example">示例</span>{% endif %}</td>
-      <td>{{ b.kind }}</td>
+      <td>{{ BUYER_KINDS.get(b.kind, b.kind) }}</td>
+      <td>{% if b.plan == 'priority' %}<span class="pill">优先</span>{% else %}<span class="muted small">免费</span>{% endif %}</td>
       <td class="small">{% for c in b.target_sectors %}{{ SECTORS[c][0] if c in SECTORS else c }}{{ '、' if not loop.last }}{% endfor %}</td>
       <td class="small">{{ b.target_regions|join('、') or '不限' }}</td>
-      <td class="num">{% if b.deal_size_min is not none %}{{ '%g'|format(b.deal_size_min) }}–{{ '%g'|format(b.deal_size_max) }}{% else %}—{% endif %}</td>
-      <td class="num">{{ b.signals|length }}</td>
+      <td class="num">{% if b.deal_size_min is not none %}{{ '%g'|format(b.deal_size_min) }}–{{ '%g'|format(b.deal_size_max) if b.deal_size_max is not none else '' }}{% else %}—{% endif %}</td>
+      <td class="small">{{ b.source }}{% if b.signals %} · {{ b.signals|length }}公告{% endif %}</td>
     </tr>
     {% else %}
-    <tr><td colspan="6" class="empty">没有符合条件的买方。</td></tr>
+    <tr><td colspan="7" class="empty">没有符合条件的买方。</td></tr>
     {% endfor %}
   </table>
 </section>

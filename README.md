@@ -1,21 +1,33 @@
 # china-ma-match (mamatch)
 
-An AI deal-origination workspace for Chinese boutique M&A advisers (accountants, law firms,
-small FAs) working on private-company sales under RMB 100m. It is built on a **buyer-intent
-index**: listed companies' acquisition announcements, turned into structured buyer profiles.
+An M&A matching service for private-company sales in China under RMB 100m, run as an
+**invitation-only pilot** by an adviser/operator. Buyers register and say what they want to buy;
+sellers see that demand only as anonymous totals, and choose whether to list anonymously or stay private.
 
-Background and positioning: [docs/research.md](docs/research.md).
+Background and positioning: [docs/research.md](docs/research.md). Design and pricing: [docs/design-v2.md](docs/design-v2.md).
 
-## What the MVP does
+## What it does
 
-1. **Buyer-intent index**: pulls acquisition announcements from CNINFO (巨潮资讯), extracts the
-   sectors, regions and deal sizes each listed buyer goes after, and keeps the announcements as evidence.
-2. **Seller intake and teaser**: the adviser records a target. Identifying details (name, owner,
-   city, USCC, brands) stay in the workspace. A teaser is drafted in Chinese, Japanese or English
-   from banded figures only, then a **re-identification check** flags anything that could reveal
-   the company. Only low-risk teasers can be approved.
-3. **Matching**: ranks buyers per target on sector, region, deal size and recency, with written reasons.
-4. **Pipeline**: suggested → shortlisted → teaser sent → NDA → IM → LOI → closing → closed, with an event log.
+1. **Buyer registration.** The operator invites buyers (CNINFO acquisition announcements suggest
+   listed companies worth inviting and pre-fill their criteria). Buyers register on a private link,
+   state sector, provinces, deal size and deal type, and are verified against the business registry.
+2. **Aggregate demand.** Sellers see how many verified buyers want a company like theirs, for fixed
+   sector × region buckets only. Groups under 5 show as "<5", counts round down to a multiple of 5,
+   and a breakdown is hidden if any group in it is under 5. Buyer names are never shown.
+3. **Two seller levels.**
+   - **Listed (free):** an anonymised card (macro-region, bands, fixed vocabulary) on a board that
+     verified buyers browse. Needs an approved, low-risk teaser first.
+   - **Private:** not listed. The paid plan unlocks the detailed demand breakdown and outreach: the
+     adviser shortlists matching buyers, the seller approves each one, and approval sends the teaser.
+4. **Buyer priority plan (paid):** new listings 7 days early, search and filters on the board, and
+   first place among equally good fits in a seller's outreach list (shown to the seller).
+5. **Teasers and re-identification check** (from v1) in Chinese, Japanese or English, and a
+   **pipeline** from suggested to closed. Names are disclosed both ways only after an NDA and the
+   seller's approval.
+
+Pages: operator workspace at `/` (targets, buyers, demand, pipeline); seller page `/s/<token>`;
+buyer page `/b/<token>`. Payments are invoiced offline and recorded by the operator; prices in
+`config.py` are placeholders.
 
 Claude (`claude-opus-5-5`) is used for announcement extraction and teaser drafting, with
 server-side refusal fallback enabled. Every step has an offline fallback, so the app runs
@@ -25,7 +37,7 @@ without credentials (`MAMATCH_LLM=off`).
 
 ```bash
 uv sync
-uv run mamatch init-db --seed        # tables plus fictional example buyers and targets
+uv run mamatch init-db --seed        # tables (adds new columns to an old DB) plus fictional examples
 uv run mamatch ingest-cninfo --days 90 --pages 2   # real buyer signals from CNINFO
 uv run mamatch serve                 # http://127.0.0.1:8600
 uv run pytest
@@ -38,7 +50,12 @@ Example records are fictional and labelled 示例 in the UI.
 ```
 src/mamatch/
   ingest/cninfo.py   CNINFO announcement search
-  ingest/profile.py  announcement -> signal -> buyer profile
+  ingest/profile.py  announcement -> signal -> suggested buyer profile
+  buyers.py          invite -> register -> verify
+  demand.py          k-suppressed demand statistics
+  plans.py           seller and buyer plans, what each unlocks
+  listing.py         anonymised board and listing cards
+  offers.py          seller-approved outreach, board interest, name disclosure
   teaser.py          banded facts, teaser drafting
   reid.py            re-identification check
   matching.py        buyer ranking with reasons
@@ -50,18 +67,21 @@ tests/               offline tests; fixtures/cninfo_query.json is a real CNINFO 
 
 ## Not built yet (deliberately)
 
-- **Auth and multi-firm accounts.** The workspace assumes one firm and has no login: run it on
-  localhost only.
+- **Auth and multi-firm accounts.** The workspace assumes one operator firm and has no login; seller
+  and buyer pages are private links. Run it on localhost only.
+- **Payments.** Plans are invoiced offline and recorded by the operator.
 - **Announcement PDFs.** Extraction reads titles only; `profile.extract(ann, body_text)` accepts
   PDF text once a PDF-to-text step is added. Deal sizes stay empty until then.
-- **Public listings, buyer self-sign-up, payments, valuation opinions.** Out of scope; see the
-  licensing notes in the research report.
+- **Open buyer self-sign-up, public (non-registered) listings, valuation opinions.** Out of scope
+  for the invitation-only pilot; see the licensing section of the design note.
 
 ## Open issues before production
 
 - **Data residency.** Deal data must be hosted in mainland China (PIPL, data-export rules).
   Calling the Claude API sends teaser inputs abroad. The inputs are banded and name-free, but
   confirm the setup with PRC counsel, or keep Claude to public announcement data only.
-- **Platform licensing.** A paid online information service needs an ICP licence; a foreign
-  operator likely needs a Chinese partner. Stay an adviser tool, not a trading venue.
+- **Platform licensing.** Paid plans for registered users make this an operating internet
+  information service: it needs an ICP operating licence, and foreign ownership is capped, so a
+  Chinese partner is needed. Stay clear of trading-venue rules: registered buyers only, one
+  adviser-led deal at a time, no bidding, no payment handling.
 - **Validation.** Interview 15–20 Yangtze River Delta advisers before building further.

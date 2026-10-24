@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
+{% block title %}{{ b.name }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ b.name }}</h1>
+  <p class="sub">{{ BUYER_STATUSES[b.status] }} · {{ BUYER_PLANS[b.plan] }}</p>
+</div>
+
+{% if b.status == 'invited' %}
+<p class="panel">欢迎。请填写您的收购偏好。卖方只会看到汇总数字（例如“10+家买方在找…”），不会看到您的名称。<br>
+  <span class="small muted">Welcome. State what you want to buy. Sellers only ever see totals (“10+ buyers want…”), never your name.</span></p>
+{% elif b.status == 'registered' %}
+<p class="panel">已收到注册，正在核对工商信息。核对后即可浏览挂牌项目并接收推介。<br>
+  <span class="small muted">Registration received; we are checking the business registry. After that you can browse listings and receive offers.</span></p>
+{% endif %}
+
+{% if b.status == 'verified' %}
+<section class="panel" id="board">
+  <h2>匿名挂牌项目 Listed deals</h2>
+  {% if can_search %}
+  <form class="inline" method="get">
+    <label>行业 Sector <select id="f_sector" name="sector"><option value="">全部 All</option>
+      {% for code in SECTORS %}<option value="{{ code }}" {{ 'selected' if code == sector }}>{{ sector_label(code) }}</option>{% endfor %}</select></label>
+    <label>地区 Region <select id="f_macro" name="macro"><option value="">全部 All</option>
+      {% for m in MACRO_REGIONS %}<option {{ 'selected' if m == macro }}>{{ m }}</option>{% endfor %}</select></label>
+    <button>筛选 Filter</button>
+  </form>
+  {% else %}
+  <p class="upsell small">优先会员（RMB {{ cfg.BUYER_PRIORITY_FEE_RMB }}/年）可提前{{ cfg.PRIORITY_HEAD_START_DAYS }}天看到新挂牌项目，并可搜索筛选。
+    {% if hidden %}<b>目前有 {{ hidden }} 个新项目仅对优先会员可见。</b>{% endif %}<br>
+    Priority members (RMB {{ cfg.BUYER_PRIORITY_FEE_RMB }}/year) see new listings {{ cfg.PRIORITY_HEAD_START_DAYS }} days early and can search and filter.
+    {% if hidden %}<b>{{ hidden }} new listing(s) are visible to priority members only right now.</b>{% endif %}</p>
+  {% endif %}
+  <div class="cards">
+  {% for t in board %}
+    {% call listing_card(cards[t.id]) %}
+      {% if t.id in interested_ids %}<span class="pill">已表达意向 interest sent</span>
+      {% else %}<form method="post" action="/b/{{ b.invite_token }}/listings/{{ t.id }}/interest"><button>表达意向 Express interest</button></form>{% endif %}
+    {% endcall %}
+  {% else %}
+  <p class="empty">暂无可见的挂牌项目。No listings visible to you yet.</p>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="panel" id="deals">
+  <h2>推介与意向 Offers and interest</h2>
+  {% for m in mine %}
+  {% set tz = shared_teaser(m.target) if m.channel == 'offer' else none %}
+  <div class="card">
+    <div class="small muted">{{ '卖方推介 Offer from a seller' if m.channel == 'offer' else '您在挂牌页表达的意向 Your interest from the board' }} · {{ STAGES[m.stage] }}</div>
+    {% if m.name_disclosed_at %}<div><b>{{ m.target.legal_name }}</b> <span class="pill">已披露名称 name disclosed</span></div>{% endif %}
+    {% if tz %}<h3>{{ tz.body.headline }}</h3><p>{{ tz.body.summary }}</p>
+      <ul>{% for h in tz.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>{% else %}<h3>{{ m.target.code_name }}</h3>{% endif %}
+    {% if m.stage == 'teaser_sent' %}
+    <div class="actions">
+      <form method="post" action="/b/{{ b.invite_token }}/matches/{{ m.id }}/respond"><input type="hidden" name="interested" value="1"><button>有兴趣 Interested</button></form>
+      <form method="post" action="/b/{{ b.invite_token }}/matches/{{ m.id }}/respond"><input type="hidden" name="interested" value="0"><button class="ghost">不考虑 Decline</button></form>
+    </div>
+    {% elif m.stage == 'interested' %}<p class="small muted">顾问将与您联系安排保密协议。The adviser will contact you about an NDA.</p>{% endif %}
+  </div>
+  {% else %}
+  <p class="empty">暂无。None yet.</p>
+  {% endfor %}
+</section>
+{% endif %}
+
+<form class="panel grid" id="criteria" method="post" action="/b/{{ b.invite_token }}/register">
+  <h2 class="wide">收购偏好与注册信息 Criteria and registration</h2>
+  <label>名称 Name <input id="name" name="name" value="{{ b.name }}" required></label>
+  <label>类型 Type <select id="kind" name="kind">{% for k, v in BUYER_KINDS.items() %}<option value="{{ k }}" {{ 'selected' if k == b.kind }}>{{ v }}</option>{% endfor %}</select></label>
+  <label>统一社会信用代码 USCC <input id="uscc" name="uscc" value="{{ b.uscc }}" maxlength="18"></label>
+  <label>联系人 Contact <input id="contact_name" name="contact_name" value="{{ b.contact_name }}"></label>
+  <label>邮箱 Email <input id="contact_email" name="contact_email" type="email" value="{{ b.contact_email }}"></label>
+  <label>规模下限 Min (RMB m) <input id="deal_size_min" name="deal_size_min" inputmode="decimal" value="{{ '%g'|format(b.deal_size_min) if b.deal_size_min is not none }}"></label>
+  <label>规模上限 Max (RMB m) <input id="deal_size_max" name="deal_size_max" inputmode="decimal" value="{{ '%g'|format(b.deal_size_max) if b.deal_size_max is not none }}"></label>
+  <fieldset class="wide"><legend>目标行业 Sectors</legend>
+    {% for code in SECTORS %}<label class="check"><input type="checkbox" name="target_sectors" value="{{ code }}" {{ 'checked' if code in b.target_sectors }}> {{ sector_label(code) }}</label>{% endfor %}
+  </fieldset>
+  <fieldset class="wide"><legend>目标省份（不选=不限）Provinces (none = anywhere)</legend>
+    {% for p in REGIONS %}<label class="check"><input type="checkbox" name="target_regions" value="{{ p }}" {{ 'checked' if p in b.target_regions }}> {{ p }}</label>{% endfor %}
+  </fieldset>
+  <fieldset class="wide"><legend>交易方式（不选=不限）Deal types (none = any)</legend>
+    {% for code, label in DEAL_TYPES.items() %}<label class="check"><input type="checkbox" name="target_deal_types" value="{{ code }}" {{ 'checked' if code in b.target_deal_types }}> {{ label }}</label>{% endfor %}
+  </fieldset>
+  <label class="check wide"><input type="checkbox" name="consent" value="1" required> 我同意平台为撮合目的处理上述信息，并仅以汇总形式向卖方展示 · I agree that this information is processed for matching and shown to sellers only as totals.</label>
+  <div class="wide"><button>{{ '保存并提交 Register' if b.status == 'invited' else '更新并确认 Update and confirm' }}</button>
+    <span class="small muted">偏好每{{ cfg.CRITERIA_TTL_DAYS }}天需确认一次。Confirm your criteria every {{ cfg.CRITERIA_TTL_DAYS }} days.</span></div>
+</form>
+{% endblock %}

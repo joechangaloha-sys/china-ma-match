@@ -1,0 +1,43 @@
+{% macro demand_panel(d, detailed, upsell='') %}
+<div class="demand">
+  <div class="big">{{ d.total }}</div>
+  <div>已认证买方在找 <b>{{ sector_label(d.sector) }}</b> · <b>{{ d.macro }}</b><br>
+    <span class="small muted">verified buyers looking for this sector in this region. Counts under {{ K }} show as “&lt;{{ K }}”; others are rounded down to a multiple of {{ K }}. Buyer names are never shown.</span></div>
+</div>
+{% if detailed %}
+  {% if not d.enough %}
+  <p class="empty">买方少于{{ K }}家，不提供细分。Fewer than {{ K }} buyers, so no breakdown.</p>
+  {% endif %}
+  <div class="breakdowns">
+  {% for bd in d.breakdowns %}
+    <div class="card">
+      <div class="small"><b>{{ bd.title }}</b></div>
+      {% if bd.suppressed %}
+      <div class="small muted">部分组别少于{{ K }}家，为保护买方不显示。Hidden: a group has fewer than {{ K }} buyers.</div>
+      {% else %}
+      <table class="small">{% for label, n in bd.rows %}<tr><td>{{ label }}</td><td class="num">{{ n }}</td></tr>{% endfor %}</table>
+      {% endif %}
+    </div>
+  {% endfor %}
+  </div>
+{% elif upsell %}
+<div class="upsell small">{{ upsell }}</div>
+{% endif %}
+{% endmacro %}
+
+{% macro listing_card(c) %}
+<div class="card listing">
+  <div><b>{{ c.code_name }}</b> <span class="muted small">{{ c.region }}</span></div>
+  <div class="small">{{ c.sector_zh }} / {{ c.sector_en }}</div>
+  <table class="small">
+    <tr><th>收入 Revenue</th><td>{{ c.revenue_band }}</td></tr>
+    <tr><th>净利 Net profit</th><td>{{ c.net_profit_band }}</td></tr>
+    <tr><th>估值 Valuation</th><td>{{ c.valuation_band }}</td></tr>
+    <tr><th>员工 Staff</th><td>{{ c.employees_band }}</td></tr>
+    <tr><th>经营 Operating</th><td>{{ c.years_operating }}</td></tr>
+    <tr><th>方式 Deal</th><td>{{ c.deal_type }}</td></tr>
+    <tr><th>原因 Reason</th><td>{{ c.sale_reason }}</td></tr>
+  </table>
+  {{ caller() if caller }}
+</div>
+{% endmacro %}
