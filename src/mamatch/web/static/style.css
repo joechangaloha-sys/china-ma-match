@@ -164,3 +164,4 @@ footer.foot a { color: var(--on-dark); }
 .faq summary { font: 600 1.05rem/1.4 var(--serif); color: var(--ink); cursor: pointer; }
 .faq details p { margin: 8px 0 0; color: var(--ink-2); max-width: 46rem; }
 .faq h2 { margin-top: 18px; }
+.tagline { font: 500 .8rem/1.4 var(--font); color: var(--brass); margin-left: .6rem; letter-spacing: .04em; }
