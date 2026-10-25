@@ -43,6 +43,26 @@
       <ul class="small">{% for d in m.target.documents if d.in_data_room %}<li><a href="{{ P }}/buyer/documents/{{ d.id }}">{{ d.filename }}</a> <span class="muted">{{ L(CHECKLIST[d.kind]) }}</span></li>{% else %}<li class="muted">{{ T('暂无文件', 'No documents yet') }}</li>{% endfor %}</ul>
       <p class="small muted">{{ T('每次查看都会被记录。', 'Every view is logged.') }}</p>
       {% else %}<p class="small muted">{{ T('资料室待卖方开放。', 'The seller has not opened the data room yet.') }}</p>{% endif %}
+      {% set o = latest_offer(m) %}
+      <details class="offer" id="offer-{{ m.id }}" {{ 'open' if not o }}>
+        <summary>{{ T('意向报价（非约束性）', 'Indicative offer (non-binding)') }}{% if o %} · {{ T('已提交', 'submitted') }} {{ o.submitted_at.strftime('%Y-%m-%d') }}{% endif %}</summary>
+        <p class="small muted">{{ T('按统一格式提交，卖方可以把各买方的报价放在一起比较。提交后仍可修改，以最新一次为准。',
+                                   'A fixed format lets the seller compare offers side by side. You can revise it; the latest one counts.') }}</p>
+        <form class="grid" method="post" action="{{ P }}/buyer/deals/{{ m.id }}/offer">
+          <label>{{ T('价格下限（百万元）', 'Price from (RMB m)') }} <input name="price_low" inputmode="decimal" required value="{{ '%g'|format(o.price_low) if o }}"></label>
+          <label>{{ T('价格上限（百万元）', 'Price to (RMB m)') }} <input name="price_high" inputmode="decimal" required value="{{ '%g'|format(o.price_high) if o }}"></label>
+          <label>{{ T('收购股权比例（%）', 'Stake acquired (%)') }} <input name="stake_pct" inputmode="decimal" value="{{ '%g'|format(o.stake_pct) if o else '100' }}"></label>
+          <label>{{ T('交割时支付比例（%）', 'Paid at closing (%)') }} <input name="cash_at_close_pct" inputmode="decimal" value="{{ '%g'|format(o.cash_at_close_pct) if o else '100' }}"></label>
+          <label>{{ T('对价方式', 'Consideration') }} <select name="consideration">{% for k, v in CONSIDERATION.items() %}<option value="{{ k }}" {{ 'selected' if o and o.consideration == k }}>{{ L(v) }}</option>{% endfor %}</select></label>
+          <label>{{ T('资金来源', 'Financing') }} <select name="financing">{% for k, v in FINANCING.items() %}<option value="{{ k }}" {{ 'selected' if o and o.financing == k }}>{{ L(v) }}</option>{% endfor %}</select></label>
+          <label>{{ T('尽调周期（周）', 'Diligence (weeks)') }} <input name="diligence_weeks" inputmode="numeric" value="{{ o.diligence_weeks if o and o.diligence_weeks is not none }}"></label>
+          <label>{{ T('期望交割', 'Target closing') }} <select name="target_close"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}" {{ 'selected' if o and o.target_close == k }}>{{ L(v) }}</option>{% endfor %}</select></label>
+          <label>{{ T('保留员工', 'Keep the staff') }} <select name="keeps_staff"><option value="">—</option><option value="yes" {{ 'selected' if o and o.keeps_staff is sameas true }}>{{ T('是', 'Yes') }}</option><option value="no" {{ 'selected' if o and o.keeps_staff is sameas false }}>{{ T('部分/可协商', 'Partly / to discuss') }}</option></select></label>
+          <label>{{ T('希望创始人', 'Founder after closing') }} <select name="founder_role"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}" {{ 'selected' if o and o.founder_role == k }}>{{ L(v) }}</option>{% endfor %}</select></label>
+          <label class="wide">{{ T('主要条件', 'Main conditions') }} <textarea name="conditions" placeholder="{{ T('例如：以尽调结果为准；需取得银行贷款审批', 'e.g. subject to diligence; subject to bank loan approval') }}">{{ o.conditions if o }}</textarea></label>
+          <div class="wide"><button>{{ T('提交意向报价', 'Submit indicative offer') if not o else T('更新报价', 'Update offer') }}</button></div>
+        </form>
+      </details>
     {% endif %}
   </div>
   {% else %}

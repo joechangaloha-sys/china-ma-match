@@ -184,6 +184,24 @@
   {% endfor %}
 </section>
 
+{% set rows = offer_rows %}
+{% if rows %}
+<section class="panel" id="offers">
+  <h2>意向报价 Indicative offers</h2>
+  <div class="tbl"><table class="small compare">
+    <tr><th>买方 Buyer</th><th class="num">报价 Price (RMB m)</th><th class="num">股权 Stake</th><th class="num">折合100% Implied 100%</th>
+      <th class="num">交割支付 At closing</th><th>对价 Consideration</th><th>资金 Financing</th><th>尽调 Diligence</th><th>交割 Closing</th><th>条件 Conditions</th></tr>
+    {% for m, o in rows %}
+    <tr class="{{ 'best' if loop.first }}"><td><b>{{ m.buyer.name }}</b><br><span class="muted">{{ o.submitted_at.strftime('%Y-%m-%d') }}</span></td>
+      <td class="num">{{ '%g'|format(o.price_low) }}–{{ '%g'|format(o.price_high) }}</td><td class="num">{{ '%g'|format(o.stake_pct) }}%</td>
+      <td class="num">{{ '%.0f'|format(o.price_low * 100 / o.stake_pct) }}–{{ '%.0f'|format(o.price_high * 100 / o.stake_pct) }}</td>
+      <td class="num">{{ '%g'|format(o.cash_at_close_pct) }}%</td><td>{{ CONSIDERATION[o.consideration] }}</td><td>{{ FINANCING[o.financing] }}</td>
+      <td>{{ o.diligence_weeks ~ ' wk' if o.diligence_weeks else '—' }}</td><td>{{ TIMING[o.target_close] if o.target_close else '—' }}</td><td>{{ o.conditions or '—' }}</td></tr>
+    {% endfor %}
+  </table></div>
+</section>
+{% endif %}
+
 <section class="panel" id="matches">
   <h2>买方匹配与引荐 Matches and introductions <span class="muted small">先硬性条件，再 AI 排序，最后由您判断 · Hard gates, then ranking, then your judgement</span></h2>
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/match"><button>匹配已认证买方 Find matching buyers</button></form>

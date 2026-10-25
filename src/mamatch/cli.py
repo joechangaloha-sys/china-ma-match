@@ -52,7 +52,7 @@ def cmd_export(args) -> None:
 
     from .export import export
 
-    files = export(Path(args.out))
+    files = export(Path(args.out), args.base_url)
     print(f"Wrote {len(files)} pages to {args.out}")
 
 
@@ -86,6 +86,8 @@ def main() -> None:
 
     a = sub.add_parser("export-static", help="Write the demo as a static website (fictional data, no forms)")
     a.add_argument("--out", default="static-demo")
+    a.add_argument("--base-url", default="https://joechangaloha-sys.github.io/china-ma-match",
+                   help="Public address of the published demo, used in share links and QR codes")
     a.set_defaults(func=cmd_export)
 
     a = sub.add_parser("serve", help="Run the website")

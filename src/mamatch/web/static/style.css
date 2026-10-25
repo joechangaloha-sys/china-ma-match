@@ -200,3 +200,24 @@ img, svg { max-width: 100%; height: auto; }
   th, td { padding: 7px 8px; }
   .search-row > label, .search-row .grow { flex: 1 1 100%; }
 }
+.compare tr.best td { background: var(--accent-soft); }
+.compare td { white-space: normal; }
+.candidate .check { font-size: 15px; }
+details.offer { border-top: 1px solid var(--rule-hair); margin-top: 10px; padding-top: 6px; }
+details.offer form { margin-top: 8px; }
+.share-grid { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
+.share .qr svg { width: 132px; height: 132px; display: block; background: #fff; }
+.share-text { width: 100%; font-size: 13px; resize: vertical; }
+@media (max-width: 640px) { .share-grid { grid-template-columns: 1fr; } .share .qr { justify-self: center; } }
+.tour-bar { position: sticky; top: 0; z-index: 20; background: var(--deep); color: #fff; border-bottom: 3px solid var(--brass);
+  display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 10px 16px; }
+.tour-bar p { margin: 0; color: #fff; font-size: 14px; max-width: 60rem; }
+.tour-bar div { display: flex; gap: 8px; }
+.tour-bar button { background: var(--brass); color: var(--deep); }
+.tour-bar button.ghost { background: transparent; color: #fff; border: 1px solid var(--on-dark-soft); }
+/* Data tables keep words whole and scroll inside their box rather than breaking headings mid-word. */
+.tbl th { white-space: nowrap; overflow-wrap: normal; }
+.tbl td { overflow-wrap: break-word; }
+.tbl table.compare { min-width: 980px; }
+.compare td:last-child { min-width: 12rem; }
+.compare td:first-child { min-width: 10rem; }

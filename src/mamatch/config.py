@@ -24,3 +24,6 @@ PLATFORM_SHARE = float(os.environ.get("MAMATCH_PLATFORM_SHARE", "0.25"))  # of f
 
 # Static export only: shows the demo guide page (`mamatch export-static`).
 DEMO_GUIDE = False
+
+# Public address used in share links and QR codes (the static export sets the GitHub Pages address).
+PUBLIC_BASE_URL = os.environ.get("MAMATCH_PUBLIC_URL", "")

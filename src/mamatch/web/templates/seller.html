@@ -100,18 +100,25 @@
   <h2>{{ T('买方', 'Buyers') }}</h2>
   {% if outreach %}
   <p class="small muted">{{ T('交易经理根据买方确认的收购方向推荐了以下买方。批准后对方收到匿名简介。', "Your deal manager suggested these buyers from their confirmed criteria. Approving one sends them the anonymous teaser.") }}</p>
-  {% for m in candidates %}
-  <div class="card">
-    <div><b>{{ anon_buyer(m.buyer, lang) }}</b></div>
-    <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
-    <div class="actions">
-      <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/approve"><button>{{ T('批准并发送', 'Approve and send') }}</button></form>
-      <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/decline"><button class="ghost">{{ T('不发送', 'Skip') }}</button></form>
+  {% if candidates %}
+  <form method="post" action="{{ P }}/seller/{{ t.id }}/send" class="bulk">
+    <p class="small"><b>{{ T('%d 位买方符合条件。', '%d matching buyers.')|format(candidates|length) }}</b>
+      {{ T('取消勾选您不想接触的买方（例如竞争对手），然后一次发送。', 'Untick any you do not want to approach (a competitor, for example), then send in one step.') }}</p>
+    {% for m in candidates %}
+    <div class="card candidate">
+      <label class="check"><input type="checkbox" name="match_ids" value="{{ m.id }}" checked> <b>{{ anon_buyer(m.buyer, lang) }}</b></label>
+      <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
+      <div class="actions">
+        <button class="ghost small" formaction="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/approve">{{ T('只发给此买方', 'Send to this buyer only') }}</button>
+        <button class="ghost small" formaction="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/decline">{{ T('不发送', 'Skip') }}</button>
+      </div>
     </div>
-  </div>
+    {% endfor %}
+    <div class="actions"><button>{{ T('发送给已勾选的买方', 'Send to the ticked buyers') }}</button></div>
+  </form>
   {% else %}
   <p class="empty">{{ T('没有待您批准的买方。', 'No buyers waiting for your approval.') }}</p>
-  {% endfor %}
+  {% endif %}
   {% endif %}
   {% if sent %}
   <h3>{{ T('进展', 'Progress') }}</h3>
@@ -132,6 +139,36 @@
   <p class="empty">{{ T('交易经理正在寻找合适的买方。', 'Your deal manager is looking for suitable buyers.') }}</p>
   {% endif %}
 </section>
+
+{% if offer_rows %}
+<section class="panel" id="offers">
+  <h2>{{ T('意向报价比较', 'Offers side by side') }}</h2>
+  <p class="small muted">{{ T('各买方按统一格式提交的非约束性报价，按对应100%股权的价值从高到低排列。价格不是唯一标准：付款方式、资金来源、员工和交接安排同样重要。',
+                             'Non-binding offers in one format, highest implied value for 100% first. Price is not everything: payment terms, financing, staff and handover matter too.') }}</p>
+  <div class="tbl"><table class="small compare">
+    <tr><th>{{ T('买方', 'Buyer') }}</th><th class="num">{{ T('报价（百万元）', 'Price (RMB m)') }}</th><th class="num">{{ T('股权', 'Stake') }}</th>
+      <th class="num">{{ T('折合100%', 'Implied 100%') }}</th><th class="num">{{ T('交割时支付', 'Paid at closing') }}</th>
+      <th>{{ T('对价', 'Consideration') }}</th><th>{{ T('资金', 'Financing') }}</th><th>{{ T('尽调', 'Diligence') }}</th>
+      <th>{{ T('交割', 'Closing') }}</th><th>{{ T('员工', 'Staff') }}</th><th>{{ T('创始人', 'Founder') }}</th><th>{{ T('条件', 'Conditions') }}</th></tr>
+    {% for m, o in offer_rows %}
+    <tr class="{{ 'best' if loop.first }}">
+      <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer, lang) }}{% endif %}<br><span class="muted">{{ o.submitted_at.strftime('%Y-%m-%d') }}</span></td>
+      <td class="num">{{ '%g'|format(o.price_low) }}–{{ '%g'|format(o.price_high) }}</td>
+      <td class="num">{{ '%g'|format(o.stake_pct) }}%</td>
+      <td class="num">{{ '%.0f'|format(o.price_low * 100 / o.stake_pct) }}–{{ '%.0f'|format(o.price_high * 100 / o.stake_pct) }}</td>
+      <td class="num">{{ '%g'|format(o.cash_at_close_pct) }}%</td>
+      <td>{{ L(CONSIDERATION[o.consideration]) }}</td>
+      <td>{{ L(FINANCING[o.financing]) }}</td>
+      <td>{{ T('%d 周', '%d weeks')|format(o.diligence_weeks) if o.diligence_weeks else '—' }}</td>
+      <td>{{ L(TIMING[o.target_close]) if o.target_close else '—' }}</td>
+      <td>{{ (T('保留', 'Kept') if o.keeps_staff else T('部分', 'Partly')) if o.keeps_staff is not none else '—' }}</td>
+      <td>{{ L(FOUNDER_TRANSITION[o.founder_role]) if o.founder_role else '—' }}</td>
+      <td>{{ o.conditions or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+</section>
+{% endif %}
 
 <section class="panel" id="data">
   <h2>{{ T('补充问卷', 'Questions buyers will ask') }}</h2>

@@ -44,7 +44,7 @@ def seller_page(target_id: int, request: Request, user: User = Depends(seller_on
                   latest_teaser=latest_teaser, missing=documents.missing_kinds(t),
                   OWNER_ROLES=authority.OWNER_ROLES, SCOPES=authority.SCOPES, PROFESSIONS=authority.PROFESSIONS,
                   auth_text=authority.AUTH_TEXT,
-                  memo=next(iter(t.memos), None))
+                  memo=next(iter(t.memos), None), offer_rows=offers.offer_table(t))
 
 
 @router.post("/{target_id}/teasers/{teaser_id}/approve")
@@ -98,6 +98,20 @@ async def seller_data(target_id: int, request: Request, user: User = Depends(sel
     save_data(t, await request.form())
     auth.log(s, user, "seller_data_saved", target_id=t.id)
     return back(f"/seller/{t.id}#data", "已保存，顾问会审核 Saved; your adviser will review it.")
+
+
+@router.post("/{target_id}/send")
+async def seller_bulk_send(target_id: int, request: Request, user: User = Depends(seller_only),
+                           s: Session = Depends(get_session)):
+    t = _mine(s, user, target_id)
+    ids = [int(x) for x in (await request.form()).getlist("match_ids") if str(x).isdigit()]
+    if not ids:
+        return back(f"/seller/{t.id}#buyers", "请至少勾选一位买方 Tick at least one buyer.")
+    sent, errors = offers.approve_many(s, t, ids, user)
+    msg = f"已发送给 {sent} 位买方 Teaser sent to {sent} buyer(s)"
+    if errors:
+        msg += " · " + errors[0]
+    return back(f"/seller/{t.id}#buyers", msg)
 
 
 @router.post("/{target_id}/matches/{match_id}/{action}")

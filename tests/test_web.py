@@ -461,3 +461,60 @@ def test_adviser_sees_only_authorised_mandates(app, db_url):
     assert adv.get(f"/adviser/{delta.id}").status_code == 200
     assert adv.get(f"/adviser/{jade.id}").status_code == 404
     assert client(app, ADVISER).get(I).status_code == 403
+
+
+# ---------------------------------------------------------------- offers, bulk send, sharing
+
+def test_seller_compares_offers_without_seeing_buyer_names(app, db_url):
+    jade = _get(db_url, Target, code_name="Project Jade")
+    page = client(app, SELLER, lang="en-US").get(f"/en/seller/{jade.id}").text
+    assert "Offers side by side" in page and "85–95" in page and "70–80" in page
+    assert page.index("85–95") < page.index("70–80")  # highest implied value first
+    assert not [n for n in _buyer_names(db_url) if n in page]
+    internal = client(app, DM).get(f"{I}/targets/{jade.id}").text
+    assert "示例·华东精密科技" in internal and "85–95" in internal
+
+
+def test_buyer_offer_needs_nda_and_own_deal(app, db_url):
+    jade = _get(db_url, Target, code_name="Project Jade")
+    buyer = client(app, BUYER)
+    nda = next(mid for mid, st in _matches(db_url, jade.id) if st == "nda_signed"
+               and _get(db_url, Match, id=mid).buyer_id == _get(db_url, Buyer, external_id="EX000").id)
+    r = buyer.post(f"/buyer/deals/{nda}/offer", data={"price_low": "90", "price_high": "88"})
+    assert "有效的价格区间" in r.text
+    r = buyer.post(f"/buyer/deals/{nda}/offer", data={"price_low": "90", "price_high": "100", "stake_pct": "100",
+                                                       "consideration": "cash", "financing": "own_funds"})
+    assert "已提交意向报价" in r.text
+    with db.session_scope(db_url) as s:
+        m = s.get(Match, nda)
+        assert m.offers[0].price_high == 100 and len(m.offers) == 2  # revised; the latest counts
+    assert client(app, PENDING).post(f"/buyer/deals/{nda}/offer", data={"price_low": "1", "price_high": "2"}).status_code == 404
+    delta = _get(db_url, Target, code_name="Project Delta")
+    m2 = client(app, BUYER).post(f"/opportunities/{delta.id}/request")
+    mid = _get(db_url, Match, target_id=delta.id, buyer_id=_get(db_url, Buyer, external_id="EX000").id).id
+    assert "签署保密协议后" in buyer.post(f"/buyer/deals/{mid}/offer", data={"price_low": "1", "price_high": "2"}).text
+
+
+def test_seller_sends_to_ticked_buyers_in_one_step(app, db_url):
+    jade = _get(db_url, Target, code_name="Project Jade")
+    seller = client(app, SELLER)
+    page = seller.get(f"/seller/{jade.id}").text
+    ids = re.findall(r'name="match_ids" value="(\d+)"', page)
+    assert len(ids) >= 2
+    r = seller.post(f"/seller/{jade.id}/send", data={"match_ids": ids[:1]})  # the other one is left out
+    assert "已发送给 1 位买方" in r.text
+    stages = dict(_matches(db_url, jade.id))
+    assert stages[int(ids[0])] == "teaser_sent" and stages[int(ids[1])] == "shortlisted"
+    assert "请至少勾选" in seller.post(f"/seller/{jade.id}/send", data={}).text
+
+
+def test_listing_share_panel(app, db_url):
+    kiln = _get(db_url, Target, code_name="Project Kiln")
+    page = client(app).get(f"/zh/opportunities/{kiln.id}").text
+    assert "分享此项目" in page and "<svg" in page and "复制链接" in page
+    assert re.search(r"<title>Project Kiln · mamatch</title>", page)  # nothing leaked into the title
+    assert f"/zh/opportunities/{kiln.id}/" in page and "把企业交棒给对的人" in page
+    for secret in (kiln.legal_name, kiln.short_name, kiln.owner_name, "无锡"):
+        assert secret not in page
+    en = client(app).get(f"/en/opportunities/{kiln.id}").text
+    assert "Share this listing" in en and "For sale: Project Kiln" in en

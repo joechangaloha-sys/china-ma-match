@@ -55,4 +55,40 @@
         : 'This is a static demo: forms and buttons do not submit.');
     });
   });
+
+  // ---------------------------------------------------------------- guided tour
+  const steps = window.MM_TOUR || [];
+  const me = document.querySelector('script[src$="static-demo.js"]');
+  if (!steps.length || !me) return;
+  const root = new URL('../', me.src);  // static/ sits at the site root
+  const lang = document.documentElement.lang.startsWith('zh') ? 'zh' : 'en';
+  const key = 'mm-tour-step';
+  const go = i => {
+    try { sessionStorage.setItem(key, String(i)); } catch {}
+    location.href = new URL(lang + '/' + steps[i].path, root).href;
+  };
+  document.querySelectorAll('[data-start-tour]').forEach(b => {
+    b.hidden = false;
+    b.addEventListener('click', e => { e.preventDefault(); go(0); });
+  });
+  let i = null;
+  try { i = sessionStorage.getItem(key); } catch {}
+  if (i === null) return;
+  i = Number(i);
+  if (!(i >= 0 && i < steps.length)) return;
+  const zh = lang === 'zh';
+  const bar = document.createElement('div');
+  bar.className = 'tour-bar';
+  bar.setAttribute('role', 'region');
+  bar.setAttribute('aria-label', zh ? '导览' : 'Guided tour');
+  const text = document.createElement('p');
+  text.textContent = (zh ? `导览 ${i + 1}/${steps.length}：` : `Tour ${i + 1} of ${steps.length}: `) + steps[i][lang];
+  const nav = document.createElement('div');
+  const button = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', fn); nav.append(b); return b; };
+  if (i > 0) button(zh ? '上一步' : 'Back', () => go(i - 1)).className = 'ghost';
+  if (i < steps.length - 1) button(zh ? '下一步' : 'Next', () => go(i + 1));
+  button(zh ? '结束导览' : 'End tour', () => { try { sessionStorage.removeItem(key); } catch {} bar.remove(); }).className = 'ghost';
+  bar.append(text, nav);
+  document.body.prepend(bar);
 })();
+

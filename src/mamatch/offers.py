@@ -183,3 +183,69 @@ def grant_data_room(session: Session, match: Match, user) -> None:
 def can_view_document(match: Match | None, doc) -> bool:
     return (match is not None and doc.in_data_room and match.target_id == doc.target_id
             and match.data_room_granted_at is not None and match.stage in AFTER_NDA)
+
+
+# ---------------------------------------------------------------- indicative offers (after NDA)
+
+CONSIDERATION = {"cash": "全部现金 All cash", "cash_earnout": "现金 + 业绩对赌 Cash plus earn-out",
+                 "cash_deferred": "现金 + 分期支付 Cash plus deferred payment", "shares": "含股份支付 Partly in shares"}
+FINANCING = {"own_funds": "自有资金 Own funds", "bank_loan": "银行并购贷款 Bank acquisition loan",
+             "fund": "基金出资 Fund capital", "mixed": "组合 Mixed"}
+
+
+def latest_offer(match: Match):
+    return match.offers[0] if match.offers else None
+
+
+def submit_offer(session: Session, match: Match, user, *, price_low: float | None, price_high: float | None,
+                 stake_pct: float | None, cash_at_close_pct: float | None, consideration: str, financing: str,
+                 diligence_weeks: int | None, target_close: str, keeps_staff: bool | None, founder_role: str,
+                 conditions: str):
+    """A buyer who has signed the NDA submits (or revises) a non-binding indication of interest."""
+    from . import auth
+    from .models import IndicativeOffer
+    from .taxonomy import FOUNDER_TRANSITION, TIMING
+
+    if match.stage not in AFTER_NDA or match.stage == "closed":
+        raise ValueError("签署保密协议后才能提交意向报价 Offers can be submitted only after the NDA.")
+    if price_low is None or price_high is None or price_low <= 0 or price_high < price_low:
+        raise ValueError("请填写有效的价格区间 Enter a valid price range.")
+    stake = stake_pct if stake_pct is not None else 100.0
+    cash = cash_at_close_pct if cash_at_close_pct is not None else 100.0
+    if not (0 < stake <= 100 and 0 <= cash <= 100):
+        raise ValueError("比例应在0到100之间 Percentages must be between 0 and 100.")
+    o = IndicativeOffer(price_low=price_low, price_high=price_high, stake_pct=stake, cash_at_close_pct=cash,
+                        consideration=consideration if consideration in CONSIDERATION else "cash",
+                        financing=financing if financing in FINANCING else "own_funds",
+                        diligence_weeks=diligence_weeks, target_close=target_close if target_close in TIMING else "",
+                        keeps_staff=keeps_staff, founder_role=founder_role if founder_role in FOUNDER_TRANSITION else "",
+                        conditions=conditions.strip()[:2000])
+    match.offers.insert(0, o)
+    session.flush()
+    auth.log(session, user, "offer_submitted", target_id=match.target_id, match_id=match.id,
+             price_low=price_low, price_high=price_high, stake=stake)
+    return o
+
+
+def offer_table(target: Target) -> list[tuple[Match, object]]:
+    """The latest offer from each buyer still in the process, highest midpoint first."""
+    rows = [(m, latest_offer(m)) for m in target.matches if m.offers and m.stage not in ("dropped",)]
+    return sorted(rows, key=lambda r: -(r[1].price_low + r[1].price_high) / 2 * 100 / (r[1].stake_pct or 100))
+
+
+def approve_many(session: Session, target: Target, match_ids: list[int], user) -> tuple[int, list[str]]:
+    """Seller sends the teaser to several shortlisted buyers at once; skipped buyers stay shortlisted."""
+    from . import auth
+
+    sent, errors = 0, []
+    wanted = set(match_ids)
+    for m in outreach_candidates(target):
+        if m.id not in wanted:
+            continue
+        try:
+            approve_and_send(session, m)
+            sent += 1
+        except ValueError as exc:
+            errors.append(str(exc))
+    auth.log(session, user, "seller_bulk_send", target_id=target.id, sent=sent, selected=len(wanted))
+    return sent, errors

@@ -5,6 +5,7 @@ each demo role (visitor, seller, buyer, adviser, deal manager), rewrites links t
 adds a banner, an in-browser search and form blocking. Nothing in the output can submit data.
 """
 
+import json
 import os
 import posixpath
 import re
@@ -31,8 +32,9 @@ def _relative(from_file: str, to_file: str) -> str:
     return posixpath.relpath(to_file, posixpath.dirname(from_file) or ".")
 
 
-def export(out: Path) -> list[str]:
+def export(out: Path, base_url: str = "https://joechangaloha-sys.github.io/china-ma-match") -> list[str]:
     tmp = Path(tempfile.mkdtemp())
+    config.PUBLIC_BASE_URL = base_url
     config.DATABASE_URL = f"sqlite:///{tmp / 'demo.db'}"
     config.UPLOAD_DIR = str(tmp / "uploads")
     config.LLM_MODE = "off"
@@ -56,6 +58,7 @@ def export(out: Path) -> list[str]:
         adv_user = s.scalar(select(User).where(User.role == "adviser"))
         adv = s.scalar(select(Adviser).where(Adviser.user_id == adv_user.id))
         adv_targets = [a.target_id for a in s.scalars(select(MandateAuthorization).where(MandateAuthorization.adviser_id == adv.id))]
+        kiln = s.scalar(select(Target.id).where(Target.code_name == "Project Kiln"))
 
     def client(email=None, lang="zh"):
         c = TestClient(app, headers={"Accept-Language": lang})
@@ -110,6 +113,8 @@ def export(out: Path) -> list[str]:
             return None
         return _file_for(key) + (f"#{frag}" if frag else "")
 
+    tour = json.dumps(tour_steps(listed_id=kiln, seller_id=jade, adviser_target=adv_targets[0] if adv_targets else None,
+                                 internal_id=jade), ensure_ascii=False)
     written = []
     for url, html in pages.items():
         lang = url.strip("/").split("/")[0]
@@ -132,7 +137,8 @@ def export(out: Path) -> list[str]:
                   f'<div class="demo-banner">Static demo: all data is fictional; forms and buttons do not submit · '
                   f'<a href="{demo}">Demo guide</a></div>')
         html = re.sub(r"(<body[^>]*>)", r"\1\n" + banner, html, count=1)
-        html = html.replace("</head>", f'<script src="{_relative(here, "static/static-demo.js")}" defer></script>\n</head>', 1)
+        html = html.replace("</head>", f'<script>window.MM_TOUR = {tour};</script>\n'
+                                       f'<script src="{_relative(here, "static/static-demo.js")}" defer></script>\n</head>', 1)
         target_file = out / here
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.write_text(html, encoding="utf-8")
@@ -160,3 +166,26 @@ ROOT_INDEX = """<!doctype html>
 </script></head>
 <body><p><a href="zh/index.html">中文</a> · <a href="en/index.html">English</a></p></body></html>
 """
+
+
+def tour_steps(*, listed_id, seller_id, adviser_target, internal_id) -> list[dict]:
+    """The guided tour: one page per step, paths relative to the site root without the edition prefix."""
+    steps = [
+        ("index.html", "为什么做这件事：第一代企业家的退出需求，以及如何把大型交易的严谨流程带给中小企业。",
+         "Why this exists: founders looking for an exit, and bringing large-deal rigour to small companies."),
+        ("opportunities/index.html", "公开的出售项目只显示匿名区间。试试关键词和“详细搜索”（在浏览器中运行）。",
+         "Public listings show anonymised ranges only. Try a keyword and the detailed search (it runs in your browser)."),
+        (f"opportunities/{listed_id}/index.html", "一个项目：期望价格、出让股权、交易诉求；下方可用微信扫码或复制文字分享。",
+         "One listing: asking price, stake and the seller's ask. Below it, share by WeChat QR code or copy the text."),
+        ("adviser/index.html", "会计师或律师在客户本人授权下为其准备出售；授权需企业主签署并经核验。",
+         "An accountant or lawyer prepares a sale for a client, under the owner's own signed and verified authorisation."),
+        (f"seller/{seller_id}/index.html", "卖方页面：确认简介、勾选买方后一次发送，并在“意向报价比较”中并排比较各买方报价。",
+         "The seller's page: approve the teaser, tick buyers and send in one step, then compare offers side by side."),
+        ("buyer/index.html", "买方页面：签署保密协议后查看信息备忘录，并按统一格式提交意向报价。",
+         "The buyer's page: after the NDA, read the info memo and submit an indicative offer in a fixed format."),
+        (f"internal/targets/{internal_id}/index.html", "交易经理（内部）：核验出售权限、审核资料、匹配买方、比较报价，每一步都有审计记录。",
+         "Deal manager (internal): verify authority, review documents, match buyers, compare offers; every step is audited."),
+        ("internal/dashboard/index.html", "试点数据：委托、核验买方、引荐、保密协议和意向书的转化情况。",
+         "Pilot metrics: mandates, verified buyers, introductions, NDAs and LOIs."),
+    ]
+    return [{"path": p, "zh": zh, "en": en} for p, zh, en in steps if "None" not in p]

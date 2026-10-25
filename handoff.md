@@ -47,12 +47,20 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
 
 ## State of the code
 
-87 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
+91 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
 anonymous, adviser scope, revoked authorisation) and the static export. Structure and routes: README.md.
 
 Layout is checked on phones and laptops: no page overflows sideways at 320, 375, 414, 768, 1280 or 1440 px (30
 pages incl. every role's portal and the internal pages); the menu wraps on phones; wide tables scroll inside their
 own box. Re-check with the iframe overflow script approach after big layout changes.
+
+Added 25 Oct (after research on BATONZ, Acquire.com, Axial): **indicative offers** after the NDA in a fixed format
+(`IndicativeOffer`, `offers.submit_offer`), compared side by side on the seller page (anonymised) and internally;
+**send to ticked buyers in one step** on the seller page (`offers.approve_many`); **listing share panel** (QR code via
+`segno`, copy text and link; links use `config.PUBLIC_BASE_URL`, set to the Pages address by the export); **guided
+tour** (8 steps, both languages) in the static demo, started from the demo guide (`export.tour_steps`, `static-demo.js`).
+Suggested but not built: a free indicative value range for sellers (careful: the plan rules out unreviewed AI
+valuations) and saved searches with new-listing alerts for buyers.
 
 Recent additions: detailed search (bands only, earnings only where the seller agreed), product/service line on
 listings, landing-page rationale and FAQ, adviser portal with verified authorisation, tagline, static export,

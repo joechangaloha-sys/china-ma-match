@@ -68,7 +68,31 @@ def opportunity(target_id: int, request: Request, user: User | None = Depends(cu
     requested = False
     if user and user.role == "buyer" and user.buyer_id:
         requested = any(m.buyer_id == user.buyer_id and m.stage != "dropped" for m in t.matches)
-    return render(request, "listing.html", user, portal="public", t=t, card=listing.card(t), requested=requested)
+    return render(request, "listing.html", user, portal="public", t=t, card=listing.card(t), requested=requested,
+                  share=_share(request, t))
+
+
+def _share(request: Request, t: Target) -> dict:
+    """Link, QR code and ready-to-paste text for sharing a listing (WeChat first)."""
+    import segno
+
+    from .. import config, i18n
+
+    lang = get_lang(request)
+    base = (config.PUBLIC_BASE_URL or str(request.base_url)).rstrip("/")
+    url = f"{base}/{lang}/opportunities/{t.id}/"
+    c = listing.card(t)
+    product = (t.products_zh if lang == "zh" else t.products_en) or t.products_zh or t.products_en
+    if lang == "zh":
+        text = (f"【出售项目】{t.code_name}：{i18n.val(c['region'], 'zh')}{c['sector_zh']}企业，"
+                f"营业收入{c['revenue_band']}，期望价格{i18n.tr(c['price_band'], 'zh')}。"
+                + (f"{product}。" if product else "") + f"把企业交棒给对的人：{url}")
+    else:
+        text = (f"For sale: {t.code_name}, a {c['sector_en'].lower()} company in {i18n.val(c['region'], 'en')}. "
+                f"Revenue {i18n.val(c['revenue_band'], 'en')}, asking {i18n.val(c['price_band'], 'en')}."
+                + (f" {product}." if product else "") + f" Hand your company on to the right owner: {url}")
+    qr = segno.make(url, error="m").svg_inline(scale=4, dark="#0b2a4f", border=2)
+    return {"url": url, "text": text, "qr": qr}
 
 
 @router.post("/opportunities/{target_id}/inquiry")

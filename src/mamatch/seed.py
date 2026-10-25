@@ -216,6 +216,33 @@ def seed(session: Session) -> None:
         if code in EXAMPLE_PREP and not fees.prep_pack_paid(t):
             _setup_prep(session, t, EXAMPLE_PREP[code])
     session.flush()
+    if "Project Jade" in have:
+        _seed_offers(session, have["Project Jade"])
+    session.flush()
+
+
+# Two example indicative offers on Project Jade, so the seller's comparison table has something to compare.
+EXAMPLE_OFFERS = [
+    dict(price_low=85, price_high=95, stake_pct=100, cash_at_close_pct=80, consideration="cash_earnout",
+         financing="bank_loan", diligence_weeks=8, target_close="6m", keeps_staff=True, founder_role="12m",
+         conditions="以财务和税务尽调结果为准；需取得并购贷款审批"),
+    dict(price_low=70, price_high=80, stake_pct=100, cash_at_close_pct=100, consideration="cash",
+         financing="own_funds", diligence_weeks=6, target_close="asap", keeps_staff=True, founder_role="6m",
+         conditions="以尽调结果为准"),
+]
+
+
+def _seed_offers(session: Session, t: Target) -> None:
+    if any(m.offers for m in t.matches):
+        return
+    after = [m for m in t.matches if m.stage in offers.AFTER_NDA]
+    for m in offers.outreach_candidates(t)[: max(0, 2 - len(after))]:
+        offers.approve_and_send(session, m)
+        offers.buyer_respond(session, m, interested=True)
+        offers.accept_nda(session, m, None)
+        after.append(m)
+    for m, spec in zip(after, EXAMPLE_OFFERS):
+        offers.submit_offer(session, m, None, **spec)
 
 
 def _seed_users(session: Session, targets: dict[str, Target]) -> None:

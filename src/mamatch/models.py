@@ -225,6 +225,8 @@ class Match(Base):
                                                      order_by="DealEvent.created_at")
     feedback: Mapped[list["MatchFeedback"]] = relationship(back_populates="match", cascade="all, delete-orphan",
                                                            order_by="MatchFeedback.created_at")
+    offers: Mapped[list["IndicativeOffer"]] = relationship(back_populates="match", cascade="all, delete-orphan",
+                                                           order_by="desc(IndicativeOffer.submitted_at)")
 
 
 class DealEvent(Base):
@@ -458,3 +460,29 @@ class MandateAuthorization(Base):
 
     target: Mapped[Target] = relationship(back_populates="authorizations")
     adviser: Mapped[Adviser] = relationship()
+
+
+class IndicativeOffer(Base):
+    """A buyer's non-binding indication of interest after the NDA, in a fixed shape so offers compare.
+
+    A buyer may revise: each submission is a new row and the latest one counts.
+    """
+
+    __tablename__ = "indicative_offers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    match_id: Mapped[int] = mapped_column(ForeignKey("matches.id"))
+    price_low: Mapped[float] = mapped_column(Float)  # RMB m, for the stake below
+    price_high: Mapped[float] = mapped_column(Float)
+    stake_pct: Mapped[float] = mapped_column(Float, default=100.0)
+    cash_at_close_pct: Mapped[float] = mapped_column(Float, default=100.0)  # rest deferred or earn-out
+    consideration: Mapped[str] = mapped_column(String(20), default="cash")  # offers.CONSIDERATION
+    financing: Mapped[str] = mapped_column(String(20), default="own_funds")  # offers.FINANCING
+    diligence_weeks: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    target_close: Mapped[str] = mapped_column(String(20), default="")  # taxonomy.TIMING key
+    keeps_staff: Mapped[bool | None] = mapped_column(nullable=True)
+    founder_role: Mapped[str] = mapped_column(String(20), default="")  # taxonomy.FOUNDER_TRANSITION key
+    conditions: Mapped[str] = mapped_column(Text, default="")
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    match: Mapped[Match] = relationship(back_populates="offers")

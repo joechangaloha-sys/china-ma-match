@@ -35,7 +35,8 @@ def buyer_home(request: Request, user: User = Depends(buyer_only), s: Session = 
                       .order_by(Match.updated_at.desc())).all()
     return render(request, "buyer_home.html", user, portal="buyer", b=b, deals=deals, proposal=None,
                   shared_teaser=offers.shared_teaser, shared_memo=infomemo.shared_memo, after_nda=offers.AFTER_NDA,
-                  nda_available=offers.nda_available, nda_text=offers.NDA_TEXT)
+                  nda_available=offers.nda_available, nda_text=offers.NDA_TEXT, latest_offer=offers.latest_offer,
+                  CONSIDERATION=offers.CONSIDERATION, FINANCING=offers.FINANCING)
 
 
 @router.post("/thesis/suggest", response_class=HTMLResponse)
@@ -48,7 +49,8 @@ def thesis_suggest(request: Request, thesis_text: str = Form(""), user: User = D
     deals = s.scalars(select(Match).where(Match.buyer_id == b.id, Match.stage.not_in(["suggested", "shortlisted"]))).all()
     return render(request, "buyer_home.html", user, portal="buyer", b=b, deals=deals, proposal=proposal,
                   shared_teaser=offers.shared_teaser, shared_memo=infomemo.shared_memo, after_nda=offers.AFTER_NDA,
-                  nda_available=offers.nda_available, nda_text=offers.NDA_TEXT,
+                  nda_available=offers.nda_available, nda_text=offers.NDA_TEXT, latest_offer=offers.latest_offer,
+                  CONSIDERATION=offers.CONSIDERATION, FINANCING=offers.FINANCING,
                   msg="已根据描述预填，请核对后提交 Pre-filled from your description: check and confirm.")
 
 
@@ -74,6 +76,26 @@ async def thesis_save(request: Request, user: User = Depends(buyer_only), s: Ses
         return back("/buyer#thesis", str(exc))
     auth.log(s, user, "thesis_saved")
     return back("/buyer", "已保存，顾问审核后即可接收项目 Saved. Once the adviser verifies you, you can receive companies.")
+
+
+@router.post("/deals/{match_id}/offer")
+async def deal_offer(match_id: int, request: Request, user: User = Depends(buyer_only), s: Session = Depends(get_session)):
+    b = _buyer(s, user)
+    m = s.get(Match, match_id)
+    if m is None or m.buyer_id != b.id:
+        not_found()
+    f = await request.form()
+    try:
+        offers.submit_offer(
+            s, m, user, price_low=num(str(f.get("price_low", ""))), price_high=num(str(f.get("price_high", ""))),
+            stake_pct=num(str(f.get("stake_pct", ""))), cash_at_close_pct=num(str(f.get("cash_at_close_pct", ""))),
+            consideration=str(f.get("consideration", "")), financing=str(f.get("financing", "")),
+            diligence_weeks=num(str(f.get("diligence_weeks", "")), int), target_close=str(f.get("target_close", "")),
+            keeps_staff={"yes": True, "no": False}.get(str(f.get("keeps_staff", ""))),
+            founder_role=str(f.get("founder_role", "")), conditions=str(f.get("conditions", "")))
+    except ValueError as exc:
+        return back(f"/buyer#offer-{m.id}", str(exc))
+    return back(f"/buyer#offer-{m.id}", "已提交意向报价 Indicative offer submitted")
 
 
 @router.post("/deals/{match_id}/{action}")

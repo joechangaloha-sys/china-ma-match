@@ -160,6 +160,7 @@ def target_detail(target_id: int, request: Request, user: User = Depends(dm), s:
                   invite=invite, seller=seller, next_statuses=dealstatus.allowed_next(t.status),
                   missing=documents.missing_kinds(t), referral_kinds=REFERRAL_KINDS,
                   OWNER_ROLES=authority.OWNER_ROLES, PROFESSIONS=authority.PROFESSIONS,
+                  offer_rows=offers.offer_table(t),
                   nda_available=offers.nda_available)
 
 

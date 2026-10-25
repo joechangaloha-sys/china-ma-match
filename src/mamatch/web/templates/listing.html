@@ -6,6 +6,20 @@
 <div class="cols">
 <section>
   {{ listing_card(card) }}
+  <div class="panel share" id="share">
+    <h2>{{ T('分享此项目', 'Share this listing') }}</h2>
+    <div class="share-grid">
+      <div class="qr" role="img" aria-label="{{ T('此项目的二维码', 'QR code for this listing') }}">{{ share.qr|safe }}</div>
+      <div>
+        <p class="small">{{ T('用微信扫一扫，或复制下方文字发给可能感兴趣的买方或顾问。', 'Scan with WeChat, or copy the text below and send it to a buyer or adviser who may be interested.') }}</p>
+        <textarea class="share-text" readonly rows="4" aria-label="{{ T('分享文字', 'Share text') }}">{{ share.text }}</textarea>
+        <div class="actions">
+          <button type="button" class="ghost small" data-copy="{{ share.text }}">{{ T('复制文字', 'Copy text') }}</button>
+          <button type="button" class="ghost small" data-copy="{{ share.url }}">{{ T('复制链接', 'Copy link') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <p class="small muted">{{ T('信息备忘录在签署保密协议后提供；公司名称在双方同意后披露。所列数字为卖方提供、经交易经理审核的区间，不构成保证。',
                              'The full info memo follows an NDA; names are disclosed once both sides agree. Figures are seller-provided ranges reviewed by a deal manager, not guarantees.') }}</p>
 </section>
@@ -35,4 +49,13 @@
   {% endif %}
 </section>
 </div>
+<script>
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]');
+  if (!b) return;
+  const done = () => { const t = b.textContent; b.textContent = '{{ T('已复制', 'Copied') }} ✓'; setTimeout(() => (b.textContent = t), 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, () => {});
+  else { const ta = document.createElement('textarea'); ta.value = b.dataset.copy; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }
+});
+</script>
 {% endblock %}

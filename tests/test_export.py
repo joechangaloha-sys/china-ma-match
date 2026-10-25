@@ -6,7 +6,7 @@ from mamatch.export import export
 
 
 def test_static_export_is_complete_and_self_contained(tmp_path, monkeypatch):
-    for name in ("DATABASE_URL", "UPLOAD_DIR", "LLM_MODE", "DEMO_GUIDE"):
+    for name in ("DATABASE_URL", "UPLOAD_DIR", "LLM_MODE", "DEMO_GUIDE", "PUBLIC_BASE_URL"):
         monkeypatch.setattr(config, name, getattr(config, name))  # export() changes these; restore afterwards
     out = tmp_path / "site"
     files = export(out)
@@ -28,3 +28,8 @@ def test_static_export_is_complete_and_self_contained(tmp_path, monkeypatch):
             assert "Static demo" in html or "静态演示" in html
     listing = (out / "en/opportunities/index.html").read_text()
     assert 'data-rev-lo="20"' in listing and "48" not in re.findall(r'data-[a-z-]+="([^"]*)"', listing)  # bands only
+
+    assert "window.MM_TOUR" in listing and "data-start-tour" in (out / "en/demo/index.html").read_text()
+    kiln_page = next(p for p in files if re.match(r"zh/opportunities/\d+/index.html", p))
+    page = (out / kiln_page).read_text()
+    assert "<svg" in page and "https://joechangaloha-sys.github.io/china-ma-match/zh/opportunities/" in page

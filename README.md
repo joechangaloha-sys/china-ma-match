@@ -12,9 +12,9 @@ Background research and design notes are kept privately, outside this repository
 | Area | URL | Who | What |
 |---|---|---|---|
 | Public site | `/`, `/opportunities`, `/sell`, `/buy`, `/fees`, `/security` | anyone | How it works, anonymised seller listings (ranges, product line, the seller's ask) with keyword and detailed search (revenue, profitability, margin, employees, years in business, price, reason for sale, deal type), seller intake form, anonymous inquiry form. Nothing about buyers is ever public. |
-| Seller portal | `/seller` | seller (opened from a one-time invite link) | Progress, document checklist and upload, teaser approval, public listing on/off, approving each buyer, NDA-stage data-room grant and name disclosure, questionnaire, info memo. No plans or demand figures. |
+| Seller portal | `/seller` | seller (opened from a one-time invite link) | Progress, document checklist and upload, teaser approval, public listing on/off, sending the teaser to ticked buyers in one step, comparing indicative offers side by side, NDA-stage data-room grant and name disclosure, questionnaire, info memo. No plans or demand figures. |
 | Adviser portal | `/adviser` | accountant, lawyer or consultant (registers at `/register/adviser`, verified by a deal manager) | Opens mandates for clients, sends the owner an authorisation link, uploads documents and answers the questionnaire while the owner's authorisation is active. Cannot approve teasers, publish, choose buyers or disclose names. |
-| Buyer portal | `/buyer` | buyer (self-registers at `/register`) | Acquisition thesis in their own words, AI-structured and confirmed; funding range and evidence; introductions; click-accept NDA; info memo; data-room downloads (logged). |
+| Buyer portal | `/buyer` | buyer (self-registers at `/register`) | Acquisition thesis in their own words, AI-structured and confirmed; funding range and evidence; introductions; click-accept NDA; info memo; data-room downloads (logged); a non-binding indicative offer in a fixed format. |
 | Internal | `/internal/...` | deal managers | Mandates and status, document extraction review, teasers, buyer verification queue, matching with accept/reject reasons, fees, referrals, pipeline, pilot dashboard, audit log. Marked internal on every page. |
 
 Authority is checked before anything reaches buyers (`authority.py`): the owner states their role (legal
@@ -70,7 +70,7 @@ fictional and labelled 示例.
 
 `uv run mamatch export-static --out static-demo` writes the whole demo as plain HTML: every page in both
 editions and as each example role (visitor, seller, buyer, adviser, deal manager), with relative links, a
-"static demo" banner, a demo guide (`/zh/demo/`, `/en/demo/`), the opportunities search running in the browser
+"static demo" banner, a demo guide (`/zh/demo/`, `/en/demo/`) with an 8-step guided tour, the opportunities search running in the browser
 on band data only, and every other form disabled. It uses a throwaway database seeded with the fictional examples,
 and drops Google Fonts (blocked in mainland China). `.github/workflows/pages.yml` builds and publishes it on each
 push to `main` once Pages > Source is set to "GitHub Actions". Preview locally with the `static-demo` entry in
