@@ -91,7 +91,8 @@ def render(request: Request, name: str, user: User | None = None, **ctx) -> HTML
     ctx = {"msg": request.query_params.get("msg", ""), "user": user, "lang": lang, "P": f"/{lang}",
            "edition_path": path + query, "here": path,
            "T": lambda zh, en: zh if lang == "zh" else en,
-           "L": lambda s: i18n.tr(s, lang), "V": lambda s: i18n.val(s, lang), **ctx}
+           "L": lambda s: i18n.tr(s, lang), "V": lambda s: i18n.val(s, lang),
+           "R": lambda s: i18n.reason(s, lang), **ctx}
     return templates.TemplateResponse(request, name, ctx)
 
 

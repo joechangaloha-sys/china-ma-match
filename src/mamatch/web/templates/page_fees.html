@@ -9,9 +9,9 @@
   <table>
     <tr><th>{{ T('服务', 'Service') }}</th><th>{{ T('卖方', 'Seller') }}</th><th>{{ T('买方', 'Buyer') }}</th></tr>
     <tr><td>{{ T('匿名挂牌与浏览', 'Anonymous listing and browsing') }}</td><td>{{ T('免费', 'Free') }}</td><td>{{ T('免费', 'Free') }}</td></tr>
-    <tr><td>{{ T('出售准备包：资料核查 + 信息备忘录', 'Sale preparation: data check and info memo') }}</td><td class="num">RMB {{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}</td><td>—</td></tr>
-    <tr><td>{{ T('主动推介服务', 'Active outreach') }}</td><td class="num">RMB {{ '{:,}'.format(cfg.SELLER_PLAN_FEE_RMB) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} {{ T('天', 'days') }}</td><td>—</td></tr>
-    <tr><td>{{ T('成交费', 'Completion fee') }}</td><td>{{ T('推介服务客户：成交价 %g%%，最低 RMB %s，已付费用抵扣', 'Outreach clients: %g%% of the deal value, minimum RMB %s, earlier fees credited')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</td><td>{{ T('试点中测试', 'Being tested in the pilot') }}</td></tr>
+    <tr><td>{{ T('出售准备包：资料核查 + 信息备忘录', 'Sale preparation: data check and info memo') }}</td><td class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.PREP_PACK_FEE_RMB)) }}</td><td>—</td></tr>
+    <tr><td>{{ T('主动推介服务', 'Active outreach') }}</td><td class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.SELLER_PLAN_FEE_RMB)) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} {{ T('天', 'days') }}</td><td>—</td></tr>
+    <tr><td>{{ T('成交费', 'Completion fee') }}</td><td>{{ T('推介服务客户：成交价 %g%%，最低 %s 元，已付费用抵扣', 'Outreach clients: %g%% of the deal value, minimum RMB %s, earlier fees credited')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</td><td>{{ T('试点中测试', 'Being tested in the pilot') }}</td></tr>
     <tr><td>{{ T('律师、会计、税务、尽调', 'Legal, accounting, tax, diligence') }}</td><td colspan="2">{{ T('合作专业机构固定报价，单独签约', 'Fixed prices from partner firms, contracted separately') }}</td></tr>
   </table>
 </section>

@@ -216,6 +216,8 @@ def seed(session: Session) -> None:
         if code in EXAMPLE_PREP and not fees.prep_pack_paid(t):
             _setup_prep(session, t, EXAMPLE_PREP[code])
     session.flush()
+    for t in have.values():
+        _seed_language_versions(session, t)
     if "Project Jade" in have:
         _seed_offers(session, have["Project Jade"])
     session.flush()
@@ -225,15 +227,44 @@ def seed(session: Session) -> None:
 EXAMPLE_OFFERS = [
     dict(price_low=85, price_high=95, stake_pct=100, cash_at_close_pct=80, consideration="cash_earnout",
          financing="bank_loan", diligence_weeks=8, target_close="6m", keeps_staff=True, founder_role="12m",
-         conditions="以财务和税务尽调结果为准；需取得并购贷款审批"),
+         conditions="以财务和税务尽调结果为准；需取得并购贷款审批 Subject to financial and tax diligence and bank loan approval"),
     dict(price_low=70, price_high=80, stake_pct=100, cash_at_close_pct=100, consideration="cash",
          financing="own_funds", diligence_weeks=6, target_close="asap", keeps_staff=True, founder_role="6m",
-         conditions="以尽调结果为准"),
+         conditions="以尽调结果为准 Subject to diligence"),
 ]
+
+
+def _seed_language_versions(session: Session, t: Target) -> None:
+    """Each example has an approved teaser in both languages (and the memo, where there is one), drafted in
+    one language each; older example drafts that mixed both languages are replaced."""
+    def mixed(body) -> bool:
+        return "Full sale" in str(body) or "successor" in str(body) or "Majority stake" in str(body)
+
+    for lang in ("zh", "en"):
+        tz = next((x for x in t.teasers if x.language == lang and x.status == "approved"), None)
+        if tz is None or (lang == "zh" and mixed(tz.body)):
+            new = teaser.draft(session, t, lang, use_llm=False)
+            teaser.approve(new)
+            teaser.seller_approve(new)
+            if tz is not None:
+                tz.status = "draft"
+        if fees.prep_pack_paid(t):
+            m = next((x for x in t.memos if x.language == lang), None)
+            if m is None or (lang == "zh" and mixed(m.body)):
+                new_m = infomemo.draft(session, t, lang, use_llm=False)
+                infomemo.approve(new_m)
+                if m is not None:
+                    m.status = "draft"
+    session.flush()
 
 
 def _seed_offers(session: Session, t: Target) -> None:
     if any(m.offers for m in t.matches):
+        for m in t.matches:  # example databases from before the conditions were bilingual
+            for o in m.offers:
+                for spec in EXAMPLE_OFFERS:
+                    if o.conditions and spec["conditions"].startswith(o.conditions) and o.conditions != spec["conditions"]:
+                        o.conditions = spec["conditions"]
         return
     after = [m for m in t.matches if m.stage in offers.AFTER_NDA]
     for m in offers.outreach_candidates(t)[: max(0, 2 - len(after))]:

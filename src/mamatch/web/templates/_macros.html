@@ -23,6 +23,10 @@
     {% if c.timing %}<tr><th>{{ T('期望时间', 'Timing') }}</th><td>{{ L(c.timing) }}</td></tr>{% endif %}
     <tr><th>{{ T('出售原因', 'Reason for sale') }}</th><td>{{ L(c.sale_reason) }}</td></tr>
   </table>
+  <div class="checks small" aria-label="{{ T('核验情况', 'Verification') }}">
+    <b>{{ T('核验情况', 'Verified') }}</b>
+    {% for chk in c.checks %}<span class="check-ok">✓ {{ L(chk) }}</span>{% else %}<span class="muted">{{ T('尚待核验', 'Not yet verified') }}</span>{% endfor %}
+  </div>
   {{ caller() if caller }}
 </div>
 {% endmacro %}
@@ -107,7 +111,7 @@
 {% endmacro %}
 
 {% macro findings_list(dc) %}
-<div class="small muted">{{ dc.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ dc.generated_by }} · {{ dc.findings|length }} {{ T('项', 'findings') }}</div>
+<div class="small muted">{{ dc.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ T('规则核查', 'rule-based check') if dc.generated_by == 'rules' else T('规则 + AI 核查', 'rules + AI review') }} · {{ dc.findings|length }} {{ T('项', 'findings') }}</div>
 {% for f in dc.findings %}
 <div class="finding {{ f.severity }}">
   <span class="pill {{ 'high' if f.severity == 'high' else 'medium' if f.severity == 'medium' else 'low' }}">{{ L(SEVERITY[f.severity]) }}</span>

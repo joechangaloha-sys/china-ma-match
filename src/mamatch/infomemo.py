@@ -9,6 +9,8 @@ Claude writes the narrative when available; otherwise a template is used. The fi
 the disclaimer are always generated here, never by the model.
 """
 
+import re
+
 from sqlalchemy.orm import Session
 
 from . import llm, reid
@@ -66,9 +68,15 @@ def _fin_table(target: Target, language: str) -> dict:
 
 
 def _offline(target: Target, f: dict, notes: str, language: str) -> dict:
+    from .teaser import localised
+
+    f = localised(f, language)
     d = target.disclosures or {}
     if language == "en":
-        overview = [f"{target.code_name} is a {f['sector_en'].lower()} company in {target.province} province, "
+        # The adviser's notes are usually in Chinese: use the approved English product line instead.
+        notes = target.products_en if re.search(r"[\u4e00-\u9fff]", notes or "") else notes
+    if language == "en":
+        overview = [f"{target.code_name} is a {f['sector_en'].lower()} company in {f['province']} province, "
                     f"operating for {f['years_operating']}, with {f['employees_band']} staff."]
         business = [notes] if notes else ["(Adviser to describe products, customers and market position.)"]
         if d.get("top_customer_share") not in (None, ""):
@@ -76,7 +84,7 @@ def _offline(target: Target, f: dict, notes: str, language: str) -> dict:
         operations = [{"owned": "The Company owns its land and plant.", "leased": "The Company leases its plant.",
                        "collective": "The plant is on collective land."}.get(d.get("land"), "Facilities: to be confirmed.")]
         transaction = [f"Proposed transaction: {f['deal_type']}.", f"Reason for sale: {f['sale_reason']}.",
-                       f"Indicative valuation: {f['valuation_band']} RMB."]
+                       f"Indicative valuation: {f['valuation_band']}."]
     else:
         overview = [f"{target.code_name}为位于{target.province}的{f['sector_zh']}企业，经营{f['years_operating']}，员工{f['employees_band']}。"]
         business = [notes] if notes else ["（由顾问补充产品、客户及市场地位。）"]

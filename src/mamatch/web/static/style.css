@@ -221,3 +221,5 @@ details.offer form { margin-top: 8px; }
 .tbl table.compare { min-width: 980px; }
 .compare td:last-child { min-width: 12rem; }
 .compare td:first-child { min-width: 10rem; }
+.checks { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; border-top: 1px solid var(--rule-hair); padding-top: 8px; }
+.check-ok { color: var(--accent); background: var(--accent-soft); border-radius: 2px; padding: 1px 6px; }

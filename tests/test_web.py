@@ -518,3 +518,19 @@ def test_listing_share_panel(app, db_url):
         assert secret not in page
     en = client(app).get(f"/en/opportunities/{kiln.id}").text
     assert "Share this listing" in en and "For sale: Project Kiln" in en
+
+
+
+def test_wrong_language_text_stays_off_portal_pages(app, db_url):
+    data = _buyer_names(db_url) + ["示例·华东精密 并购部", "示例·王先生", "示例·长三角并购顾问事务所", "示例·李会计师",
+                                   "示例·长三角会计师事务所"]  # example names are data, not interface text
+    for email, url in ((SELLER, "/seller/1"), (BUYER, "/buyer")):
+        en = client(app, email, lang="en-US").get(f"/en{url}").text
+        en = re.sub(r"<(script|style|textarea)[^>]*>.*?</\1>", " ", en, flags=re.S)
+        en = re.sub(r"<[^>]+>", " ", en)
+        for name in sorted(data, key=len, reverse=True):
+            en = en.replace(name, "")
+        assert not re.search(r"[\u4e00-\u9fff]{2,}", en.replace("中文", "")), re.findall(r".{15}[\u4e00-\u9fff]{2,}.{15}", en)[:3]
+        zh = client(app, email).get(f"/zh{url}").text
+        for english in ("Full sale", "successor", "Stated interest", "Deal size fits", "rules"):
+            assert english not in re.sub(r"<(script|textarea)[^>]*>.*?</\1>", " ", zh, flags=re.S), english

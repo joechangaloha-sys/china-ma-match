@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from .. import auth, authority, documents, listing, offers, plans, teaser
 from ..models import MandateAuthorization, Match, Target, Teaser, User
-from .common import anon_buyer, back, get_session, not_found, num, render, require, save_data, seller_reasons
+from .common import anon_buyer, back, get_lang, get_session, not_found, num, render, require, save_data, seller_reasons
 
 router = APIRouter(prefix="/seller")
 seller_only = require("seller")
@@ -36,7 +36,10 @@ def seller_home(request: Request, user: User = Depends(seller_only), s: Session 
 def seller_page(target_id: int, request: Request, user: User = Depends(seller_only), s: Session = Depends(get_session)):
     t = _mine(s, user, target_id)
     outreach = plans.seller_outreach(t)
-    latest_teaser = next((tz for tz in t.teasers if tz.status == "approved"), None)
+    lang = get_lang(request)
+    approved = [tz for tz in t.teasers if tz.status == "approved"]
+    latest_teaser = next((tz for tz in approved if tz.language == lang), approved[0] if approved else None)
+    memo = next((m for m in t.memos if m.language == lang), next(iter(t.memos), None))
     return render(request, "seller.html", user, portal="seller", t=t, card=listing.card(t), outreach=outreach,
                   candidates=offers.outreach_candidates(t) if outreach else [],
                   sent=[m for m in t.matches if m.stage not in ("suggested", "shortlisted")],
@@ -44,7 +47,7 @@ def seller_page(target_id: int, request: Request, user: User = Depends(seller_on
                   latest_teaser=latest_teaser, missing=documents.missing_kinds(t),
                   OWNER_ROLES=authority.OWNER_ROLES, SCOPES=authority.SCOPES, PROFESSIONS=authority.PROFESSIONS,
                   auth_text=authority.AUTH_TEXT,
-                  memo=next(iter(t.memos), None), offer_rows=offers.offer_table(t))
+                  memo=memo, offer_rows=offers.offer_table(t))
 
 
 @router.post("/{target_id}/teasers/{teaser_id}/approve")

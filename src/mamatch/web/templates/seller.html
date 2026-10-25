@@ -107,7 +107,7 @@
     {% for m in candidates %}
     <div class="card candidate">
       <label class="check"><input type="checkbox" name="match_ids" value="{{ m.id }}" checked> <b>{{ anon_buyer(m.buyer, lang) }}</b></label>
-      <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ r }}</li>{% endfor %}</ul>
+      <ul class="reasons">{% for r in seller_reasons(m) %}<li>{{ R(r) }}</li>{% endfor %}</ul>
       <div class="actions">
         <button class="ghost small" formaction="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/approve">{{ T('只发给此买方', 'Send to this buyer only') }}</button>
         <button class="ghost small" formaction="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/decline">{{ T('不发送', 'Skip') }}</button>
@@ -163,7 +163,7 @@
       <td>{{ L(TIMING[o.target_close]) if o.target_close else '—' }}</td>
       <td>{{ (T('保留', 'Kept') if o.keeps_staff else T('部分', 'Partly')) if o.keeps_staff is not none else '—' }}</td>
       <td>{{ L(FOUNDER_TRANSITION[o.founder_role]) if o.founder_role else '—' }}</td>
-      <td>{{ o.conditions or '—' }}</td>
+      <td>{{ L(o.conditions) if o.conditions else '—' }}</td>
     </tr>
     {% endfor %}
   </table></div>

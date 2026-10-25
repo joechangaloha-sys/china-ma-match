@@ -47,7 +47,7 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
 
 ## State of the code
 
-91 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
+93 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
 anonymous, adviser scope, revoked authorisation) and the static export. Structure and routes: README.md.
 
 Layout is checked on phones and laptops: no page overflows sideways at 320, 375, 414, 768, 1280 or 1440 px (30
@@ -61,6 +61,19 @@ Added 25 Oct (after research on BATONZ, Acquire.com, Axial): **indicative offers
 tour** (8 steps, both languages) in the static demo, started from the demo guide (`export.tour_steps`, `static-demo.js`).
 Suggested but not built: a free indicative value range for sellers (careful: the plan rules out unreviewed AI
 valuations) and saved searches with new-listing alerts for buyers.
+
+Language: public pages and both portals show one language only, including match reasons (`i18n.reason`),
+drafted teasers and memos (examples drafted separately in zh and en; `teaser.localised`), fee amounts and the
+data-check label. Free text people type (offer conditions, notes) appears as typed. Test:
+`test_wrong_language_text_stays_off_portal_pages`.
+
+Rationale added to the FAQ and homepage (Joe's reasoning, 25 Oct): Japan's USD 5–20m deals run by brokers through
+platforms where owners' own lawyers and accountants fill in information; the bakery and car-repair/dry-cleaner
+examples; small companies are owners' main wealth; in China trust is the hard part. Joe's internal view: buyers
+and sellers would use it even if ~7 in 10 listings were fully reliable at first, aiming for 9 in 10. The public
+copy states only the 9-in-10 goal and shows per-listing verification (`listing.checks`). Next trust step promised
+in the FAQ: document integrity checks (edited PDFs, registry-code match, balance sheet balances, figures agreeing
+across documents, repeated invoice numbers), flagged for people to review.
 
 Recent additions: detailed search (bands only, earnings only where the seller agreed), product/service line on
 listings, landing-page rationale and FAQ, adviser portal with verified authorisation, tagline, static export,

@@ -59,3 +59,11 @@ def test_product_text_is_checked_before_publishing(seeded):
     jade.products_zh = "恒泰牌汽车空调管路"  # a brand
     with pytest.raises(ValueError, match="re-identification"):
         listing.publish(jade)
+
+
+def test_cards_show_only_checks_actually_done(seeded):
+    delta, kiln = _t(seeded, "Project Delta"), _t(seeded, "Project Kiln")
+    assert [c.split()[0] for c in listing.card(delta)["checks"]] == ["出售权限已核验", "由已认证的会计师或律师协助准备"]
+    assert listing.checks(kiln) == ["authority"]
+    kiln.authority_verified_at = None
+    assert listing.card(kiln)["checks"] == []

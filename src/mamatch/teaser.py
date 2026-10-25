@@ -75,12 +75,27 @@ def facts(target: Target) -> dict:
     }
 
 
+def localised(f: dict, language: str) -> dict:
+    """Facts with labels and bands in one language (the stored facts are bilingual)."""
+    from . import i18n
+
+    lang = "en" if language == "en" else "zh"
+    out = dict(f)
+    for k in ("deal_type", "sale_reason"):
+        out[k] = i18n.tr(f[k], lang)
+    if lang == "en":
+        for k in ("revenue_band", "net_profit_band", "valuation_band", "employees_band", "years_operating", "region", "province"):
+            out[k] = i18n.val(f[k], "en")
+    return out
+
+
 def draft_offline(target: Target, f: dict, language: str) -> dict:
+    f = localised(f, language)
     if language == "en":
         return {
             "headline": f"{f['code_name']}: {f['sector_en']} company in {f['region'] or f['province']}",
             "summary": (f"An established {f['sector_en'].lower()} business in {f['province']} province, operating for "
-                        f"{f['years_operating']}. Revenue {f['revenue_band']} RMB, net profit {f['net_profit_band']}. "
+                        f"{f['years_operating']}. Revenue {f['revenue_band']}, net profit {f['net_profit_band']}. "
                         f"Transaction: {f['deal_type']}."),
             "highlights": [f"Team of {f['employees_band']}", f"Reason for sale: {f['sale_reason']}"],
             "ideal_buyer": f"Strategic buyer in {f['sector_en'].lower()} or adjacent industries.",

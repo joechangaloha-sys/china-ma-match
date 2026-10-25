@@ -70,6 +70,28 @@ def stake_label(pct: float | None, deal_type: str) -> str:
     return f"{lo}–{lo + 10}%"
 
 
+CHECKS = {
+    "authority": "出售权限已核验 Authority to sell verified",
+    "adviser": "由已认证的会计师或律师协助准备 Prepared with a verified accountant or lawyer",
+    "figures": "财务数字已对照原始文件核对 Figures checked against source documents",
+    "data_check": "已完成出售准备核查 Sale-readiness check done",
+}
+
+
+def checks(target: Target) -> list[str]:
+    """What has been verified for this listing, in the order buyers care about. Only checks actually done."""
+    done = []
+    if target.authority_verified_at is not None:
+        done.append("authority")
+    if any(a.status == "verified" and a.adviser.status == "verified" for a in target.authorizations):
+        done.append("adviser")
+    if any(f.status == "confirmed" for f in target.fields):
+        done.append("figures")
+    if target.data_checks:
+        done.append("data_check")
+    return done
+
+
 def card(target: Target) -> dict:
     f = teaser.facts(target)
     ev = None
@@ -92,6 +114,7 @@ def card(target: Target) -> dict:
         "keep_employees": {True: "希望保留全部员工 Wants all staff kept", False: "可协商 Open to discussion"}.get(
             target.keep_employees, ""),
         "timing": TIMING.get(target.timing, ""),
+        "checks": [CHECKS[c] for c in checks(target)],
     }
 
 
