@@ -50,6 +50,10 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
 87 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
 anonymous, adviser scope, revoked authorisation) and the static export. Structure and routes: README.md.
 
+Layout is checked on phones and laptops: no page overflows sideways at 320, 375, 414, 768, 1280 or 1440 px (30
+pages incl. every role's portal and the internal pages); the menu wraps on phones; wide tables scroll inside their
+own box. Re-check with the iframe overflow script approach after big layout changes.
+
 Recent additions: detailed search (bands only, earnings only where the seller agreed), product/service line on
 listings, landing-page rationale and FAQ, adviser portal with verified authorisation, tagline, static export,
 GitHub Pages workflow.
