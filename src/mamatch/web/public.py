@@ -16,7 +16,7 @@ from .common import COOKIE, I, back, current_user, firm, get_lang, get_session, 
 
 router = APIRouter()
 PAGES = {"sell": "page_sell.html", "buy": "page_buy.html", "fees": "page_fees.html", "security": "page_security.html",
-         "faq": "page_faq.html"}
+         "faq": "page_faq.html", "conduct": "page_conduct.html"}
 
 
 def _home_for(user: User | None) -> str:
@@ -68,8 +68,9 @@ def opportunity(target_id: int, request: Request, user: User | None = Depends(cu
     requested = False
     if user and user.role == "buyer" and user.buyer_id:
         requested = any(m.buyer_id == user.buyer_id and m.stage != "dropped" for m in t.matches)
+    similar = listing.similar(s, t)
     return render(request, "listing.html", user, portal="public", t=t, card=listing.card(t), requested=requested,
-                  share=_share(request, t))
+                  share=_share(request, t), similar=similar, similar_cards={o.id: listing.card(o) for o in similar})
 
 
 def _share(request: Request, t: Target) -> dict:
@@ -106,6 +107,24 @@ def opportunity_inquiry(target_id: int, s: Session = Depends(get_session), name:
     except ValueError as exc:
         return back(f"/opportunities/{t.id}#inquiry", str(exc))
     return back(f"/opportunities/{t.id}", "感谢您的咨询，顾问会尽快与您联系。Thank you: the adviser will contact you shortly.")
+
+
+@router.get("/opportunities/{target_id}/report", response_class=HTMLResponse)
+def report_page(target_id: int, request: Request, user: User | None = Depends(current_user),
+                s: Session = Depends(get_session)):
+    t = _listed(s, target_id)
+    return render(request, "report.html", user, portal="public", t=t, REPORT_REASONS=listing.REPORT_REASONS)
+
+
+@router.post("/opportunities/{target_id}/report")
+def report_submit(target_id: int, user: User | None = Depends(current_user), s: Session = Depends(get_session),
+                  reason: str = Form(""), message: str = Form(""), contact: str = Form("")):
+    t = _listed(s, target_id)
+    try:
+        listing.report_problem(s, t, reason=reason, message=message, contact=contact, user=user)
+    except ValueError as exc:
+        return back(f"/opportunities/{t.id}/report", str(exc))
+    return back(f"/opportunities/{t.id}", "感谢您的报告，交易经理会核实并跟进。Thank you: the deal manager will look into it.")
 
 
 @router.post("/opportunities/{target_id}/request")

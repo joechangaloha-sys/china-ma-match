@@ -82,7 +82,8 @@ def export(out: Path, base_url: str = "https://joechangaloha-sys.github.io/china
     for L in LANGS:
         anon = client()
         for p in ["/", "/opportunities", "/sell", "/buy", "/fees", "/security", "/faq", "/demo", "/login", "/register",
-                  "/register/adviser", *[f"/opportunities/{i}" for i in listed]]:
+                  "/register/adviser", "/conduct", *[f"/opportunities/{i}" for i in listed],
+                  *[f"/opportunities/{i}/report" for i in listed]]:
             grab(anon, f"/{L}{p}" if p != "/" else f"/{L}/")
         grab(client("seller.jade@demo.mamatch.test"), f"/{L}/seller")
         grab(client("buyer.huadong@demo.mamatch.test"), f"/{L}/buyer")

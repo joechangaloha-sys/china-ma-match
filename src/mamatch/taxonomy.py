@@ -100,6 +100,26 @@ FOUNDER_TRANSITION = {
     "24m": "可留任2年以上 Can stay 2 years or more",
 }
 
+# What the sale includes, in fixed vocabulary so the listing cannot identify the company.
+PREMISES = {
+    "owned_included": "自有房产，随交易转让 Owned property, included in the sale",
+    "owned_leased": "自有房产由卖方保留，出租给买方 Property kept by the seller and leased to the buyer",
+    "leased": "租赁经营场所 Leased premises",
+    "none": "无固定经营场所 No fixed premises",
+}
+
+PERMITS = {
+    "company": "资质登记在公司名下，股权转让后保留 Permits held by the company, kept in a share sale",
+    "transfer": "部分资质需变更或重新申请 Some permits must be transferred or reapplied for",
+    "none": "无特殊资质要求 No special permits needed",
+}
+
+INVENTORY = {
+    "included": "存货包含在价格内 Inventory included in the price",
+    "extra": "存货按成本另计 Inventory extra, at cost",
+    "none": "无重要存货 No significant inventory",
+}
+
 TIMING = {
     "asap": "尽快 As soon as possible",
     "6m": "6个月内 Within 6 months",

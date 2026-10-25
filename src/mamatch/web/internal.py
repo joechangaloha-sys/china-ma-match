@@ -14,7 +14,7 @@ from .. import (analytics, auth, authority, buyers, datacheck, dealstatus, docum
                 pipeline, plans, teaser)
 from ..models import (Adviser, AuditEvent, Buyer, Document, ExpertReferral, ExtractedField, InfoMemo,
                       MandateAuthorization, Match, Target, Teaser, User)
-from ..taxonomy import FOUNDER_TRANSITION, PAYMENT_TERMS, TIMING
+from ..taxonomy import FOUNDER_TRANSITION, INVENTORY, PAYMENT_TERMS, PERMITS, PREMISES, TIMING
 from .common import I, back, firm, get_session, not_found, num, render, require, save_data
 
 router = APIRouter(prefix=I)
@@ -120,6 +120,9 @@ def _apply_ask(t: Target, f) -> None:
     t.founder_transition = f.get("founder_transition") if f.get("founder_transition") in FOUNDER_TRANSITION else ""
     t.keep_employees = {"yes": True, "no": False}.get(f.get("keep_employees"))
     t.timing = f.get("timing") if f.get("timing") in TIMING else ""
+    t.premises = f.get("premises") if f.get("premises") in PREMISES else ""
+    t.permits = f.get("permits") if f.get("permits") in PERMITS else ""
+    t.inventory = f.get("inventory") if f.get("inventory") in INVENTORY else ""
     t.normalized_earnings = num(f.get("normalized_earnings"))
     t.show_earnings = bool(f.get("show_earnings"))
     t.products_zh = str(f.get("products_zh", "")).strip()[:300]
@@ -161,7 +164,8 @@ def target_detail(target_id: int, request: Request, user: User = Depends(dm), s:
                   missing=documents.missing_kinds(t), referral_kinds=REFERRAL_KINDS,
                   OWNER_ROLES=authority.OWNER_ROLES, PROFESSIONS=authority.PROFESSIONS,
                   offer_rows=offers.offer_table(t),
-                  nda_available=offers.nda_available)
+                  nda_available=offers.nda_available, reports=listing.reports(s, t),
+                  REPORT_REASONS=listing.REPORT_REASONS)
 
 
 @router.post("/targets/{target_id}/status")

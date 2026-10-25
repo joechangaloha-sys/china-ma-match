@@ -334,7 +334,9 @@ def test_english_edition_has_no_chinese_interface_text(app, db_url):
     data_names = _buyer_names(db_url)
     with db.session_scope(db_url) as s:
         data_names += [t.code_name for t in s.scalars(select(Target))] + ["示例·长三角并购顾问事务所"]
-    for url in ("/en/", "/en/opportunities", "/en/sell", "/en/buy", "/en/fees", "/en/security", "/en/login", "/en/register"):
+    kiln = _get(db_url, Target, code_name="Project Kiln")
+    for url in ("/en/", "/en/opportunities", "/en/sell", "/en/buy", "/en/fees", "/en/security", "/en/login", "/en/register",
+                "/en/faq", "/en/conduct", f"/en/opportunities/{kiln.id}", f"/en/opportunities/{kiln.id}/report"):
         text = _re.sub(r"<[^>]+>", " ", c.get(url).text)
         for name in data_names:
             text = text.replace(name, "")
@@ -546,3 +548,54 @@ def test_listing_card_uses_scoped_dated_wording(app, db_url):
     assert ">Verified<" not in en
     zh = client(app).get(f"/zh/opportunities/{delta.id}").text
     assert re.search(r"已核查内容（截至 \d{4}-\d{2}-\d{2}）", zh)
+
+
+# ---------------------------------------------------------------- listing detail, reports, code of conduct
+
+def test_listing_shows_what_the_sale_includes(app, db_url):
+    kiln = _get(db_url, Target, code_name="Project Kiln")
+    en = client(app, lang="en-US").get(f"/en/opportunities/{kiln.id}").text
+    for words in ("What the sale includes", "Leased premises", "Permits held by the company, kept in a share sale",
+                  "Inventory included in the price", "Figures for", "Available to buyers next",
+                  "Standard NDA, signed online", "Similar opportunities", "Project Delta", "Report a problem with this listing"):
+        assert words in en, words
+    zh = client(app).get(f"/zh/opportunities/{kiln.id}").text
+    assert "交易包含什么" in zh and "租赁经营场所" in zh and "类似项目" in zh
+    board = client(app, lang="en-US").get("/en/opportunities").text
+    assert "What the sale includes" not in board  # the board keeps short cards
+
+
+def test_deal_manager_sets_what_the_sale_includes(app, db_url):
+    delta = _get(db_url, Target, code_name="Project Delta")
+    client(app, DM).post(f"{I}/targets/{delta.id}/ask", data={"premises": "owned_leased", "permits": "transfer",
+                                                              "inventory": "bogus", "asking_value": "70"})
+    t = _get(db_url, Target, id=delta.id)
+    assert (t.premises, t.permits, t.inventory) == ("owned_leased", "transfer", "")
+
+
+def test_anyone_can_report_a_listing_and_the_deal_manager_sees_it(app, db_url):
+    kiln = _get(db_url, Target, code_name="Project Kiln")
+    c = client(app, lang="en-US")
+    assert "What is the problem?" in c.get(f"/en/opportunities/{kiln.id}/report").text
+    r = c.post(f"/en/opportunities/{kiln.id}/report", data={"reason": "figures", "message": ""}, follow_redirects=False)
+    assert r.headers["location"].startswith(f"/en/opportunities/{kiln.id}/report")
+    c.post(f"/en/opportunities/{kiln.id}/report", data={"reason": "figures", "message": "Revenue band looks too high",
+                                                        "contact": "li@example.com"})
+    with db.session_scope(db_url) as s:
+        ev = s.scalar(select(AuditEvent).where(AuditEvent.action == "listing_report"))
+        assert ev.target_id == kiln.id and ev.detail["reason"] == "figures"
+    page = client(app, DM).get(f"{I}/targets/{kiln.id}").text
+    assert "Revenue band looks too high" in page and "li@example.com" in page
+
+
+def test_code_of_conduct_and_new_faq_questions(app):
+    en = client(app, lang="en-US")
+    conduct = en.get("/en/conduct").text
+    assert "Code of conduct" in conduct and "personal account" in conduct and "Not allowed" in conduct
+    assert 'href="/en/conduct"' in en.get("/en/").text  # footer link
+    faq = en.get("/en/faq").text
+    for q in ("What exactly is being sold?", "Will the owner stay on after the sale?", "How is the price usually paid?",
+              "Can I contact the company directly?", "How do I avoid scams?", "Are there rules for everyone on the platform?"):
+        assert q in faq, q
+    zh = client(app).get("/zh/conduct").text
+    assert "行为准则" in zh and "个人账户" in zh

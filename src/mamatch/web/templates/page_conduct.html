@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ T('行为准则', 'Code of conduct') }}{% endblock %}
+{% block body %}
+<div>
+  <h1>{{ T('行为准则', 'Code of conduct') }}</h1>
+  <p class="sub">{{ T('卖方、买方、顾问和我们自己都遵守同样的规则。信任来自每一方的行为。',
+                      'Sellers, buyers, advisers and our own team follow the same rules. Trust comes from how everyone behaves.') }}</p>
+</div>
+<div class="cols">
+<section class="panel small">
+  <h2>{{ T('我们期待', 'What we expect') }}</h2>
+  <ul>
+    <li>{{ T('及时、专业地回复对方，哪怕答案是“不感兴趣”。', 'Reply promptly and professionally, even when the answer is “not interested”.') }}</li>
+    <li>{{ T('提供准确、最新的信息：财务数字有原始文件支持，并说明对应的年度。', 'Give accurate, up-to-date information: financial figures backed by source documents, with the year they cover.') }}</li>
+    <li>{{ T('如实说明自己的身份，以及与交易、企业或买方的关系。', 'Be truthful about who you are and your relationship to the deal, the company or the buyer.') }}</li>
+    <li>{{ T('诚信推进：按约定的时间表提交资料和报价，发现问题及时说明。', 'Act in good faith: deliver documents and offers on the agreed timetable, and raise problems as soon as you see them.') }}</li>
+    <li>{{ T('买方说明真实的收购方向和资金来源。', 'Buyers describe their real acquisition aims and how they will fund them.') }}</li>
+  </ul>
+</section>
+<section class="panel small">
+  <h2>{{ T('不允许的行为', 'Not allowed') }}</h2>
+  <ul>
+    <li>{{ T('提供虚假或误导性的公司、财务或个人信息。', 'False or misleading company, financial or personal information.') }}</li>
+    <li>{{ T('未经授权代表企业出售，或未经卖方同意把项目信息转给他人。', 'Selling a company without authority, or passing on a listing’s information without the seller’s consent.') }}</li>
+    <li>{{ T('签署保密协议后泄露或滥用保密信息。', 'Leaking or misusing confidential information after signing an NDA.') }}</li>
+    <li>{{ T('绕过交易经理直接联系企业、员工、客户或供应商。', 'Going around the deal manager to contact the company, its staff, customers or suppliers directly.') }}</li>
+    <li>{{ T('夸大其词的描述，例如“稳赚”“全网最低价”。', 'Hype in descriptions, such as “guaranteed returns” or “lowest price anywhere”.') }}</li>
+    <li>{{ T('要求对方把定金或任何款项打入个人账户。', 'Asking anyone to pay a deposit or any other money into a personal account.') }}</li>
+    <li>{{ T('为规避费用把交易转到平台之外。', 'Taking a deal off the platform to avoid agreed fees.') }}</li>
+  </ul>
+</section>
+</div>
+<section class="panel small">
+  <h2>{{ T('违反准则会怎样', 'What happens if the rules are broken') }}</h2>
+  <p>{{ T('交易经理会核实每一份报告。视情况，我们会要求更正信息、暂停项目展示、暂停或注销账户，并在涉嫌违法时配合有关部门。每一步处理都有审计记录。',
+          'A deal manager looks into every report. Depending on what we find, we ask for the information to be corrected, take the listing down, suspend or close the account, and cooperate with the authorities where the law may have been broken. Every step is recorded in the audit log.') }}</p>
+  <p>{{ T('发现问题？在任一项目页面点击“报告此项目的问题”。', 'Seen a problem? Use “Report a problem with this listing” on any listing page.') }}</p>
+</section>
+{% endblock %}

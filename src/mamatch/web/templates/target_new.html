@@ -37,6 +37,9 @@
   <label>创始人交接 Founder <select id="founder_transition" name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
   <label>保留员工 Keep all staff <select id="keep_employees" name="keep_employees"><option value="">—</option><option value="yes">是 Yes</option><option value="no">可协商 Negotiable</option></select></label>
   <label>期望时间 Timing <select id="timing" name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label>经营场所 Premises <select id="premises" name="premises"><option value="">—</option>{% for k, v in PREMISES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label>资质 Permits <select id="permits" name="permits"><option value="">—</option>{% for k, v in PERMITS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+  <label>存货 Inventory <select id="inventory" name="inventory"><option value="">—</option>{% for k, v in INVENTORY.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
   <label class="wide">访谈记录 Intake notes <textarea id="description" name="description" placeholder="业务、客户、优势、卖方诉求……"></textarea></label>
   <div class="wide"><button>保存 Save target</button></div>
 </form>

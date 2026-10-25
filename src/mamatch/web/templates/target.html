@@ -42,6 +42,9 @@
     <label>创始人交接 Founder <select name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}" {{ 'selected' if k == t.founder_transition }}>{{ v }}</option>{% endfor %}</select></label>
     <label>保留员工 Keep all staff <select name="keep_employees"><option value="">—</option><option value="yes" {{ 'selected' if t.keep_employees is sameas true }}>是 Yes</option><option value="no" {{ 'selected' if t.keep_employees is sameas false }}>可协商 Negotiable</option></select></label>
     <label>期望时间 Timing <select name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}" {{ 'selected' if k == t.timing }}>{{ v }}</option>{% endfor %}</select></label>
+    <label>经营场所 Premises <select name="premises"><option value="">—</option>{% for k, v in PREMISES.items() %}<option value="{{ k }}" {{ 'selected' if k == t.premises }}>{{ v }}</option>{% endfor %}</select></label>
+    <label>资质 Permits <select name="permits"><option value="">—</option>{% for k, v in PERMITS.items() %}<option value="{{ k }}" {{ 'selected' if k == t.permits }}>{{ v }}</option>{% endfor %}</select></label>
+    <label>存货 Inventory <select name="inventory"><option value="">—</option>{% for k, v in INVENTORY.items() %}<option value="{{ k }}" {{ 'selected' if k == t.inventory }}>{{ v }}</option>{% endfor %}</select></label>
     <label>调整后利润 Normalised earnings (RMB m) <input name="normalized_earnings" inputmode="decimal" value="{{ '%g'|format(t.normalized_earnings) if t.normalized_earnings is not none }}"></label>
     <label class="check"><input type="checkbox" name="show_earnings" value="1" {{ 'checked' if t.show_earnings }}> 卖方同意公开利润与利润率区间 Seller approved showing earnings and margin ranges</label>
     <label class="wide">公开产品与服务（中文，不含名称、品牌、客户）Products and services, Chinese, no names, brands or customers <input name="products_zh" maxlength="300" value="{{ t.products_zh }}"></label>
@@ -57,6 +60,19 @@
   {{ listing_card(card) }}
 </section>
 </div>
+
+{% if reports %}
+<section class="panel" id="reports">
+  <h2>问题报告 Reports from visitors <span class="pill high">{{ reports|length }}</span></h2>
+  <div class="tbl"><table class="small">
+    <tr><th>日期 Date</th><th>类型 Reason</th><th>说明 Message</th><th>联系方式 Contact</th></tr>
+    {% for r in reports %}
+    <tr><td>{{ r.created_at.strftime('%Y-%m-%d') }}</td><td>{{ REPORT_REASONS.get(r.detail.reason, r.detail.reason) }}</td>
+      <td>{{ r.detail.message }}</td><td>{{ r.detail.contact or '—' }}{% if r.user %}<br><span class="muted">{{ r.user.email }}</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table></div>
+</section>
+{% endif %}
 
 <section class="panel" id="authority">
   <h2>出售权限与顾问授权 Authority to sell and adviser authorisations</h2>

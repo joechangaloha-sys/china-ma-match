@@ -121,6 +121,9 @@ class Target(Base):
     founder_transition: Mapped[str] = mapped_column(String(20), default="")
     keep_employees: Mapped[bool | None] = mapped_column(nullable=True)
     timing: Mapped[str] = mapped_column(String(20), default="")
+    premises: Mapped[str] = mapped_column(String(20), default="")  # taxonomy.PREMISES
+    permits: Mapped[str] = mapped_column(String(20), default="")  # taxonomy.PERMITS
+    inventory: Mapped[str] = mapped_column(String(20), default="")  # taxonomy.INVENTORY
 
     # private: not listed; the seller approves outreach buyer by buyer.
     # listed: an anonymised card on the board that verified buyers browse.

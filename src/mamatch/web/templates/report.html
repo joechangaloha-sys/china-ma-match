@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ T('报告问题', 'Report a problem') }}{% endblock %}
+{% block body %}
+<p class="small"><a href="{{ P }}/opportunities/{{ t.id }}">← {{ t.code_name }}</a></p>
+<div>
+  <h1>{{ T('报告此项目的问题', 'Report a problem with this listing') }}</h1>
+  <p class="sub">{{ T('如果您发现信息可能不准确、能看出是哪家公司，或怀疑存在欺诈，请告诉我们。交易经理会核实并跟进，必要时暂停展示该项目。',
+                      'If something may be wrong, the company can be identified, or you suspect fraud, tell us. A deal manager will look into it and, if needed, take the listing down while it is checked.') }}</p>
+</div>
+<form class="panel grid" method="post" action="{{ P }}/opportunities/{{ t.id }}/report">
+  <label class="wide">{{ T('问题类型', 'What is the problem?') }}
+    <select name="reason" required><option value="">—</option>{% for k, v in REPORT_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label class="wide">{{ T('说明', 'Details') }} <textarea name="message" required maxlength="2000"
+    placeholder="{{ T('请说明您看到了什么，请勿填写任何人的个人信息。', 'Say what you noticed. Please leave out personal details about anyone.') }}"></textarea></label>
+  <label class="wide">{{ T('联系方式（可选）', 'Phone or email (optional)') }} <input name="contact" maxlength="100"></label>
+  <p class="wide small muted">{{ T('报告只发给交易经理，不会转给卖方或其他买方。', 'Reports go to the deal manager only, never to the seller or other buyers.') }}</p>
+  <div class="wide"><button>{{ T('提交报告', 'Send report') }}</button></div>
+</form>
+{% endblock %}

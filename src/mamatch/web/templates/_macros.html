@@ -1,4 +1,4 @@
-{% macro listing_card(c, link='') %}
+{% macro listing_card(c, link='', full=false) %}
 <div class="card listing">
   <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ c.code_name }}</a>{% else %}{{ c.code_name }}{% endif %}</b>
     <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span>
@@ -22,7 +22,22 @@
     {% if c.keep_employees %}<tr><th>{{ T('员工安排', 'Employees') }}</th><td>{{ L(c.keep_employees) }}</td></tr>{% endif %}
     {% if c.timing %}<tr><th>{{ T('期望时间', 'Timing') }}</th><td>{{ L(c.timing) }}</td></tr>{% endif %}
     <tr><th>{{ T('出售原因', 'Reason for sale') }}</th><td>{{ L(c.sale_reason) }}</td></tr>
+    {% if full %}<tr><th>{{ T('数据年度', 'Figures for') }}</th><td>{% if c.figures_year %}{{ T('%s 财年', 'Financial year %s')|format(c.figures_year) }}{% else %}{{ T('最近完整财年', 'Latest full year') }}{% endif %}</td></tr>{% endif %}
   </table>
+  {% if full and (c.premises or c.permits or c.inventory) %}
+  <h3 class="small">{{ T('交易包含什么', 'What the sale includes') }}</h3>
+  <table class="small">
+    {% if c.premises %}<tr><th>{{ T('经营场所', 'Premises') }}</th><td>{{ L(c.premises) }}</td></tr>{% endif %}
+    {% if c.permits %}<tr><th>{{ T('经营资质', 'Permits and licences') }}</th><td>{{ L(c.permits) }}</td></tr>{% endif %}
+    {% if c.inventory %}<tr><th>{{ T('存货', 'Inventory') }}</th><td>{{ L(c.inventory) }}</td></tr>{% endif %}
+  </table>
+  {% endif %}
+  {% if full %}
+  <div class="ready small" aria-label="{{ T('买方下一步可获得', 'Available to buyers next') }}">
+    <b>{{ T('买方下一步可获得', 'Available to buyers next') }}</b>
+    {% for r in c.ready %}<span class="chip">{{ L(r) }}</span>{% endfor %}
+  </div>
+  {% endif %}
   <div class="checks small" aria-label="{{ T('已核查内容', 'What has been checked') }}">
     <b>{% if c.checks_as_of %}{{ T('已核查内容（截至 %s）', 'What has been checked, as of %s')|format(c.checks_as_of) }}{% else %}{{ T('已核查内容', 'What has been checked') }}{% endif %}</b>
     {% for chk in c.checks %}<span class="check-ok">✓ {{ L(chk) }}</span>{% else %}<span class="muted">{{ T('尚未核查；以下信息由卖方提供', 'Nothing yet: information is as provided by the seller') }}</span>{% endfor %}

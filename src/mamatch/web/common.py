@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 
 from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid
 from ..models import AdviserFirm, Buyer, Match, Target, User
-from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, MACRO_REGIONS, PAYMENT_TERMS, REGIONS,
-                        SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
+from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, INVENTORY, MACRO_REGIONS, PAYMENT_TERMS,
+                        PERMITS, PREMISES, REGIONS, SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
 
 HERE = Path(__file__).parent
 COOKIE = "mm_session"
@@ -23,7 +23,7 @@ I = "/internal"
 templates = Jinja2Templates(directory=HERE / "templates")
 templates.env.globals.update(
     SECTORS=SECTORS, REGIONS=REGIONS, DEAL_TYPES=DEAL_TYPES, SALE_REASONS=SALE_REASONS, PAYMENT_TERMS=PAYMENT_TERMS,
-    FOUNDER_TRANSITION=FOUNDER_TRANSITION, TIMING=TIMING, FUNDING_EVIDENCE=FUNDING_EVIDENCE,
+    FOUNDER_TRANSITION=FOUNDER_TRANSITION, TIMING=TIMING, PREMISES=PREMISES, PERMITS=PERMITS, INVENTORY=INVENTORY, FUNDING_EVIDENCE=FUNDING_EVIDENCE,
     STAGES=pipeline.STAGES, STATUSES=dealstatus.STATUSES, BUYER_KINDS=BUYER_KINDS,
     MACRO_REGIONS=MACRO_REGIONS, CHECKLIST=documents.CHECKLIST, ROLES=auth.ROLES,
     REJECT_REASONS=offers.REJECT_REASONS, AUTH_STATUS=authority.STATUS, OWNER_ROLES=authority.OWNER_ROLES,

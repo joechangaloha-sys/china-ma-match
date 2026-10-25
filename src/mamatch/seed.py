@@ -88,6 +88,16 @@ EXAMPLE_PUBLIC = {
                           products_en="Custom automated assembly lines for appliance and auto-parts plants"),
 }
 
+# The seller's ask and what each sale includes (fixed vocabulary, see taxonomy.py).
+EXAMPLE_ASK = {
+    "Project Jade": dict(premises="owned_included", permits="company", inventory="included",
+                         payment_terms="cash", founder_transition="6m"),
+    "Project Kiln": dict(premises="leased", permits="company", inventory="included",
+                         payment_terms="cash_earnout", founder_transition="24m"),
+    "Project Delta": dict(premises="leased", permits="none", inventory="extra",
+                          payment_terms="cash", founder_transition="12m"),
+}
+
 # How each example target is set up for the v2 demo: (visibility, seller plan, listed days ago)
 EXAMPLE_SETUP = {"Project Jade": ("private", "paid", None), "Project Kiln": ("listed", "free", 12),
                  "Project Delta": ("listed", "free", 2)}
@@ -206,6 +216,11 @@ def seed(session: Session) -> None:
         if code in EXAMPLE_PUBLIC and not t.products_zh:
             for k, v in EXAMPLE_PUBLIC[code].items():
                 setattr(t, k, v)
+    for code, t in have.items():
+        if code in EXAMPLE_ASK and not t.premises:
+            for k, v in EXAMPLE_ASK[code].items():
+                if not getattr(t, k):
+                    setattr(t, k, v)
     _seed_users(session, have)
     for code, t in have.items():
         if t.seller_plan == "paid" and not any(c.kind == "outreach" for c in t.charges):

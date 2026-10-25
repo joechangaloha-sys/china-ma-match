@@ -17,7 +17,8 @@ from sqlalchemy.orm import Session
 
 from . import reid, teaser
 from .models import Target
-from .taxonomy import FOUNDER_TRANSITION, PAYMENT_TERMS, SECTOR_KEYWORDS, SECTORS, TIMING, macro_region
+from .taxonomy import (FOUNDER_TRANSITION, INVENTORY, PAYMENT_TERMS, PERMITS, PREMISES, SECTOR_KEYWORDS, SECTORS, TIMING,
+                       macro_region)
 
 CARD_FIELDS = ("sector_zh", "sector_en", "revenue_band", "net_profit_band", "employees_band",
                "years_operating", "deal_type", "sale_reason")
@@ -102,6 +103,66 @@ def checks_as_of(target: Target) -> str:
     return max(dates).strftime("%Y-%m-%d") if dates else ""
 
 
+READINESS = {
+    "nda": "标准保密协议可在线签署 Standard NDA, signed online",
+    "memo": "信息备忘录已就绪 Info memo ready",
+    "data_room": "资料室已就绪 Data room ready",
+}
+
+
+def readiness(target: Target) -> list[str]:
+    """What a buyer can get to next. A listed company always has the platform NDA."""
+    ready = ["nda"]
+    if any(m.status == "approved" for m in target.memos):
+        ready.append("memo")
+    if any(d.in_data_room for d in target.documents):
+        ready.append("data_room")
+    return ready
+
+
+def figures_year(target: Target) -> str:
+    """The latest full year with submitted figures, so buyers know how current the bands are."""
+    years = [y for y, v in (target.financials or {}).items() if y.isdigit() and (v or {}).get("revenue") not in (None, "")]
+    return max(years) if years else ""
+
+
+REPORT_REASONS = {
+    "figures": "数字或描述可能不准确 Figures or description may be wrong",
+    "identifies": "能看出是哪家公司 The company can be identified",
+    "authority": "怀疑卖方无权出售或涉嫌欺诈 Seller may not be entitled to sell, or possible fraud",
+    "conduct": "有人违反行为准则 Someone broke the code of conduct",
+    "other": "其他 Something else",
+}
+
+
+def report_problem(session: Session, target: Target, *, reason: str, message: str, contact: str, user=None) -> None:
+    """Anyone can flag a listing; the deal manager sees reports on the mandate page and follows up."""
+    from . import auth
+
+    if reason not in REPORT_REASONS:
+        raise ValueError("请选择问题类型 Please choose what the problem is.")
+    if not message.strip():
+        raise ValueError("请简要说明问题 Please describe the problem briefly.")
+    auth.log(session, user, "listing_report", target_id=target.id, reason=reason, message=message.strip()[:2000],
+             contact=contact.strip()[:100])
+
+
+def reports(session: Session, target: Target) -> list:
+    from .models import AuditEvent
+
+    return session.scalars(select(AuditEvent).where(AuditEvent.target_id == target.id,
+                                                    AuditEvent.action == "listing_report")
+                           .order_by(AuditEvent.created_at.desc())).all()
+
+
+def similar(session: Session, target: Target, n: int = 3) -> list[Target]:
+    """Other listings in the same sector first, then the same broad region."""
+    others = [t for t in public_board(session) if t.id != target.id]
+    region = macro_region(target.province)
+    others.sort(key=lambda t: (t.sector != target.sector, macro_region(t.province) != region))
+    return [t for t in others if t.sector == target.sector or macro_region(t.province) == region][:n]
+
+
 def card(target: Target) -> dict:
     f = teaser.facts(target)
     ev = None
@@ -124,6 +185,11 @@ def card(target: Target) -> dict:
         "keep_employees": {True: "希望保留全部员工 Wants all staff kept", False: "可协商 Open to discussion"}.get(
             target.keep_employees, ""),
         "timing": TIMING.get(target.timing, ""),
+        "premises": PREMISES.get(target.premises, ""),
+        "permits": PERMITS.get(target.permits, ""),
+        "inventory": INVENTORY.get(target.inventory, ""),
+        "figures_year": figures_year(target),
+        "ready": [READINESS[r] for r in readiness(target)],
         "checks": [CHECKS[c] for c in checks(target)],
         "checks_as_of": checks_as_of(target),
     }

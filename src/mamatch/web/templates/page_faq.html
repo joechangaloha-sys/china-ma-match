@@ -53,6 +53,10 @@
         '下一步，我们会让 AI 检查文件本身：PDF 是否被编辑过、文件中的公司名称和统一社会信用代码是否与工商登记一致、资产负债表是否平衡、同一数字在不同文件中是否一致、发票编号是否重复等。可疑之处会提示交易经理和会计师人工复核，而不会自动下结论。',
         'Next, AI will examine the documents themselves: whether a PDF has been edited, whether the company name and registration code match the business registry, whether the balance sheet balances, whether the same figure agrees across documents, and whether invoice numbers repeat. Anything suspicious is flagged to the deal manager and accountant for a person to review; AI does not reach conclusions on its own.') }}
 
+  {{ qa('平台有行为准则吗？', 'Are there rules for everyone on the platform?',
+        '有。卖方、买方和顾问都须遵守行为准则：如实提供信息、及时回复、未经同意不转发项目、不绕过交易经理、不要求把款项打入个人账户。任何人都可以在项目页面点击“报告此项目的问题”，交易经理会核实并处理，必要时暂停项目或账户。',
+        'Yes. Sellers, buyers and advisers all follow a code of conduct: give truthful information, reply promptly, never pass on a listing without consent, never go around the deal manager, and never ask for money to be paid into a personal account. Anyone can use “Report a problem with this listing” on a listing page; a deal manager looks into every report and, if needed, takes the listing or account down.') }}
+
   <h2>{{ T('卖方', 'Sellers') }}</h2>
   {{ qa('我的企业信息会被公开吗？', 'Will my company be identifiable?',
         '不会。公开页面只显示行业、大区、收入和员工等区间，以及您确认过的产品描述；不显示公司名称、城市、客户或准确数字。买方签署保密协议后才能看到信息备忘录，公司名称在双方同意后才披露。',
@@ -85,5 +89,20 @@
   {{ qa('买方如何获得项目？', 'How do buyers get access?',
         '注册并描述您的收购方向和资金情况，经核验后即可申请引荐。签署保密协议后查看信息备忘录，卖方同意后开放资料室。',
         'Register, describe your acquisition thesis and funding, and once verified you can request introductions. After signing the NDA you receive the information memorandum, and the data room opens with the seller’s consent.') }}
+  {{ qa('交易到底包含什么？', 'What exactly is being sold?',
+        '每个项目页面的“交易包含什么”会说明：经营场所是自有并随交易转让、由卖方保留后出租，还是租赁；经营资质登记在公司名下还是需要变更；存货是否包含在价格内。一般来说，股权转让时公司名下的资产、合同和资质随公司一起保留；资产转让时，部分资质和合同需要重新办理。具体安排在信息备忘录中详细说明，并在交易文件中约定。',
+        'Each listing’s “What the sale includes” says whether the premises are owned and included, kept by the seller and leased to the buyer, or leased; whether permits are held by the company or must be transferred; and whether inventory is in the price. As a rule, in a share sale the company keeps its assets, contracts and permits; in an asset sale some permits and contracts must be applied for again. The details are in the info memo and are settled in the transaction documents.') }}
+  {{ qa('卖方交割后会留下来协助吗？', 'Will the owner stay on after the sale?',
+        '很多卖方愿意。项目页面会显示创始人的交接安排：交割后即退出、留任约6个月或12个月协助交接，或可留任2年以上。对客户关系和技术依赖创始人的企业，买方通常会要求一段交接期，具体时长和方式在报价和交易文件中约定。',
+        'Many will. The listing shows the founder’s handover plan: leaving at closing, staying about 6 or 12 months to hand over, or staying 2 years or more. Where customers or know-how depend on the founder, buyers usually ask for a handover period; its length and form are agreed in the offer and the transaction documents.') }}
+  {{ qa('价款通常如何支付？', 'How is the price usually paid?',
+        '常见方式包括交割时一次付清、分期付款，以及部分价款与交割后的业绩挂钩（对赌）。为保护双方，价款常先存入买卖双方共同监管的银行账户，满足约定条件后再放款。项目页面会显示卖方期望的付款方式；买方在意向报价中写明现金比例和其余部分的安排，便于卖方比较。',
+        'Common structures are payment in full at closing, payment in instalments, and part of the price tied to results after closing (an earn-out). To protect both sides, money is often first paid into a bank account jointly controlled by buyer and seller and released once agreed conditions are met. The listing shows the seller’s preferred terms, and buyers state the cash share and how the rest is paid in their indicative offer, so the seller can compare offers.') }}
+  {{ qa('我可以直接联系这家公司吗？', 'Can I contact the company directly?',
+        '请不要。所有沟通都通过交易经理进行。请勿打扰企业的员工、客户或供应商，也不要尝试猜测或打听公司名称：员工和客户过早知道出售消息，可能伤害企业本身。双方同意后，交易经理会安排直接见面。',
+        'Please don’t. All contact goes through the deal manager. Do not approach the company’s staff, customers or suppliers, or try to work out its name: if staff or customers hear about a sale too early, the business itself can be harmed. Once both sides agree, the deal manager arranges a direct meeting.') }}
+  {{ qa('如何避免上当受骗？', 'How do I avoid scams?',
+        '平台和交易经理不会要求您把定金或任何款项打入个人账户，也不会在签约前要求支付“诚意金”。收到这类要求，或有人自称代表平台私下联系您，请先通过平台核实，并点击“报告此项目的问题”告诉我们。大额价款应通过共同监管账户支付，并在专业律师和会计师协助下签署交易文件。',
+        'We and our deal managers will never ask you to pay a deposit or any other money into a personal account, or to pay “earnest money” before contracts are signed. If you get such a request, or someone claims to act for the platform outside it, check with us first and tell us through “Report a problem with this listing”. Large payments should go through a jointly controlled account, with transaction documents signed with the help of your own lawyer and accountant.') }}
 </section>
 {% endblock %}

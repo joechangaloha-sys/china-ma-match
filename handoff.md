@@ -47,7 +47,7 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
 
 ## State of the code
 
-93 tests pass (`uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
+98 tests pass (`MAMATCH_LLM=off uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
 anonymous, adviser scope, revoked authorisation) and the static export. Structure and routes: README.md.
 
 Layout is checked on phones and laptops: no page overflows sideways at 320, 375, 414, 768, 1280 or 1440 px (30
@@ -61,6 +61,17 @@ Added 25 Oct (after research on Acquire.com, Axial and similar marketplaces): **
 tour** (8 steps, both languages) in the static demo, started from the demo guide (`export.tour_steps`, `static-demo.js`).
 Suggested but not built: a free indicative value range for sellers (careful: the plan rules out unreviewed AI
 valuations) and saved searches with new-listing alerts for buyers.
+
+Added 26 Oct (after a look across Axial and BizBuySell): listing pages show **what the sale includes** (premises,
+permits, inventory: `Target.premises/permits/inventory`, vocab in `taxonomy.py`, set in the internal ask form), the
+**year the figures cover** (`listing.figures_year`), **what buyers can get next** (NDA, info memo, data room:
+`listing.readiness`) and **similar opportunities** (`listing.similar`). The board keeps short cards (`listing_card(full=)`).
+**Report a problem** (`/opportunities/{id}/report`, stored as `listing_report` audit events, shown on the internal
+mandate page) and a **code of conduct** page (`/conduct`, footer link). Six FAQ questions: what is sold, owner
+handover, how the price is paid, no direct contact, avoiding scams, rules for everyone. Other ideas from that look,
+not built: a seller "buyer demand" count, listing statistics for sellers, saved searches, buyer track-record
+profiles, a quarterly market snapshot once there is enough data, a closed-deals page, and a buyer-side success fee
+on a sliding scale as a pricing option.
 
 Language: public pages and both portals show one language only, including match reasons (`i18n.reason`),
 drafted teasers and memos (examples drafted separately in zh and en; `teaser.localised`), fee amounts and the
