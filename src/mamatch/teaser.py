@@ -11,7 +11,7 @@ from . import llm, reid
 from .models import Target, Teaser
 from .taxonomy import DEAL_TYPES, SALE_REASONS, SECTORS, macro_region
 
-LANGUAGES = {"zh": "Simplified Chinese", "ja": "Japanese", "en": "English"}
+LANGUAGES = {"zh": "Simplified Chinese", "en": "English"}
 
 TEASER_SCHEMA = {
     "type": "object",
@@ -99,14 +99,6 @@ def draft_offline(target: Target, f: dict, language: str) -> dict:
                         f"Transaction: {f['deal_type']}."),
             "highlights": [f"Team of {f['employees_band']}", f"Reason for sale: {f['sale_reason']}"],
             "ideal_buyer": f"Strategic buyer in {f['sector_en'].lower()} or adjacent industries.",
-        }
-    if language == "ja":
-        return {
-            "headline": f"{f['code_name']}：{f['region'] or f['province']}の{f['sector_zh']}企業",
-            "summary": (f"{f['province']}省で{f['years_operating']}の業歴を持つ{f['sector_zh']}企業。"
-                        f"売上高{f['revenue_band']}、純利益{f['net_profit_band']}。スキーム：{f['deal_type']}。"),
-            "highlights": [f"従業員{f['employees_band']}", f"譲渡理由：{f['sale_reason']}"],
-            "ideal_buyer": f"{f['sector_zh']}または周辺業種の事業会社。",
         }
     return {
         "headline": f"{f['code_name']}：{f['region'] or f['province']}{f['sector_zh']}企业",

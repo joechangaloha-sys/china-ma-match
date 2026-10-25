@@ -15,7 +15,7 @@ def test_band_labels():
     assert teaser.band(None, [1], "x") == "未披露"
 
 
-@pytest.mark.parametrize("language", ["zh", "ja", "en"])
+@pytest.mark.parametrize("language", ["zh", "en"])
 def test_offline_draft_is_low_risk(seeded, language):
     tz = teaser.draft(seeded, _jade(seeded), language)
     assert tz.generated_by == "offline"
