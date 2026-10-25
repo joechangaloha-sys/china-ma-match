@@ -150,7 +150,7 @@ def export(out: Path, base_url: str = "https://joechangaloha-sys.github.io/china
     return sorted(written)
 
 
-# The neutral homepage: same rule as the live site and the Japan IR Index (remembered switch choice,
+# The neutral homepage: same rule as the live site (remembered switch choice,
 # then the first supported browser language, then English).
 ROOT_INDEX = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

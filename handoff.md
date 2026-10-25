@@ -67,8 +67,9 @@ drafted teasers and memos (examples drafted separately in zh and en; `teaser.loc
 data-check label. Free text people type (offer conditions, notes) appears as typed. Test:
 `test_wrong_language_text_stays_off_portal_pages`.
 
-Rationale added to the FAQ and homepage (Joe's reasoning, 25 Oct): Japan's USD 5–20m deals run by brokers through
-platforms where owners' own lawyers and accountants fill in information; the bakery and car-repair/dry-cleaner
+Rationale added to the FAQ and homepage (Joe's reasoning, 25 Oct; on 26 Oct Joe asked for no Japan references on the
+site or in the FAQ, so the comparison is now the US market: investment banks rarely below USD 25–50m, brokers and
+marketplaces such as BizBuySell, PE-backed roll-ups in vets/HVAC/auto repair); the bakery and car-repair/dry-cleaner
 examples; small companies are owners' main wealth; in China trust is the hard part. Joe's internal view: buyers
 and sellers would use it even if ~7 in 10 listings were fully reliable at first, aiming for 9 in 10. The public
 copy states only the 9-in-10 goal and shows per-listing verification (`listing.checks`). Next trust step promised

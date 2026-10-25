@@ -1,4 +1,4 @@
-/* Remember an explicit language switch, as on the Japan IR Index. The choice stays in this
+/* Remember an explicit language switch. The choice stays in this
    browser (localStorage) and in a first-party cookie so the server can open the same edition
    from the neutral homepage. Ordinary links into the other edition are not remembered. */
 (() => {

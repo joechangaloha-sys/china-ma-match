@@ -383,6 +383,8 @@ def test_faq_and_why_section_in_both_languages(app):
     zh = client(app).get("/zh/faq").text
     assert "常见问题" in zh and "顾问的收费如何安排" in zh
     assert "How do you verify authority?" in faq and "Can an adviser make decisions for the client?" in faq
+    assert "What does the US market show?" in faq and "Japan" not in faq and "日本" not in zh
+    assert "Japan" not in home and "日本" not in client(app).get("/zh/").text
 
 
 def test_adviser_can_submit_for_a_client(app, db_url):
