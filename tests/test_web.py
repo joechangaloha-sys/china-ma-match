@@ -310,7 +310,7 @@ def test_status_changes_are_audited(app, db_url):
     assert "seller on holiday" in dm.get(f"{I}/audit?target={delta.id}").text
 
 
-# ---------------------------------------------------------------- languages (same rules as the Japan IR Index)
+# ---------------------------------------------------------------- languages (one language per page)
 
 @pytest.mark.parametrize("accept, expected", [("zh-CN,zh;q=0.9,en;q=0.8", "/zh/"), ("en-GB,en;q=0.9", "/en/"),
                                               ("ja-JP,ja;q=0.9", "/en/"), ("de-DE,en;q=0.5,zh;q=0.8", "/zh/"), ("", "/en/")])

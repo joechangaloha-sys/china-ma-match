@@ -1,7 +1,7 @@
 """Re-identification check for anonymised teasers.
 
 Chinese business-registry data (Qichacha, Tianyancha) makes small companies easy to identify
-from a few facts, so the check is stricter than a Japanese ノンネーム review: any name, brand,
+from a few facts, so the check is stricter than a usual no-names teaser review: any name, brand,
 city below province level, exact figure or registry code in the teaser is flagged.
 """
 

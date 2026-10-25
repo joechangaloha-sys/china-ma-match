@@ -25,7 +25,7 @@ async def lifespan(_app: FastAPI):
 
 
 class LanguageEditions:
-    """/zh/... and /en/... are the two editions, as on the Japan IR Index.
+    """/zh/... and /en/... are the two editions.
 
     The prefix is stripped before routing and kept on the request (request.state.lang), and
     same-site redirects issued inside an edition stay in it. Direct edition links never

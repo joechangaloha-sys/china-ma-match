@@ -28,13 +28,13 @@ data room → names disclosed both ways with the seller's consent.
 
 ## Languages and look
 
-Two editions, `/zh/...` and `/en/...`, following the Japan IR Index rules: the neutral homepage `/` opens the
+Two editions, `/zh/...` and `/en/...`: the neutral homepage `/` opens the
 edition the visitor last chose with the header switch (remembered in localStorage and the `mm_lang` cookie),
 otherwise the first supported browser language, otherwise English. Direct edition links never redirect; query
 strings are kept, and redirects inside an edition stay in it (`LanguageEditions` in `web/app.py`). Labels are
 written bilingually in code and `i18n.tr` / `i18n.val` pick the reader's side; public pages and both portals show
 one language, internal pages stay bilingual for deal managers. The visual style (navy masthead over a brass rule,
-serif headlines, IBM Plex, light only) matches the Japan IR Index house theme.
+serif headlines, IBM Plex, light only) is the project's house theme.
 
 Detailed search filters only on the bands the cards already show, and on profit and margin only where the seller
 agreed to show earnings; values that are not published band edges are ignored, so searches cannot reveal exact

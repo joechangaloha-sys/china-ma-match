@@ -38,8 +38,8 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   takes 25% of fees the partner adviser invoices (site copy says so, disclosed to the client).
 - **Brand:** "mamatch" for now; tagline 把企业交棒给对的人 / Hand your company on to the right owner. Founders
   described as having bulge-bracket, major law firm and Big Four experience; no personal names on the site.
-  "Relay"/接棒 rejected as a brand (BATONZ and existing "Relay" M&A firms).
-- **Look and languages** follow the Japan IR Index (read-only reference; never modify `~/Documents/japan-ir-index`):
+  "Relay"/接棒 rejected as a brand (too close to existing M&A platforms and "Relay" M&A firms).
+- **Look and languages** follow a separate reference project in `~/Documents` (read-only; never modify it):
   navy/brass house style; `/zh/` and `/en/` editions; neutral homepage picks the remembered switch choice, then the
   browser language, then English.
 - Data residency, ICP and licensing are handled by Joe in China, outside the code. Patents: not now.
@@ -54,7 +54,7 @@ Layout is checked on phones and laptops: no page overflows sideways at 320, 375,
 pages incl. every role's portal and the internal pages); the menu wraps on phones; wide tables scroll inside their
 own box. Re-check with the iframe overflow script approach after big layout changes.
 
-Added 25 Oct (after research on BATONZ, Acquire.com, Axial): **indicative offers** after the NDA in a fixed format
+Added 25 Oct (after research on Acquire.com, Axial and similar marketplaces): **indicative offers** after the NDA in a fixed format
 (`IndicativeOffer`, `offers.submit_offer`), compared side by side on the seller page (anonymised) and internally;
 **send to ticked buyers in one step** on the seller page (`offers.approve_many`); **listing share panel** (QR code via
 `segno`, copy text and link; links use `config.PUBLIC_BASE_URL`, set to the Pages address by the export); **guided
@@ -67,8 +67,8 @@ drafted teasers and memos (examples drafted separately in zh and en; `teaser.loc
 data-check label. Free text people type (offer conditions, notes) appears as typed. Test:
 `test_wrong_language_text_stays_off_portal_pages`.
 
-Rationale added to the FAQ and homepage (Joe's reasoning, 25 Oct; on 26 Oct Joe asked for no Japan references on the
-site or in the FAQ, so the comparison is now the US market: investment banks rarely below USD 25–50m, brokers and
+Rationale added to the FAQ and homepage (Joe's reasoning, 25 Oct; on 26 Oct the
+market comparison on the site and in the FAQ became the US market: investment banks rarely below USD 25–50m, brokers and
 marketplaces such as BizBuySell, PE-backed roll-ups in vets/HVAC/auto repair); the bakery and car-repair/dry-cleaner
 examples; small companies are owners' main wealth; in China trust is the hard part. Joe's internal view: buyers
 and sellers would use it even if ~7 in 10 listings were fully reliable at first, aiming for 9 in 10. The public
