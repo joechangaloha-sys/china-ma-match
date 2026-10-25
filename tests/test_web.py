@@ -534,3 +534,13 @@ def test_wrong_language_text_stays_off_portal_pages(app, db_url):
         zh = client(app, email).get(f"/zh{url}").text
         for english in ("Full sale", "successor", "Stated interest", "Deal size fits", "rules"):
             assert english not in re.sub(r"<(script|textarea)[^>]*>.*?</\1>", " ", zh, flags=re.S), english
+
+
+
+def test_listing_card_uses_scoped_dated_wording(app, db_url):
+    delta = _get(db_url, Target, code_name="Project Delta")
+    en = client(app).get(f"/en/opportunities/{delta.id}").text
+    assert re.search(r"What has been checked, as of \d{4}-\d{2}-\d{2}", en) and "Checks cover only the items listed" in en
+    assert ">Verified<" not in en
+    zh = client(app).get(f"/zh/opportunities/{delta.id}").text
+    assert re.search(r"已核查内容（截至 \d{4}-\d{2}-\d{2}）", zh)

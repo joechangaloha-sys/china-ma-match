@@ -92,6 +92,16 @@ def checks(target: Target) -> list[str]:
     return done
 
 
+def checks_as_of(target: Target) -> str:
+    """Date of the most recent completed check, so buyers know how current the list is."""
+    dates = [target.authority_verified_at]
+    dates += [f.reviewed_at for f in target.fields if f.status == "confirmed"]
+    dates += [a.verified_at for a in target.authorizations if a.status == "verified"]
+    dates += [d.created_at for d in target.data_checks]
+    dates = [d for d in dates if d is not None]
+    return max(dates).strftime("%Y-%m-%d") if dates else ""
+
+
 def card(target: Target) -> dict:
     f = teaser.facts(target)
     ev = None
@@ -115,6 +125,7 @@ def card(target: Target) -> dict:
             target.keep_employees, ""),
         "timing": TIMING.get(target.timing, ""),
         "checks": [CHECKS[c] for c in checks(target)],
+        "checks_as_of": checks_as_of(target),
     }
 
 

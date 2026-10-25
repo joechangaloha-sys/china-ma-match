@@ -67,3 +67,11 @@ def test_cards_show_only_checks_actually_done(seeded):
     assert listing.checks(kiln) == ["authority"]
     kiln.authority_verified_at = None
     assert listing.card(kiln)["checks"] == []
+
+
+def test_check_heading_is_scoped_and_dated(seeded):
+    delta, kiln = _t(seeded, "Project Delta"), _t(seeded, "Project Kiln")
+    c = listing.card(delta)
+    assert c["checks_as_of"] and len(c["checks_as_of"]) == 10  # YYYY-MM-DD
+    kiln.authority_verified_at = None
+    assert listing.card(kiln)["checks_as_of"] == ""

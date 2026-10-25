@@ -23,9 +23,10 @@
     {% if c.timing %}<tr><th>{{ T('期望时间', 'Timing') }}</th><td>{{ L(c.timing) }}</td></tr>{% endif %}
     <tr><th>{{ T('出售原因', 'Reason for sale') }}</th><td>{{ L(c.sale_reason) }}</td></tr>
   </table>
-  <div class="checks small" aria-label="{{ T('核验情况', 'Verification') }}">
-    <b>{{ T('核验情况', 'Verified') }}</b>
-    {% for chk in c.checks %}<span class="check-ok">✓ {{ L(chk) }}</span>{% else %}<span class="muted">{{ T('尚待核验', 'Not yet verified') }}</span>{% endfor %}
+  <div class="checks small" aria-label="{{ T('已核查内容', 'What has been checked') }}">
+    <b>{% if c.checks_as_of %}{{ T('已核查内容（截至 %s）', 'What has been checked, as of %s')|format(c.checks_as_of) }}{% else %}{{ T('已核查内容', 'What has been checked') }}{% endif %}</b>
+    {% for chk in c.checks %}<span class="check-ok">✓ {{ L(chk) }}</span>{% else %}<span class="muted">{{ T('尚未核查；以下信息由卖方提供', 'Nothing yet: information is as provided by the seller') }}</span>{% endfor %}
+    <span class="muted">{{ T('核查范围仅限所列项目，不构成对盈利、估值或产权的保证。', 'Checks cover only the items listed; they are not a guarantee of earnings, value or title.') }}</span>
   </div>
   {{ caller() if caller }}
 </div>
