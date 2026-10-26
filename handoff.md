@@ -1,8 +1,10 @@
 # Handoff: china-ma-match (mamatch)
 
-Last updated 25 Oct 2026. Read this first, then `README.md`. Private background (not in the public repo):
+Last updated 26 Oct 2026. Read this first, then `README.md`. Private background (not in the public repo):
 `docs/research.md`, `docs/design-v2.md`, and Joe's pilot plan at
 `~/Documents/kimi/tasks/2026-10-24/21-21-56-3d0b2468/china_small_ma_pilot_and_ai_website_plan.md`.
+Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findings to `docs/kimi-research/`
+(both gitignored). Read `docs/kimi-research/00-index.md` first when it exists.
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 

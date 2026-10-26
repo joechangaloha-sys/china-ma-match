@@ -9,3 +9,5 @@ static-demo/
 # Design notes are kept locally, not published
 docs/research.md
 docs/design-v2.md
+docs/kimi-handoff.md
+docs/kimi-research/
