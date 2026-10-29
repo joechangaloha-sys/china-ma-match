@@ -1,12 +1,34 @@
 # Handoff: china-ma-match (mamatch)
 
-Last updated 26 Oct 2026. Read this first, then `README.md`. Private background (not in the public repo):
+Last updated 29 Oct 2026. Read this first, then `README.md`. Private background (not in the public repo):
 `docs/research.md`, `docs/design-v2.md`, and Joe's pilot plan at
 `~/Documents/kimi/tasks/2026-10-24/21-21-56-3d0b2468/china_small_ma_pilot_and_ai_website_plan.md`.
 Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findings to `docs/kimi-research/`
 (both gitignored). Read `docs/kimi-research/00-index.md` first when it exists.
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
+
+## Live fictional demo and Git updates (29 Oct 2026)
+
+- **Lighthouse demo:** Singapore server `43.153.223.242`, temporary HTTPS address
+  `https://43.153.223.242.sslip.io`. The public `main` branch contains the dynamic demo (`056ad25`) and Git
+  deployment route (`93be97b`). Joe reports that the deployed site responds, `/health/ready` returns 200, existing
+  records survived the switch (40 buyers, 15 teasers, 13 matches and others), and the outer passcode is unchanged.
+- **Routine updates use Git, not ZIP uploads.** Change and test locally, commit, run `git push`, then run
+  `deploy/lighthouse/deploy.sh` from the repository root. An optional branch argument deploys another branch.
+  Only code pushed to GitHub is deployed. `UPLOAD_TO_LIGHTHOUSE.command` and `install.sh` are first-install-only;
+  do not build new ZIP bundles for ordinary updates.
+- `deploy.sh` connects as `ubuntu` using Joe's SSH key (`~/.ssh/id_ed25519`), then clones/pulls `origin/main` into
+  `/opt/mamatch-src` and matches it exactly to GitHub with a remote hard reset. It rebuilds with Docker Compose,
+  waits for `/health/ready`, and prunes old images. Never edit `/opt/mamatch-src` directly on the server.
+- **Server layout:** `/opt/mamatch-src` is the deployment source; `/opt/mamatch` retains `.env` (PostgreSQL password,
+  demo passcode and public URL) and `DEMO_LOGIN.txt`. Compose reads secrets with `--env-file`; `show_login.sh`
+  remains the way to retrieve demo login details. `compose.git.yaml` changes only the web build context to `../..`.
+  The Compose project remains `mamatch-lighthouse`, preserving the PostgreSQL, uploads, Caddy-data and Caddy-config
+  volumes. **Never run `docker compose down -v`.**
+- The repository is **public**: never commit `.env`, passwords, keys or genuine business data. Fictional demo data
+  only. `.gitignore` excludes `release/`, `.test-tools/` and `.DS_Store`. Old release ZIPs and extracted
+  `release/mamatch-lighthouse-demo 2/3/4` folders are no longer needed but have not been deleted.
 
 ## Where things are
 
@@ -132,9 +154,8 @@ GitHub Pages workflow.
 4. From the plan, not built: MFA for deal managers, document watermarks, malware scanning of uploads, sign-in rate
    limiting, CSRF tokens, semantic matching (pgvector), WeChat sign-in, buyer saved searches, durable COS uploads
    and production database migrations.
-5. Next deployment action: Joe creates/protects his Tencent account, CloudBase environment and private PostgreSQL
-   instance using `deploy/tencent-cloud/README.md`, then we walk through the first fictional-data deployment.
-   Do not request his password, secret keys or full database URL. No real domain or production/ICP launch yet.
+5. Routine Lighthouse updates now follow the Git route above; `deploy/lighthouse/README.md` is the operating guide.
+   Do not request Joe's password, secret keys or full database URL. No real domain or production/ICP launch yet.
 
 ## Useful commands
 
