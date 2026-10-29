@@ -49,8 +49,37 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
 
 ## State of the code
 
-98 tests pass (`MAMATCH_LLM=off uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
-anonymous, adviser scope, revoked authorisation) and the static export. Structure and routes: README.md.
+104 tests pass (`MAMATCH_LLM=off uv run pytest`), including permission tests (other buyer, other seller, no data-room grant,
+anonymous, adviser scope, revoked authorisation), the static export and dynamic-demo access/configuration tests.
+Structure and routes: README.md.
+
+Added 26 Oct: dynamic fictional-data demo deployment support. `web/demo.py` adds an expiring signed passcode
+cookie, safe redirects, noindex headers and liveness/readiness checks; `web/app.py` validates configuration,
+initialises the database and optionally seeds examples. `Dockerfile`, `container.py`, `compose.demo.yaml` and
+`psycopg` support non-root CloudRun on `$PORT` with PostgreSQL. `deploy/tencent-cloud/README.md` is Joe's
+account-to-publish guide; `demo.env.example` contains placeholders only. CloudRun maximum instances must stay
+at 1 while startup seeding is enabled. Local uploads remain ephemeral until COS is implemented. Verified with
+the full test suite, the `npm run dev` host/port preview check, and an equivalent isolated Docker/PostgreSQL 16
+smoke test covering passcode access, health, seed data, English pages, seller form persistence and DB read-back.
+`node scripts/visual_demo.mjs` also passed in isolated headless Chrome: passcode redirect, fictional-data warning,
+Chinese homepage, English opportunities and 375 px Chinese opportunities, with no horizontal overflow. Screenshots
+are in `artifacts/demo-visual/`; the script starts and stops the app and Chrome itself. Docker Compose itself was
+not installed, so that exact Compose command was not executed. No Tencent resources were created and no real
+credentials/data were used.
+
+Local preview fix (27 Oct): executable `START_LOCAL_DEMO.command` starts the seeded fictional demo on port 7100
+with passcode `demo-gate-local-only`; keep its Terminal window open, Ctrl+C stops it. It supports `--host`/`--port`,
+and `npm run dev` uses the same launcher. Both `scripts/smoke_preview.py` and the full headless-Chrome visual test
+pass through this launcher. This fixed Joe's `localhost refused to connect` report: a server must actually be running;
+the preview URL alone does not start one in his external browser.
+
+Tencent handoff package added 26 Oct: `scripts/build_tencent_bundle.py` creates `release/mamatch-tencent-demo.zip`,
+a standalone operator guide and SHA256 file. The ZIP has Dockerfile at archive root and 105 files, with no local
+DB, virtualenv, Git metadata, screenshots, research or credentials. `deploy/tencent-cloud/README.md` is the
+comprehensive console-upload/redeploy/acceptance/troubleshooting guide; `deploy_demo.sh` is an optional redeploy
+helper (`--check` tested only; no cloud deploy). The extracted ZIP independently passed all 104 tests and its
+Docker image passed the isolated PostgreSQL 16 passcode/health/seed/seller-form/read-back smoke test. Verification
+extraction directories are gitignored. The release ZIP is ready for console upload but is not deployed.
 
 Layout is checked on phones and laptops: no page overflows sideways at 320, 375, 414, 768, 1280 or 1440 px (30
 pages incl. every role's portal and the internal pages); the menu wraps on phones; wide tables scroll inside their
@@ -101,9 +130,11 @@ GitHub Pages workflow.
 3. Not translated yet: matching reasons shown to sellers (English only); AI-drafted teasers and memos appear in the
    language they were drafted in.
 4. From the plan, not built: MFA for deal managers, document watermarks, malware scanning of uploads, sign-in rate
-   limiting, CSRF tokens, semantic matching (pgvector), WeChat sign-in, buyer saved searches, PostgreSQL deployment.
-5. Possible later: a Hong Kong demo server running the live app (password-protected, example data only) if the
-   static demo is not enough for reviewers.
+   limiting, CSRF tokens, semantic matching (pgvector), WeChat sign-in, buyer saved searches, durable COS uploads
+   and production database migrations.
+5. Next deployment action: Joe creates/protects his Tencent account, CloudBase environment and private PostgreSQL
+   instance using `deploy/tencent-cloud/README.md`, then we walk through the first fictional-data deployment.
+   Do not request his password, secret keys or full database URL. No real domain or production/ICP launch yet.
 
 ## Useful commands
 

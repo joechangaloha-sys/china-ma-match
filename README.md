@@ -53,7 +53,20 @@ figures (`listing.matches`).
 Claude (`claude-opus-5-5`) is used whenever available; every step has an offline fallback (`MAMATCH_LLM=off`).
 Uploaded documents are treated as untrusted data. Status changes are made by people, never by a model response.
 
-## Run it
+## Run the complete local demo
+
+On this Mac, double-click `START_LOCAL_DEMO.command`, or run it in Terminal. Keep the window open while using
+the site; press Ctrl+C to stop. It uses a dedicated fictional SQLite database, seeds all role accounts and starts
+at `http://127.0.0.1:7100` with outer passcode `demo-gate-local-only`.
+
+```bash
+./START_LOCAL_DEMO.command
+# Optional: ./START_LOCAL_DEMO.command --host 127.0.0.1 --port 7100
+```
+
+`npm run dev -- --host 127.0.0.1 --port 7100` uses the same launcher for the Kimi Work preview.
+
+## Run it manually
 
 ```bash
 uv sync
@@ -65,6 +78,34 @@ uv run pytest
 
 Demo sign-ins for local testing are defined in `seed.py` (`DEMO_USERS`, `DEMO_PASSWORD`). Example records are
 fictional and labelled 示例.
+
+## Dynamic demo (Docker and Tencent Cloud)
+
+`Dockerfile` runs the app as a non-root user on port `8080`; `compose.demo.yaml` adds an isolated
+PostgreSQL 16 database and fictional seed data. For a local container demo:
+
+```bash
+docker compose -f compose.demo.yaml up --build
+# http://127.0.0.1:8600 — outer demo passcode: demo-gate-local-only
+```
+
+The demo has a separate expiring passcode gate, visible fictional-data warnings and `noindex` headers.
+It is not a production security boundary. `deploy/tencent-cloud/README.md` is the Tencent account,
+CloudBase CloudRun and private TencentDB for PostgreSQL publishing runbook; its `demo.env.example`
+lists placeholders only. The default Tencent URL is for development/testing, not a production launch.
+Uploaded files are ephemeral on CloudRun until private COS storage is implemented.
+
+Build the clean console-upload package and standalone operator guide with:
+
+```bash
+python scripts/build_tencent_bundle.py
+# release/mamatch-tencent-demo.zip
+# release/mamatch-tencent-demo-guide.md
+# release/mamatch-tencent-demo.sha256
+```
+
+The ZIP has `Dockerfile` at its root and excludes Git history, local databases, virtual environments, screenshots,
+research notes and credentials. The extracted bundle is independently testable with `uv run --frozen pytest`.
 
 ## Static demo (GitHub Pages)
 
@@ -97,5 +138,7 @@ tests/            offline tests incl. permission tests (another buyer, another s
 
 MFA for deal managers, watermarking, malware scanning of uploads, rate limiting on sign-in, CSRF tokens (cookies
 are SameSite=Lax), semantic retrieval for matching, WeChat sign-in, payments (fees are invoiced offline and
-recorded), PostgreSQL deployment. Hosting, ICP and data-location setup in China are handled by Joe outside this code.
-The NDA text in `offers.py` is a template for counsel to review.
+recorded), durable COS uploads, and production database migrations. PostgreSQL and Tencent demo deployment are
+prepared and locally smoke-tested, but no cloud resource has been deployed. Production hosting, ICP and
+data-location setup in China are handled by Joe outside this code. The NDA text in `offers.py` is a template for
+counsel to review.

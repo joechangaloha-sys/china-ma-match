@@ -53,6 +53,9 @@
   {% endif %}
   </nav>
 </div></header>
+{% if cfg.DEMO_MODE %}
+<div class="demo-banner" role="note">{{ T('功能演示：全部为虚构示例数据，请勿提交真实或机密信息', 'Functional demo: all data is fictional; do not submit real or confidential information') }}</div>
+{% endif %}
 {% if portal == 'internal' %}
 <div class="internal-banner" role="note">内部页面：仅限交易经理使用，不对卖方、买方或公众开放 · Internal page for deal managers only, not visible to sellers, buyers or the public</div>
 {% endif %}

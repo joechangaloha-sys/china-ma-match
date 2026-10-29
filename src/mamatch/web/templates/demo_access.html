@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ T('演示访问', 'Demo access') }}{% endblock %}
+{% block body %}
+<section class="hero">
+  <div class="eyebrow">mamatch · {{ T('隔离演示', 'Isolated demonstration') }}</div>
+  <h1>{{ T('输入演示访问密码', 'Enter the demo passcode') }}</h1>
+  <p>{{ T('此网站仅用于功能演示，所有企业、买方、文件与交易均为虚构示例。请勿提交真实或机密信息。',
+          'This site is a functional demonstration. Every company, buyer, document and deal is fictional. Do not submit real or confidential information.') }}</p>
+</section>
+<div class="card" style="max-width: 560px;">
+  <form method="post" action="{{ P }}/demo-access">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="access_key">{{ T('演示访问密码', 'Demo passcode') }}</label>
+    <input id="access_key" name="access_key" type="password" required autocomplete="current-password" autofocus>
+    <div class="actions" style="margin-top: 16px;"><button type="submit">{{ T('进入演示', 'Enter demo') }}</button></div>
+  </form>
+</div>
+{% endblock %}

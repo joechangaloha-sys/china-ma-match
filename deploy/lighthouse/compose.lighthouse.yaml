@@ -1,0 +1,63 @@
+name: mamatch-lighthouse
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - mamatch_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    # Deliberately no host port: PostgreSQL is reachable only by the web container.
+
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      MAMATCH_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MAMATCH_DEMO_MODE: "true"
+      MAMATCH_DEMO_ACCESS_KEY: ${MAMATCH_DEMO_ACCESS_KEY}
+      MAMATCH_DEMO_ACCESS_HOURS: "12"
+      MAMATCH_SEED_DEMO: "true"
+      MAMATCH_SECURE_COOKIES: ${MAMATCH_SECURE_COOKIES:-true}
+      MAMATCH_PUBLIC_URL: ${MAMATCH_PUBLIC_URL}
+      MAMATCH_UPLOAD_DIR: /app/data/uploads
+      MAMATCH_LLM: off
+      MAMATCH_FORWARDED_ALLOW_IPS: "*"
+      PORT: 8080
+    expose:
+      - "8080"
+    volumes:
+      - mamatch_uploads:/app/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      MAMATCH_PUBLIC_HOST: ${MAMATCH_PUBLIC_HOST}
+    ports:
+      - "${APP_HTTP_PORT:-80}:80"
+      - "${APP_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - mamatch_caddy_data:/data
+      - mamatch_caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  mamatch_postgres:
+  mamatch_uploads:
+  mamatch_caddy_data:
+  mamatch_caddy_config:

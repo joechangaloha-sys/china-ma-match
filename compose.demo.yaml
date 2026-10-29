@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mamatch
+      POSTGRES_USER: mamatch
+      POSTGRES_PASSWORD: demo-local-only
+    volumes:
+      - demo_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mamatch -d mamatch"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    # No host port: the demo database is reachable only by the web container.
+
+  web:
+    build: .
+    environment:
+      MAMATCH_DATABASE_URL: postgresql+psycopg://mamatch:demo-local-only@db:5432/mamatch
+      MAMATCH_DEMO_MODE: "true"
+      MAMATCH_DEMO_ACCESS_KEY: demo-gate-local-only
+      MAMATCH_SEED_DEMO: "true"
+      MAMATCH_SECURE_COOKIES: "false"
+      MAMATCH_PUBLIC_URL: http://localhost:8600
+      MAMATCH_LLM: off
+      PORT: 8080
+    ports:
+      - "127.0.0.1:8600:8080"
+    volumes:
+      - demo_uploads:/app/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  demo_db:
+  demo_uploads:

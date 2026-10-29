@@ -1,0 +1,7 @@
+{
+  "name": "mamatch-local-preview",
+  "private": true,
+  "scripts": {
+    "dev": "bash START_LOCAL_DEMO.command"
+  }
+}

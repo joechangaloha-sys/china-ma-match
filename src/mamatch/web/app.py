@@ -12,15 +12,21 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from .. import db, i18n
-from . import adviser, buyer, internal, public, seller
+from .. import config, db, i18n
+from . import adviser, buyer, demo, internal, public, seller
 
 HERE = Path(__file__).parent
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    config.validate_runtime()
     db.init_db()
+    if config.SEED_DEMO:
+        from ..seed import seed
+
+        with db.session_scope() as s:
+            seed(s)
     yield
 
 
@@ -62,8 +68,10 @@ class LanguageEditions:
 
 
 app = FastAPI(title="mamatch", lifespan=lifespan)
-app.add_middleware(LanguageEditions)
+app.add_middleware(demo.DemoAccess)
+app.add_middleware(LanguageEditions)  # outermost: strips /zh or /en before the demo gate
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
+app.include_router(demo.router)
 app.include_router(internal.router)
 app.include_router(seller.router)
 app.include_router(buyer.router)

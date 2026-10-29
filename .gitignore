@@ -5,9 +5,16 @@ __pycache__/
 data/*.db
 .env
 data/uploads/
+data/local-demo-uploads/
+data/visual-demo-*/
+artifacts/demo-visual/
+release/verify-*/
 static-demo/
 # Design notes are kept locally, not published
 docs/research.md
 docs/design-v2.md
 docs/kimi-handoff.md
 docs/kimi-research/
+.DS_Store
+.test-tools/
+release/
