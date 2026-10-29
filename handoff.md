@@ -27,8 +27,9 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   The Compose project remains `mamatch-lighthouse`, preserving the PostgreSQL, uploads, Caddy-data and Caddy-config
   volumes. **Never run `docker compose down -v`.**
 - The repository is **public**: never commit `.env`, passwords, keys or genuine business data. Fictional demo data
-  only. `.gitignore` excludes `release/`, `.test-tools/` and `.DS_Store`. Old release ZIPs and extracted
-  `release/mamatch-lighthouse-demo 2/3/4` folders are no longer needed but have not been deleted.
+  only. `.gitignore` excludes `release/`, `.test-tools/` and `.DS_Store`. On 29 Oct the old release ZIPs (with
+  their `.sha256` files) and the extracted `release/mamatch-lighthouse-demo 2/3/4` folders were moved to the macOS
+  Trash. `release/` still holds the original extracted folder, the two guides and the `verify-*` test folders.
 
 ## Where things are
 
