@@ -1,0 +1,7 @@
+# Overlay for deploying from a Git clone on the server (see deploy.sh).
+# The ZIP bundle flattens compose.lighthouse.yaml next to the Dockerfile; in the repository the
+# Dockerfile is two levels up, so only the build context changes. Same project name, same volumes.
+services:
+  web:
+    build:
+      context: ../..
