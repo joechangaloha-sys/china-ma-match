@@ -179,7 +179,7 @@ def login_page(request: Request, next: str = "", user: User | None = Depends(cur
 
 
 def _safe_next(nxt: str, user: User) -> str:
-    return nxt if nxt.startswith("/") and not nxt.startswith("//") else _home_for(user)
+    return nxt if mfa.safe_path(nxt) else _home_for(user)
 
 
 def _signin_response(request, session, user, destination):

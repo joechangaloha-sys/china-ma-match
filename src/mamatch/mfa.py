@@ -46,6 +46,11 @@ def blocked(session, user):
         AuditEvent.created_at >= now() - timedelta(minutes=15))) >= 10
 
 
+def safe_path(value):
+    return (isinstance(value, str) and value.startswith('/') and not value.startswith('//')
+            and len(value) <= 500 and '\\' not in value and not any(ord(c) < 32 for c in value))
+
+
 def begin(session, user, next_path='/', enrollment=False):
     if not available() or not user.active or blocked(session, user):
         raise ValueError('MFA unavailable')
@@ -55,7 +60,7 @@ def begin(session, user, next_path='/', enrollment=False):
     purpose = 'enroll' if not user.mfa_secret else 'verify'
     session.add(MfaChallenge(token_hash=digest(token), user_id=user.id, purpose=purpose,
                 pending_secret=cipher().encrypt(pyotp.random_base32().encode()).decode() if purpose == 'enroll' else '',
-                next_path=next_path if next_path.startswith('/') and not next_path.startswith('//') else '/',
+                next_path=next_path if safe_path(next_path) else '/',
                 expires_at=now() + timedelta(minutes=5)))
     session.flush()
     return token

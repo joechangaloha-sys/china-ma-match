@@ -33,6 +33,7 @@ PY
 install -d /etc/systemd/system/clamav-daemon.service.d
 cat > /etc/systemd/system/clamav-daemon.service.d/mamatch-resources.conf <<'EOF'
 [Service]
+Environment=TZ=UTC
 MemoryHigh=1100M
 MemoryMax=1400M
 Restart=on-failure

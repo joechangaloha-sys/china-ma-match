@@ -23,7 +23,7 @@ Shared seeded fictional demo accounts are explicitly exempt only in demo mode an
 Encrypted seeds, replay protection, one-use recovery codes, challenge/account attempt limits, session
 revocation and sensitive-page headers are implemented. Activation tokens are redacted in access logs.
 Private account settings: /zh/account/mfa and /en/account/mfa. See docs/MFA.md and docs/UPLOAD_SECURITY.md.
-193 offline tests pass. The first deployment exposed a legacy PostgreSQL Boolean-default migration bug;
+198 offline tests pass. The first deployment exposed a legacy PostgreSQL Boolean-default migration bug;
 the previous review build was restored, and the helper now uses portable TRUE/FALSE literals with regression coverage. User's personal email was requested; the user must choose their password and
 scan/confirm their own authenticator. Do not enroll an agent-owned device, print seeds/recovery codes,
 send an invitation email or create an administrator without the user's chosen email.

@@ -97,3 +97,11 @@ def test_activation_tokens_redacted_in_access_logs():
         ('127.0.0.1','GET','/zh/account/activate/private-token','1.1',200),None)
     assert SensitivePathFilter().filter(record)
     assert 'private-token' not in record.getMessage() and '[redacted]' in record.getMessage()
+
+
+@pytest.mark.parametrize('value', ['//external.test', '/\\external.test', '/ok\r\nLocation: bad', '/'+'x'*501])
+def test_mfa_destination_is_same_site_only(seeded, personal, value):
+    assert not mfa.safe_path(value)
+    token = mfa.begin(seeded, personal, value)
+    item, _ = mfa.challenge(seeded, token)
+    assert item.next_path == '/'

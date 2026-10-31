@@ -282,3 +282,4 @@ def test_scanner_setup_enables_only_needed_version_command():
     assert "'EnableShutdownCommand':'false'" in script
     assert "'EnableReloadCommand':'false'" in script
     assert "'LocalSocketMode':'660'" in script
+    assert "Environment=TZ=UTC" in script
