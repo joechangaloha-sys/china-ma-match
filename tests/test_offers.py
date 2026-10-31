@@ -42,10 +42,20 @@ def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
     with pytest.raises(ValueError, match="teaser"):
         listing.publish(t)
     tz = teaser.draft(seeded, t, "zh")
-    teaser.approve(tz)
+    from mamatch import release
+    from mamatch.models import User
+    reviewer = seeded.scalar(select(User).where(User.role == 'deal_manager'))
+    owner = seeded.scalar(select(User).where(User.role == 'seller'))
+    t.seller_user_id = owner.id
+    from mamatch.models import Document
+    source = Document(target_id=t.id, kind='other', filename='fixture.txt', stored_path='/not-served', sha256='fixture-sha')
+    seeded.add(source); seeded.flush()
+    for path, _ in release.assertions(tz.body):
+        release.review_claim(tz, path, 'Test source, page 1; checked against fixture', reviewer, source.id)
+    teaser.approve(tz, reviewer)
     with pytest.raises(ValueError, match="seller must approve"):
         listing.publish(t)
-    teaser.seller_approve(tz)
+    teaser.seller_approve(tz, owner)
     with pytest.raises(ValueError, match="authority"):
         listing.publish(t)
     from datetime import datetime, timezone

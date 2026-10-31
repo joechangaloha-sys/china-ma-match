@@ -14,7 +14,7 @@ STAGES: dict[str, str] = {
     "shortlisted": "入围 / Shortlisted",
     "teaser_sent": "已发简介 / Teaser sent",
     "interested": "买方有意向 / Buyer interested",
-    "nda_signed": "已签保密协议 / NDA signed",
+    "nda_signed": "保密协议阶段 / NDA stage",
     "im_sent": "已发信息备忘录 / IM sent",
     "loi": "意向书 / LOI",
     "closing": "交割中 / Closing",
