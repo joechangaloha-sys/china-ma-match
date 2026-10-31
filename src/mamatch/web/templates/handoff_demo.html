@@ -20,13 +20,13 @@
 <section class="panel">
 <h2>{{ T('当前交接状态', 'Current handoff status') }}</h2>
 <p><span class="pill {{ 'low' if checks.access else 'high' }}">{{ L(HANDOFF_ACCESS_LABELS[access_status]) }}</span></p>
-<dl class="small"><dt>{{ T('保密协议', 'NDA') }}</dt><dd>{{ L(NDA_LABELS[h.nda_state]) }}</dd><dt>{{ T('访问范围', 'Access scope') }}</dt><dd>{{ T('独立买方组 · 只读 · 七天演示期限', 'Separate participant group · view-only · seven-day demo period') }}</dd><dt>{{ T('到期时间', 'Expiry') }}</dt><dd>{{ h.access_expires_at.strftime('%Y-%m-%d %H:%M UTC') if h.access_expires_at else '—' }}</dd></dl>
+<dl class="small"><dt>{{ T('保密协议', 'NDA') }}</dt><dd>{{ L(NDA_LABELS[h.nda_state]) }}</dd><dt>{{ T('访问范围', 'Access scope') }}</dt><dd>{{ T('独立买方组 · 只读 · 七天演示期限', 'Separate participant group · read-only · seven-day demo period') }}</dd><dt>{{ T('到期时间', 'Expiry') }}</dt><dd>{{ h.access_expires_at.strftime('%Y-%m-%d %H:%M UTC') if h.access_expires_at else '—' }}</dd></dl>
 <p>{{ T('只有收到当前协议的模拟凭据、完成人工权限审核、取得卖方批准并确认开通，演示访问才会生效。', 'Demo access activates only after the current NDA receipt, human authority review, seller approval and provisioning confirmation.') }}</p>
 <p class="small muted">{{ T('到期或撤销后，服务器立即拒绝演示文件请求；旧签署凭据重放不会恢复访问。', 'After expiry or revocation, the server rejects demo file requests. Replaying an old signing receipt cannot restore access.') }}</p>
 </section>
 <section class="panel">
 <h2>{{ T('留下证据，保留控制。', 'Keep the evidence. Keep control.') }}</h2>
-<ul class="small"><li>{{ T('协议版本与主体绑定，不能套用到另一方。', 'NDA version and parties are bound together; proof cannot be reused for another party.') }}</li><li>{{ T('签署完成不等于已核验签署权限。', 'Signing completion does not establish authority to bind a company.') }}</li><li>{{ T('卖方批准绑定资料室、只读权限及到期时间。', 'Seller approval binds the room, view-only role and expiry.') }}</li><li>{{ T('批准后仍须确认资料室已开通。', 'Approval is followed by a separate provisioning confirmation.') }}</li><li>{{ T('真实签署与资料室连接保留为待办，不会自动开通。', 'Real signing and VDR connections remain deferred to-dos; none are activated automatically.') }}</li></ul>
+<ul class="small"><li>{{ T('协议版本与主体绑定，不能套用到另一方。', 'NDA version and parties are bound together; proof cannot be reused for another party.') }}</li><li>{{ T('签署完成不等于已核验签署权限。', 'Signing completion does not establish authority to bind a company.') }}</li><li>{{ T('卖方批准绑定资料室、只读权限及到期时间。', 'Seller approval binds the room, read-only role and expiry.') }}</li><li>{{ T('批准后仍须确认资料室已开通。', 'Approval is followed by a separate provisioning confirmation.') }}</li><li>{{ T('真实签署与资料室连接保留为待办，不会自动开通。', 'Real signing and VDR connections remain deferred to-dos; none are activated automatically.') }}</li></ul>
 <p class="small">{{ T('此场景记录了 %s 个模拟审计事件。', 'This scenario records %s simulated audit events.')|format(event_count) }}</p>
 <details><summary>{{ T('模拟文件指纹', 'Mock document fingerprint') }}</summary><code class="hash">{{ h.signed_document_hash or '—' }}</code></details>
 </section>
