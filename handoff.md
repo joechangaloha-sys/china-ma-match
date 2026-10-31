@@ -20,7 +20,8 @@ licence, invoice and contact identifiers remain data. Original source disclosure
 Teaser/memo lists show only the selected edition. Locale links and original dropdown submission values
 are preserved. 210 tests passed, including legacy live pipeline notes, language checks on seven internal routes, document filtering,
 immutable saved records and English province-label/Chinese canonical-value regression coverage.
-Deploy branch kimi/internal-language-cleanup for Tencent review and check laptop/mobile pages.
+Deployed 28356cf on Tencent. Verified seven internal routes in both editions at 390/1366px; no horizontal overflow.
+Chinese dashboard is fully Chinese and English dashboard fully English. Legacy pipeline note also verified clean.
 MFA remains disabled; the local scanner remains active. Do not merge older cumulative PRs independently.
 
 ## MFA prepared but not live — 31 October 2026
