@@ -332,3 +332,9 @@ Branch `kimi/chinese-teaser-layout` includes prior review work; no merge to main
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/8.
 149 tests passed; browser checked Chinese controls/data tab, JSON download and 375px
 layout. Chinese rendered body and export contain no English prose or abbreviations.
+
+Tencent deployed `aca07d5`: live English/Chinese shell structures and CSS/renderer
+bytes match; Chinese data packaged and numeric ranges/claim IDs unchanged. Live
+Chinese page rendered fully in the visible browser using the existing demo gate.
+Screenshot saved for Joe. Saved counts remain 3/40/13/0 targets/buyers/matches/documents
+and 2 handoffs/6 events. No real provider connection or transaction action added.
