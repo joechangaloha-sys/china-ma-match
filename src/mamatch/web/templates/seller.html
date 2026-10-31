@@ -130,7 +130,7 @@
       <td>{{ L(STAGES[m.stage]) }}{% set hand = handoff.get(m) %}{% if hand %}<br><span class="pill">{{ L(HANDOFF_ACCESS_LABELS[handoff.access_status(hand)]) }}</span>{% endif %}</td>
       <td class="actions">{% if m.stage in after_nda %}
         {% if hand and handoff.access_status(hand) == 'awaiting_seller' %}
-        <p class="small">{{ T('虚构资料室，只读权限，到期时间：', 'Fictional room, view-only access, expires: ') }}{{ hand.access_expires_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
+        <p class="small">{{ T('虚构资料室，只读权限，到期时间：', 'Fictional room, read-only access, expires: ') }}{{ hand.access_expires_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
         <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">{{ T('批准此范围，等待开通', 'Approve this scope; await provisioning') }}</button></form>
         {% elif hand and hand.vdr_state == 'active' %}
         <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/revoke"><button class="ghost">{{ T('撤销演示访问', 'Revoke demo access') }}</button></form>

@@ -19,7 +19,7 @@ parties and cancellation of an unsigned request. These use the same offline stat
 portals and do not change saved mandates.
 
 Open **NDA / VDR handoff** from a buyer row in an internal mandate to operate the persisted mock workflow:
-prepare a request → simulate a receipt → review signatory authority → request view-only access for 1–30 days
+prepare a request → simulate a receipt → review signatory authority → request read-only access for 1–30 days
 → mandate owner approves room/role/expiry in their seller portal → deal manager confirms mock provisioning.
 Owner approval alone does not activate access. Owner/deal manager may revoke it; the demo can also advance
 past expiry. Every action is recorded in `handoff_events`; duplicate/stale signing receipts cannot revive a
