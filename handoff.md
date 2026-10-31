@@ -18,7 +18,7 @@ Localised status dictionaries, controls, accessible labels, placeholders and aud
 aliases for known fictional seed labels only; original records and audit JSON remain unchanged. Registry,
 licence, invoice and contact identifiers remain data. Original source disclosures remain editable data.
 Teaser/memo lists show only the selected edition. Locale links and original dropdown submission values
-are preserved. 209 tests passed, including language checks on seven internal routes, document filtering,
+are preserved. 210 tests passed, including legacy live pipeline notes, language checks on seven internal routes, document filtering,
 immutable saved records and English province-label/Chinese canonical-value regression coverage.
 Deploy branch kimi/internal-language-cleanup for Tencent review and check laptop/mobile pages.
 MFA remains disabled; the local scanner remains active. Do not merge older cumulative PRs independently.

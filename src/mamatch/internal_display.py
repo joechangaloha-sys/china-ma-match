@@ -21,6 +21,8 @@ ZH_NOTES={'Adviser shortlist','NDA signed','Fictional signing completion; no ext
 def record(value, lang):
     if not isinstance(value,str):return value
     if lang=='zh':
+        legacy = re.fullmatch(r'NDA v([0-9-]+) accepted online', value)
+        if legacy:return '演示：已在线确认保密协议，版本'+legacy[1]
         if value in ZH_NOTES:return EXAMPLES[value]
         return i18n.tr(value,lang).replace('示例·待审核买方A','示例·待审核买方甲')
     if value in EXAMPLES and value not in ZH_NOTES:return EXAMPLES[value]

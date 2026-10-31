@@ -868,3 +868,10 @@ def test_language_display_does_not_rewrite_mandate_records(app,db_url):
 def test_english_region_label_preserves_submitted_value(app):
     page=client(app,DM).get('/en/internal/targets/new').text
     assert '<option value="浙江">Zhejiang</option>' in page
+
+
+def test_legacy_demo_pipeline_note_localises_without_rewriting():
+    from mamatch.internal_display import record
+    original='NDA v1-2026-10 accepted online'
+    assert record(original,'zh')=='演示：已在线确认保密协议，版本1-2026-10'
+    assert record(original,'en')==original
