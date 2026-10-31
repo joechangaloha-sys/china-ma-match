@@ -133,7 +133,8 @@ def test_internal_pages_are_marked_internal(app, db_url):
                 f"{I}/targets/{jade.id}"):
         r = c.get(url)
         assert r.status_code == 200, url
-        assert "Internal page for deal managers only" in r.text, url
+        assert "内部页面：仅限项目负责人使用" in r.text, url
+        assert "Internal page for deal managers only" in c.get("/en"+url).text, url
 
 
 # ---------------------------------------------------------------- seller portal
@@ -725,3 +726,32 @@ def test_handoff_roles_and_owner_approval_cannot_be_bypassed(app, db_url):
         assert not handoff.access_active(handoff.get(s.get(Match,mid)))
     client(app,SELLER).post(f'/seller/{jade.id}/matches/{mid}/revoke')
     assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'revoked'
+
+
+def test_readiness_is_private_monolingual_and_read_only(app,db_url):
+    from html.parser import HTMLParser
+    from mamatch.models import HandoffEvent,DealHandoff
+    def counts():
+        with db.session_scope(db_url) as s:
+            return [len(s.scalars(select(model)).all()) for model in (Target,Match,DealHandoff,HandoffEvent,AuditEvent)]
+    assert client(app).get('/en/internal/readiness',follow_redirects=False).status_code==303
+    for email in (SELLER,BUYER,ADVISER):
+        assert client(app,email).get('/en/internal/readiness').status_code==403
+    c=client(app,DM);before=counts()
+    class Text(HTMLParser):
+        def __init__(self):super().__init__();self.skip=0;self.parts=[];self.actions=[]
+        def handle_starttag(self,t,a):
+            if t=='form':self.actions.append(dict(a).get('action'))
+            if t in ('script','style'):self.skip+=1
+        def handle_endtag(self,t):
+            if t in ('script','style'):self.skip-=1
+        def handle_data(self,d):
+            if not self.skip:self.parts.append(d)
+    for lang in ('en','zh'):
+        page=c.get(f'/{lang}/internal/readiness');assert page.status_code==200
+        p=Text();p.feed(page.text);text=' '.join(p.parts)
+        assert not re.search(r'[\u4e00-\u9fff]' if lang=='en' else r'[A-Za-z]',text)
+        assert f'/{lang}/internal/targets/' in page.text
+        assert p.actions==[f'/{lang}/logout']
+    assert c.post('/en/internal/readiness').status_code==405
+    assert counts()==before

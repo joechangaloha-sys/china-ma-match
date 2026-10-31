@@ -2,6 +2,7 @@
 {% from "_macros.html" import listing_card, fees_panel, data_form, findings_list, memo_view with context %}
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
+<p><a href="{{ P }}{{ I }}/readiness#mandate-{{ t.id }}">{{ T('查看项目准备情况及下一步工作','View readiness and next action') }} →</a></p>
 <div>
   <p class="small"><a href="{{ I }}">← 卖方项目 Mandates</a> · <a href="{{ I }}/audit?target={{ t.id }}">审计记录 Audit log</a></p>
   <h1>{{ t.code_name }} {% if t.is_example %}<span class="pill example">示例 example</span>{% endif %}

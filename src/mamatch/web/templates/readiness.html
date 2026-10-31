@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ T('项目准备情况','Deal readiness') }}{% endblock %}
+{% block body %}
+<header><p class="eyebrow">{{ T('项目负责人工作台','Deal-manager workspace') }}</p><h1>{{ T('项目准备情况','Deal readiness') }}</h1><p class="sub">{{ T('依据当前版本、审核记录及访问状态，识别下一步工作。','Identify the next action from current document versions, review records and access status.') }}</p></header>
+<p class="panel small">{{ T('只读汇总，不产生批准、签署、文件发送或访问授权。演示状态不代表真实电子签名或外部资料室确认。','Read-only overview: it creates no approvals, signatures, document delivery or access grants. Demo states are not real e-signatures or external VDR acknowledgements.') }}</p>
+{% set actions = {
+ 'terminal':('核对归档及后续事项；不再自动推进。','Review archive and follow-up items; no automatic progression.'),
+ 'authority':('核实委托人身份及出售授权。','Verify the mandate owner and authority to sell.'),
+ 'teaser':('完成当前语言项目简介的逐项依据核验及卖方确认。','Complete evidence review and seller approval for the current-language teaser.'),
+ 'memo':('完成当前语言信息备忘录的逐项依据核验及卖方确认。','Complete evidence review and seller approval for the current-language information memorandum.'),
+ 'providers':('真实交易须先落实签署服务及外部资料室；当前连接仍待接入。','Real deals require e-signature and external VDR integration; connections remain deferred.'),
+ 'buyers':('审核潜在投资方资格及资金证明。','Review prospective buyers and funding evidence.'),
+ 'handoff':('逐一核对保密协议、签署权限、卖方授权及资料室开通状态。','Review each NDA, signing authority, seller approval and room provisioning state.'),
+ 'diligence':('跟进尽职调查事项及意向性条款；另行审核每次资料提供。','Follow up diligence and indicative terms; review each disclosure separately.')
+} %}
+{% for row in rows %}{% set t=row.target %}
+<article class="panel" id="mandate-{{ t.id }}">
+<h2>{{ V(t.code_name) }} · {{ L(STATUSES[t.status]) }}</h2>
+<p class="small">{{ T('虚构示例项目','Fictional example mandate') if t.is_example else T('真实委托项目：外部服务待落实','Real mandate: external services outstanding') }}</p>
+<div class="cols three">
+<section><h3>{{ T('委托授权','Mandate authority') }}</h3><span class="pill {{ '' if t.authority_verified_at else 'medium' }}">{{ T('已有核验记录','Review recorded') if t.authority_verified_at else T('待核验','Review needed') }}</span></section>
+{% for artifact,ready,label_zh,label_en,kind in [(row.teaser,row.teaser_ready,'项目简介','Teaser','teaser'),(row.memo,row.memo_ready,'信息备忘录','Information memorandum','memo')] %}
+<section><h3>{{ T(label_zh,label_en) }}</h3><p class="small">{{ T('当前语言版本','Current language version') }}: {{ artifact.version if artifact else '—' }}</p><span class="pill {{ '' if ready else 'medium' }}">{{ T('版本审核通过','Current version approved') if ready else T('缺失或审核已失效','Missing or review not current') }}</span>{% if artifact %}<p><a href="{{ P }}{{ I }}/review/{{ kind }}/{{ artifact.id }}">{{ T('核验依据及审核版本','Review evidence and version') }} →</a></p>{% endif %}</section>
+{% endfor %}
+</div>
+<div class="stats" style="margin:1rem 0"><div class="stat"><b>{{ row.qualified }}</b><span>{{ T('已审核投资方','Verified buyers') }}</span></div><div class="stat"><b>{{ row.active }}</b><span>{{ T('当前演示访问有效','Current active demo access') }}</span></div><div class="stat"><b>{{ row.loi_stage }}</b><span>{{ T('处于意向书及后续阶段','Matches at LOI stage or later') }}</span></div></div>
+<p class="flash"><strong>{{ T('下一步：','Next action: ') }}</strong>{{ T(actions[row.next][0],actions[row.next][1]) }}</p>
+<p><a class="button" href="{{ P }}{{ I }}/targets/{{ t.id }}#{{ 'authority' if row.next == 'authority' else 'teasers' if row.next == 'teaser' else 'memo' if row.next == 'memo' else 'matches' }}">{{ T('打开委托项目','Open mandate') }} →</a></p>
+{% if row.missing %}<details><summary>{{ T('尚未上传的基础资料类别','Basic document categories not uploaded') }} ({{ row.missing|length }})</summary><ul>{% for kind in row.missing %}<li>{{ L(CHECKLIST[kind]) }}</li>{% endfor %}</ul><p class="small muted">{{ T('类别统计不代表真实性核验，也不替代逐项审核；演示依据可能为模拟记录。','Category counts do not establish authenticity or replace claim-level review; example evidence may be simulated.') }}</p></details>{% endif %}
+{% if row.attention %}<details><summary>{{ T('需跟进的投资方资料访问','Buyer access requiring follow-up') }} ({{ row.attention|length }})</summary><ul>{% for match,status in row.attention %}<li>{{ T('匹配编号','Match reference') }} {{ match.id }} · {{ L(HANDOFF_ACCESS_LABELS[status]) }} · <a href="{{ P }}{{ I }}/handoffs/{{ match.id }}">{{ T('核对签署及访问状态','Review signing and access') }} →</a></li>{% endfor %}</ul></details>{% endif %}
+</article>
+{% else %}<p class="panel">{{ T('暂无委托项目。','No mandates yet.') }}</p>{% endfor %}
+<p><a href="{{ P }}{{ I }}/connections">{{ T('查看暂缓接入的外部服务清单','View deferred external connections') }} →</a></p>
+{% endblock %}
