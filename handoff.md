@@ -380,3 +380,7 @@ shared Japan IR Index-inspired navy/white/cool-grey palette; removed decorative
 amber from promotional/internal banners and fixed internal badge contrast. No
 transaction economics, permissions, stored identities or external services changed.
 Branch: `kimi/main-site-standards`.
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/11. All 151 tests pass.
+Targets the main website as Joe requested; standing rules are persisted in memory
+and repository instructions. Public-page structures and language isolation verified.
