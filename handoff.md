@@ -8,6 +8,27 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## NDA/VDR mock workflow and deferred connections (31 Oct 2026)
+
+- Joe: "lets set up external connections later. record them as to-dos and continue building".
+  Deferred checklist: `docs/INTEGRATIONS_TODO.md` and private `/internal/connections`. Intended account
+  owner is a mainland company; pilot signers are mainland companies/individuals. No accounts, credentials,
+  subscriptions, real signatures or external invitations were requested or created.
+- Added persisted `DealHandoff` + append-only `HandoffEvent` ledger, mock request/completion/cancellation,
+  agreement/party hashes, duplicate/stale receipt checks, human signatory-authority review, owner approval
+  bound to room/viewer role/expiry, separate mock provisioning, expiry and revocation.
+- Internal mandate match rows link to `/internal/handoffs/{match_id}`; owners approve/revoke in their
+  seller portal. Old timestamp-only data-room grants no longer suffice. Every demo download and memo view
+  rechecks active/current/unexpired access. Real mandates remain blocked. Cancellation applies only to
+  unsigned pending requests; an old completion replay cannot revive revoked access.
+- `/zh/handoff` and `/en/handoff` demonstrate nine scenarios in isolated temporary databases, linked from
+  the existing workflow demo. Internal to-do/handoff screens are included in the static export too.
+- External callbacks, provider-side enforcement, provider accounts and procurement remain deferred.
+  Do not confuse a mock completion or local access flag with a real provider acknowledgement.
+- Branch `kimi/nda-vdr-handoff` includes prior review work because main is still unchanged. PR: pending.
+  Validate offline suite, legacy database upgrade, live zh/en scenarios, role checks and phone layouts;
+  back up existing Tencent PostgreSQL before deploying the pushed review branch. Never merge for Joe.
+
 ## Evidence-bound document release (31 Oct 2026, branch kimi/release-controls)
 
 - Joe approved the review recommendations and asked to build and show them on the website. First
