@@ -93,7 +93,7 @@ def export(out: Path, base_url: str = "https://joechangaloha-sys.github.io/china
             grab(a, f"/{L}{p}")
         dm = client("dm@demo.mamatch.test")
         for p in ["/internal", "/internal/buyers", "/internal/advisers", "/internal/pipeline", "/internal/dashboard",
-                  "/internal/audit", "/internal/connections", "/internal/targets/new",
+                  "/internal/audit", "/internal/readiness", "/internal/connections", "/internal/targets/new",
                   *[f"/internal/handoffs/{i}" for i in matches], *[f"/internal/targets/{i}" for i in targets]]:
             grab(dm, f"/{L}{p}")
 

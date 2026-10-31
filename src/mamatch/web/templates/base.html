@@ -23,12 +23,12 @@
 </div></div>
 <header class="bar"><div class="in">
   {% if portal == 'internal' %}
-  <a class="brand" href="{{ I }}">{{ T('中小企业并购平台', 'mamatch') }} <span class="pill internal-pill">{{ T('内部', 'INTERNAL') }}</span></a>
+  <a class="brand" href="{{ P }}{{ I }}">{{ T('中小企业并购平台', 'mamatch') }} <span class="pill internal-pill">{{ T('内部', 'INTERNAL') }}</span></a>
   {% else %}
   <a class="brand" href="{{ P }}/">{{ T('中小企业并购平台', 'mamatch') }} <small>{{ T('中小企业并购', 'Small-company M&A') }}</small></a>
   {% endif %}
   <span class="who">
-    {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ L(ROLES[user.role]) }}</span>
+    {% if user %}<span class="small muted">{% if not omit_profile_name %}{{ user.name or user.email }} · {% endif %}{{ L(ROLES[user.role]) }}</span>
       {% if portal not in ('seller', 'buyer', 'adviser', 'internal') %}<a class="small" href="{{ P ~ {'seller': '/seller', 'buyer': '/buyer', 'adviser': '/adviser', 'deal_manager': I}[user.role] }}">{{ T('我的页面', 'My page') }}</a>{% endif %}
       <form method="post" action="{{ P }}/logout" class="inline"><button class="ghost small">{{ T('退出', 'Sign out') }}</button></form>
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
@@ -37,13 +37,14 @@
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("交易文件演示", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('项目简介演示', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}
-    <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
-    <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
-    <a href="{{ I }}/advisers" class="{{ 'on' if request.url.path.startswith(I + '/advisers') }}">{{ T('顾问审核', 'Adviser checks') }}</a>
-    <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
-    <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
-    <a href="{{ I }}/connections">{{ T('外部连接待办', 'Connection to-dos') }}</a>
-    <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
+    <a href="{{ P }}{{ I }}/readiness">{{ T('项目准备情况', 'Deal readiness') }}</a>
+    <a href="{{ P }}{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
+    <a href="{{ P }}{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
+    <a href="{{ P }}{{ I }}/advisers" class="{{ 'on' if request.url.path.startswith(I + '/advisers') }}">{{ T('顾问审核', 'Adviser checks') }}</a>
+    <a href="{{ P }}{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
+    <a href="{{ P }}{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
+    <a href="{{ P }}{{ I }}/connections">{{ T('外部连接待办', 'Connection to-dos') }}</a>
+    <a href="{{ P }}{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
   {% else %}
     {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
     {% elif portal == 'buyer' %}<a href="{{ P }}/buyer" class="on">{{ T('我的收购', 'My acquisitions') }}</a>
@@ -62,7 +63,7 @@
 <div class="demo-banner" role="note">{{ T('功能演示：全部为虚构示例数据，请勿提交真实或机密信息', 'Functional demo: all data is fictional; do not submit real or confidential information') }}</div>
 {% endif %}
 {% if portal == 'internal' %}
-<div class="internal-banner" role="note">内部页面：仅限交易经理使用，不对卖方、买方或公众开放 · Internal page for deal managers only, not visible to sellers, buyers or the public</div>
+<div class="internal-banner" role="note">{{ T('内部页面：仅限项目负责人使用，不对卖方、买方或公众开放', 'Internal page for deal managers only, not visible to sellers, buyers or the public') }}</div>
 {% endif %}
 <main>
 {% if msg %}<p class="flash" role="status">{{ L(msg) }}</p>{% endif %}

@@ -37,6 +37,15 @@ def home(request: Request, user: User = Depends(dm), s: Session = Depends(get_se
                   to_verify=to_verify, firm=firm(s), nda_available=offers.nda_available)
 
 
+@router.get("/readiness", response_class=HTMLResponse)
+def readiness_page(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
+    from .. import readiness
+    from .common import get_lang
+    targets = s.scalars(select(Target).order_by(Target.created_at.desc())).all()
+    rows = [readiness.snapshot(t, get_lang(request)) for t in targets]
+    return render(request, "readiness.html", user, portal="internal", rows=rows, omit_profile_name=True)
+
+
 @router.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
     return render(request, "dashboard.html", user, portal="internal", m=analytics.metrics(s))
