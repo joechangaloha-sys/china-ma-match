@@ -271,3 +271,15 @@ Tencent deployed commit `695e5fc`: all 18 bilingual document stages, navigation/
 links, teaser cross-link, installed export script and passcode gate passed live HTTPS
 checks. Saved records remain 3 targets / 40 buyers / 13 matches / 0 documents /
 2 handoffs / 6 events. No provider connections or real signing/sending performed.
+
+## Language editions and Chinese transaction style — 31 October 2026
+
+Joe requests English-only English pages and Chinese-only Chinese pages, with a formal
+mainland investment-banking register. `docs/LANGUAGE_STYLE.md` records the convention.
+Public page labels, project names, currency labels, demo stages and documents are
+localised; Chinese teaser links now open `/zh/teaser-demo/`, with the same fictional
+financial bands in Chinese. The original English Kimi page remains `/en/teaser-demo/`.
+Chinese text exports and filenames are localised. No cross-language fallback for
+product descriptions. Stored identities, records, economics and release controls
+are not changed. Public/demo language isolation checks include all document stages.
+Branch: `kimi/language-editions`, cumulative prior review work, no merge to main.

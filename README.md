@@ -226,3 +226,15 @@ enterprise value, equity value and the acquired stake. All new transaction terms
 are fictional assumptions. Counsel review remains outstanding for real use.
 All pages share the passcode gate and are disabled outside demo mode. Branch:
 `kimi/document-demos`; cumulative review includes PRs #1–#4, with no merge to main.
+
+## Language editions and Chinese transaction style — 31 October 2026
+
+Joe requests English-only English pages and Chinese-only Chinese pages, with a formal
+mainland investment-banking register. `docs/LANGUAGE_STYLE.md` records the convention.
+Public page labels, project names, currency labels, demo stages and documents are
+localised; Chinese teaser links now open `/zh/teaser-demo/`, with the same fictional
+financial bands in Chinese. The original English Kimi page remains `/en/teaser-demo/`.
+Chinese text exports and filenames are localised. No cross-language fallback for
+product descriptions. Stored identities, records, economics and release controls
+are not changed. Public/demo language isolation checks include all document stages.
+Branch: `kimi/language-editions`, cumulative prior review work, no merge to main.

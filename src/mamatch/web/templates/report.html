@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ T('报告问题', 'Report a problem') }}{% endblock %}
 {% block body %}
-<p class="small"><a href="{{ P }}/opportunities/{{ t.id }}">← {{ t.code_name }}</a></p>
+<p class="small"><a href="{{ P }}/opportunities/{{ t.id }}">← {{ V(t.code_name) }}</a></p>
 <div>
   <h1>{{ T('报告此项目的问题', 'Report a problem with this listing') }}</h1>
   <p class="sub">{{ T('如果您发现信息可能不准确、能看出是哪家公司，或怀疑存在欺诈，请告诉我们。交易经理会核实并跟进，必要时暂停展示该项目。',

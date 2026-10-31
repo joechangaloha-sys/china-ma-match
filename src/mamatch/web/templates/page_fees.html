@@ -22,7 +22,7 @@
   {% for deal in [2000000, 7500000, 20000000] %}
   {% set gross = [deal * cfg.SUCCESS_FEE_RATE, cfg.SUCCESS_FEE_MIN_RMB]|max %}
   {% set credit = [cfg.PREP_PACK_FEE_RMB + cfg.SELLER_PLAN_FEE_RMB, gross]|min %}
-  <tr><td>RMB {{ '{:,.0f}'.format(deal) }}</td><td>RMB {{ '{:,.0f}'.format(gross) }}</td><td>{{ '%g'|format(gross / deal * 100) }}%</td><td>RMB {{ '{:,.0f}'.format(credit) }}</td><td>RMB {{ '{:,.0f}'.format(gross - credit) }}</td></tr>
+  <tr><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(deal) }}</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross) }}</td><td>{{ '%g'|format(gross / deal * 100) }}%</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(credit) }}</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross - credit) }}</td></tr>
   {% endfor %}</table></div>
   <p class="small muted">{{ T('最低成功费对小额交易的实际费率较高。价格仍为试点方案，请在委托前确认。', 'The minimum creates a higher effective rate on smaller transactions. Pricing remains a pilot proposal to confirm before engagement.') }}</p>
 </section>
