@@ -110,12 +110,12 @@ def test_standalone_kimi_teaser_and_assets_share_the_demo_gate(demo_app, monkeyp
     assert c.get('/teaser-demo/assets/%2e%2e/%2e%2e/config.py').status_code == 404
     for lang in ('zh', 'en'):
         home = c.get(f'/{lang}/').text
-        assert home.count('href="/teaser-demo/"') >= 2  # menu and prominent homepage action
+        assert home.count(f'href="/{lang}/teaser-demo/"') >= 2  # menu and prominent homepage action
         assert c.get(f'/{lang}/teaser-demo/').status_code == 200
     monkeypatch.setattr(config, 'DEMO_MODE', False)
     for path in protected:
         assert c.get(path).status_code == 404
-    assert 'href="/teaser-demo/"' not in c.get('/en/').text
+    assert 'href="/en/teaser-demo/"' not in c.get('/en/').text
 
 
 def test_document_demos_are_gated_bilingual_and_do_not_create_deals(demo_app, monkeypatch):
@@ -147,3 +147,51 @@ def test_document_demos_are_gated_bilingual_and_do_not_create_deals(demo_app, mo
     monkeypatch.setattr(config, 'DEMO_MODE', False)
     for path in ('/document-demos', '/document-demos/nda', '/document-demos/loi', '/document-demos/info-memo'):
         assert c.get(path).status_code == 404
+
+
+def test_public_and_document_editions_do_not_mix_language(demo_app):
+    import re
+    from html.parser import HTMLParser
+
+    class VisibleText(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.skip = 0
+            self.parts = []
+        def handle_starttag(self, tag, attrs):
+            if tag in ('script', 'style', 'code'):
+                self.skip += 1
+        def handle_endtag(self, tag):
+            if tag in ('script', 'style', 'code'):
+                self.skip -= 1
+        def handle_data(self, data):
+            if not self.skip:
+                self.parts.append(data)
+
+    c = TestClient(demo_app)
+    c.post('/demo-access', data={'access_key': PASSCODE})
+    paths = ['/', '/sell', '/buy', '/fees', '/security', '/conduct', '/faq',
+             '/opportunities', '/workflow', '/handoff', '/login', '/register', '/demo-access', '/document-demos']
+    from mamatch.db import session_scope
+    from mamatch.models import Target
+    from sqlalchemy import select
+    with session_scope() as session:
+        listed = session.scalar(select(Target).where(Target.code_name == 'Project Kiln'))
+        paths += [f'/opportunities/{listed.id}', f'/opportunities/{listed.id}/report']
+    paths += [f'/document-demos/{kind}?state={state}' for kind, states in
+              {'info-memo': ('draft','review','buyer'), 'nda': ('draft','sent','complete'),
+               'loi': ('draft','review','revised')}.items() for state in states]
+    for lang in ('en', 'zh'):
+        for path in paths + ['/teaser-demo/']:
+            r = c.get(f'/{lang}{path}')
+            assert r.status_code == 200
+            parser = VisibleText(); parser.feed(r.text)
+            text = re.sub(r'https?://\S+', '', ' '.join(parser.parts))
+            forbidden = r'[\u4e00-\u9fff]' if lang == 'en' else r'[A-Za-z]'
+            assert not re.search(forbidden, text), (lang, path, re.findall(r'.{0,20}' + forbidden + r'.{0,20}', text))
+    page = c.get('/zh/document-demos/loi').text
+    for term in ('标的公司', '股权转让对价', '先决条件', '尽职调查', '法律约束力'):
+        assert term in page
+    assert '息税折旧及摊销前利润' in c.get('/zh/document-demos/info-memo').text
+    assert c.get('/zh/teaser-demo/?state=preview').status_code == 200
+    assert c.get('/zh/teaser-demo/?state=unknown').status_code == 400

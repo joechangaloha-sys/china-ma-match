@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}{{ T('中小企业转让', 'Small-business sales') }}{% endblock %} · mamatch</title>
+<title>{% block title %}{{ T('中小企业转让', 'Small-business sales') }}{% endblock %} · {{ T('中小企业并购平台', 'mamatch') }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
@@ -16,15 +16,15 @@
 <body class="{{ portal or 'public' }}">
 <div class="util"><div class="in">
   <span>{% if portal == 'internal' %}{{ T('内部 · 交易经理', 'Internal · deal managers') }}{% else %}{{ T('中小企业转让与收购', 'Selling and buying small businesses') }}{% endif %}</span>
-  <nav class="langs" aria-label="Language" data-language-switch>
-    {% for code, label in [('zh', '中文'), ('en', 'English')] %}<a href="/{{ code }}{{ edition_path }}" lang="{{ code }}" hreflang="{{ code }}" {{ 'aria-current="true"'|safe if lang == code }} class="{{ 'on' if lang == code }}">{{ label }}</a>{% endfor %}
+  <nav class="langs" aria-label="{{ T('语言', 'Language') }}" data-language-switch>
+    {% for code, label in [('zh', T('中文', 'Chinese')), ('en', T('英文', 'English'))] %}<a href="/{{ code }}{{ edition_path }}" lang="{{ code }}" hreflang="{{ code }}" {{ 'aria-current="true"'|safe if lang == code }} class="{{ 'on' if lang == code }}">{{ label }}</a>{% endfor %}
   </nav>
 </div></div>
 <header class="bar"><div class="in">
   {% if portal == 'internal' %}
-  <a class="brand" href="{{ I }}">mamatch <span class="pill internal-pill">{{ T('内部', 'INTERNAL') }}</span></a>
+  <a class="brand" href="{{ I }}">{{ T('中小企业并购平台', 'mamatch') }} <span class="pill internal-pill">{{ T('内部', 'INTERNAL') }}</span></a>
   {% else %}
-  <a class="brand" href="{{ P }}/">mamatch <small>{{ T('中小企业并购', 'Small-company M&A') }}</small></a>
+  <a class="brand" href="{{ P }}/">{{ T('中小企业并购平台', 'mamatch') }} <small>{{ T('中小企业并购', 'Small-company M&A') }}</small></a>
   {% endif %}
   <span class="who">
     {% if user %}<span class="small muted">{{ user.name or user.email }} · {{ L(ROLES[user.role]) }}</span>
@@ -33,8 +33,8 @@
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
   <nav>
-  {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("文件演示：备忘录 / NDA / LOI", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
-  {% if cfg.DEMO_MODE %}<a href="/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('独立简介演示（英文）', 'Teaser demo') }}</a>{% endif %}
+  {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("交易文件演示", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
+  {% if cfg.DEMO_MODE %}<a href="{{ P }}/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('项目简介演示', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}
     <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
     <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
@@ -69,7 +69,7 @@
 </main>
 {% if portal != 'internal' %}
 <footer class="foot"><div class="in small">
-  <span class="fbrand">mamatch <span class="tagline">{{ T('把企业交棒给对的人', 'Hand your company on to the right owner') }}</span></span>
+  <span class="fbrand">{{ T('中小企业并购平台', 'mamatch') }} <span class="tagline">{{ T('把企业交棒给对的人', 'Hand your company on to the right owner') }}</span></span>
   <p>{{ T('平台核验身份与资料来源，但不保证盈利、估值、产权或未来业绩；AI 生成内容均经人工审核。不提供法律、税务、会计或投资意见。',
           'We verify identity and document sources, but do not guarantee earnings, valuation, title or future performance. AI-drafted content is reviewed by people. Not legal, tax, accounting or investment advice.') }}</p>
   <p><a href="{{ P }}/fees">{{ T('费用与利益冲突', 'Fees and conflicts') }}</a> · <a href="{{ P }}/security">{{ T('保密与安全', 'Confidentiality and security') }}</a> · <a href="{{ P }}/conduct">{{ T('行为准则', 'Code of conduct') }}</a></p>
