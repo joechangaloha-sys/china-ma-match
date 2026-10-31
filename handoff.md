@@ -231,3 +231,16 @@ uv run mamatch create-user you@example.com --role deal_manager
 uv run mamatch serve                               # http://127.0.0.1:8600
 uv run mamatch export-static --out static-demo     # static demo; preview with the static-demo launch config (port 8601)
 ```
+
+## Kimi standalone teaser integration — 31 October 2026
+
+The original Project Willow page from Kimi's ZIP is served at `/teaser-demo/` inside
+the existing demo passcode gate. Open **Teaser demo** in the main navigation or
+**Open the standalone teaser demo** on the homepage. Chinese navigation labels
+the original English page clearly. The approval workflow also links to it.
+
+The original rendering, checks, data/rules panels, copy, JSON download and print/PDF
+controls remain available. This is fictional demonstration data; browser checks
+and illustrative approval fields do not approve or publish real deals. External
+e-signature and VDR connections remain deferred. Assets are packaged with the app;
+the routes are disabled outside demo mode. Work branch: `kimi/standalone-teaser`.

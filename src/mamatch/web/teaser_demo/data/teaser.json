@@ -1,0 +1,90 @@
+{
+  "teaser_spec_version": "0.1",
+  "listing_id": "demo-listing-0001",
+  "project_code": "Project Willow",
+  "public_headline": "Established industrial equipment maintenance business",
+  "industry_l1": "Industrial services",
+  "industry_l2": "Equipment maintenance and repair",
+  "region_public": "East China",
+  "business_summary_public": "The business provides preventive maintenance, emergency repair and parts-replacement services for industrial equipment used by manufacturing and warehouse operators.",
+  "service_categories_public": [
+    "Preventive maintenance",
+    "Emergency equipment repair",
+    "Replacement parts installation"
+  ],
+  "customer_mix_public": "A diversified base of manufacturing, logistics and industrial customers",
+  "operating_history_public": "More than 10 years",
+  "transaction_type_public": "Majority-share sale",
+  "stake_description_public": "The seller is open to discussing a majority or full sale",
+  "reason_for_sale_public": "The founder is considering succession planning and gradual retirement.",
+  "target_buyer_types": [
+    "Strategic buyer",
+    "Industrial-services consolidator",
+    "Experienced owner-operator"
+  ],
+  "process_timeline_public": "Initial expressions of interest are expected to be reviewed on a rolling basis.",
+  "nda_required": true,
+  "next_step_text": "Qualified parties may register interest through the platform before being invited to execute a confidentiality agreement.",
+  "financial_period_start": "2025-01-01",
+  "financial_period_end": "2025-12-31",
+  "financial_period_public": "FY2025",
+  "currency": "CNY",
+  "revenue_min": 25000000,
+  "revenue_max": 40000000,
+  "profit_metric_type": "Adjusted EBITDA",
+  "profit_min": 4000000,
+  "profit_max": 7000000,
+  "financial_basis_public": "Seller-provided management information",
+  "employee_count_min": 40,
+  "employee_count_max": 60,
+  "site_count_min": 3,
+  "site_count_max": 5,
+  "recurring_revenue_min_pct": 55,
+  "recurring_revenue_max_pct": 65,
+  "revenue_quality_public": "A proportion of revenue is generated under recurring or repeat-service arrangements.",
+  "margin_comment_public": "Profitability reflects the business's service mix and established regional customer base.",
+  "highlights": [
+    {
+      "text": "Established operating history of more than 10 years",
+      "source_claim_id": "claim-demo-001"
+    },
+    {
+      "text": "Revenue between RMB 25 million and RMB 40 million in FY2025",
+      "source_claim_id": "claim-demo-002"
+    },
+    {
+      "text": "Adjusted EBITDA between RMB 4 million and RMB 7 million in FY2025",
+      "source_claim_id": "claim-demo-003"
+    },
+    {
+      "text": "Recurring or repeat-service arrangements represented approximately 55%–65% of revenue",
+      "source_claim_id": "claim-demo-004"
+    },
+    {
+      "text": "Regional service network across three to five operating locations",
+      "source_claim_id": "claim-demo-005"
+    }
+  ],
+  "information_as_of": "2026-09-30",
+  "verification_label": "Checked against specified supporting documents",
+  "checks_completed_public": [
+    "Business registration details checked against the specified corporate record",
+    "FY2025 revenue range checked against the specified management schedule",
+    "Adjusted EBITDA range reconciled to the specified management schedule"
+  ],
+  "reviewer_role": "Deal manager",
+  "reviewer_id": "user-demo-101",
+  "seller_confirmed_at": "2026-10-15T10:30:00+08:00",
+  "internal_approved_at": "2026-10-16T14:00:00+08:00",
+  "publication_approved_by": "user-demo-101",
+  "anonymity_review_status": "passed",
+  "ai_assisted": false,
+  "ai_disclosure_required": false,
+  "source_claim_ids": [
+    "claim-demo-001",
+    "claim-demo-002",
+    "claim-demo-003",
+    "claim-demo-004",
+    "claim-demo-005"
+  ]
+}
