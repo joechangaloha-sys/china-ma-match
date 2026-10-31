@@ -244,3 +244,7 @@ controls remain available. This is fictional demonstration data; browser checks
 and illustrative approval fields do not approve or publish real deals. External
 e-signature and VDR connections remain deferred. Assets are packaged with the app;
 the routes are disabled outside demo mode. Work branch: `kimi/standalone-teaser`.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/4.
+Validation: 145 tests passed; original assets included in wheel; browser render, checks,
+data panel and 375px layout verified. Live route: https://43.153.223.242.sslip.io/teaser-demo/.
