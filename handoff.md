@@ -15,7 +15,7 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   earlier preparation and outreach fees credited, charged only at closing; free-listing sellers pay no success
   fee. Amounts come from `config.py` (`SUCCESS_FEE_RATE`, `SUCCESS_FEE_MIN_RMB`), so they stay in step with the
   fees page, and the entry links to `/fees`. All 104 tests pass (`uv run pytest`); both editions render with no
-  language leakage. PR: pending push access from this environment.
+  language leakage. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/1. Codex resumed the handoff, reran all 104 tests successfully, and pushed this branch for Tencent Lighthouse browser review (main unchanged).
 
 ## Live fictional demo and Git updates (29 Oct 2026)
 
