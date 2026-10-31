@@ -3,9 +3,9 @@
 An IM carries exact figures, so a buyer sees it only after signing an NDA. It still leaves out the
 company's identity (names, brands, city, registry code) until the seller approves name disclosure;
 those are masked in the adviser's notes and checked again after drafting. Every IM is a draft until
-the adviser approves it, and states that it was prepared from seller-provided, unaudited data.
+the deal manager and seller approve its exact version, and states that it was prepared from seller-provided, unaudited data.
 
-Claude writes the narrative when available; otherwise a template is used. The financial table and
+Narrative generation currently uses a deterministic template; AI calls are disabled. The financial table and
 the disclaimer are always generated here, never by the model.
 """
 
@@ -13,7 +13,7 @@ import re
 
 from sqlalchemy.orm import Session
 
-from . import llm, reid
+from . import reid, release
 from .datacheck import FIN_FIELDS, years
 from .models import InfoMemo, Target
 from .teaser import facts
@@ -107,21 +107,15 @@ def draft(session: Session, target: Target, language: str = "zh", use_llm: bool 
     notes = mask(target, target.description or "")
     parts = _offline(target, f, notes, language)
     generated_by = "offline"
-    if use_llm:
-        prompt = (f"Write in {LANGUAGES[language]}.\nFacts: {f}\nFinancials (RMB m): {target.financials}\n"
-                  f"Checklist answers: {target.disclosures}\nAdviser notes (masked): {notes}")
-        narrative = llm.structured(NARRATIVE_SYSTEM, prompt, NARRATIVE_SCHEMA)
-        if narrative is not None:
-            parts.update(narrative)
-            generated_by = llm.label()
+    # AI remains disabled until provider and input-data handling are approved.
 
     h = H[language]
     firm = target.firm.name if target.firm else ""
     disclaimer = (f"本备忘录根据卖方提供、未经审计的资料编制{'，并由AI辅助起草' if generated_by != 'offline' else ''}，"
-                  f"经{firm}审核。仅供已签署保密协议的买方评估之用，不构成任何保证或估值意见。"
+                  f"提交{firm}审核。仅供已签署保密协议的买方评估之用，不构成任何保证或估值意见。"
                   if language == "zh" else
                   f"Prepared from unaudited information provided by the seller{', drafted with AI assistance' if generated_by != 'offline' else ''}, "
-                  f"and reviewed by {firm}. For the evaluation of buyers who have signed an NDA only; no representation, "
+                  f"submitted for review by {firm}. For the evaluation of buyers who have signed an NDA only; no representation, "
                   "warranty or valuation opinion is given.")
     body = {
         "title": f"{target.code_name} · {'信息备忘录' if language == 'zh' else 'Information memorandum'}",
@@ -138,19 +132,22 @@ def draft(session: Session, target: Target, language: str = "zh", use_llm: bool 
     name_findings = [x for x in findings if x["field"] in IDENTITY_FIELDS]
     version = 1 + max((m.version for m in target.memos if m.language == language), default=0)
     memo = InfoMemo(target=target, version=version, language=language, body=body, name_findings=name_findings,
-                    generated_by=generated_by)
+                    generated_by=generated_by, source_hash=release.source_digest(target))
     session.add(memo)
     session.flush()
     return memo
 
 
-def approve(memo: InfoMemo) -> None:
-    """The adviser approves; an IM that still names the company cannot be approved."""
+def approve(memo: InfoMemo, user=None) -> None:
     if memo.name_findings:
         raise ValueError("Remove the identifying details before approving this info memo.")
-    memo.status = "approved"
+    release.approve(memo, user)
+
+
+def seller_approve(memo: InfoMemo, user=None) -> None:
+    release.seller_approve(memo, user)
 
 
 def shared_memo(target: Target, language: str = "zh") -> InfoMemo | None:
-    approved = [m for m in target.memos if m.status == "approved"]
-    return next((m for m in approved if m.language == language), approved[0] if approved else None)
+    approved = [m for m in target.memos if release.ready(m)]
+    return next((m for m in approved if m.language == language), None)

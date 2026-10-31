@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="description" content="Fictional-data teaser automation demo for a China M&A listing platform.">
+  <title>Project Willow · Teaser Automation Demo</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="mamatch-return" aria-label="mamatch navigation">
+    <a href="/en/">← Back to mamatch</a>
+    <span>Kimi’s original standalone teaser · English · fictional data</span>
+    <a href="/zh/teaser-demo/">Chinese edition →</a>
+      <a href="/en/document-demos">Info memo · NDA · LOI →</a>
+      <a href="/en/workflow">Approval workflow →</a>
+  </div>
+  <a class="skip-link" href="#teaser-preview">Skip to teaser</a>
+
+  <header class="site-header" id="top">
+    <div class="brand-block" aria-label="M&A Match demonstration platform">
+      <span class="brand-mark">MA</span>
+      <span class="brand-name">M&amp;A Match</span>
+    </div>
+    <nav class="site-nav" aria-label="Demo sections">
+      <a href="#teaser-preview">Teaser</a>
+      <a href="#automation">Automation</a>
+      <a href="#specification">Data spec</a>
+      <a href="#deployment">Deployment</a>
+    </nav>
+    <div class="demo-badge" role="status">
+      <span class="status-dot" aria-hidden="true"></span>
+      Fictional data
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-grid" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <p class="eyebrow">Teaser automation v0.1</p>
+        <h1 id="page-title">Project Willow</h1>
+        <p class="intro-dek">A fictional teaser rendered from structured demonstration data. The layout separates buyer-facing content from provenance, checks and release controls.</p>
+      </div>
+      <div class="release-card" aria-label="Current release state">
+        <span class="release-label">Release state</span>
+        <strong>Fictional preview</strong>
+        <span>Illustrative approval records only · no live publication</span>
+      </div>
+    </section>
+
+    <div class="workspace-grid">
+      <article class="teaser-document" id="teaser-preview" aria-labelledby="teaser-title">
+        <div class="document-banner">
+          <span>Confidential business-sale teaser</span>
+          <span>Demonstration data only</span>
+        </div>
+        <div id="teaser-content" class="teaser-content" aria-live="polite">
+          <div class="loading-state">Loading teaser data…</div>
+        </div>
+      </article>
+
+      <aside class="control-panel" id="automation" aria-labelledby="automation-title">
+        <div class="panel-heading">
+          <p class="eyebrow">Control room</p>
+          <h2 id="automation-title">Teaser automation</h2>
+          <p>Deterministic rendering and illustrative source-claim checks. This page does not approve or publish deals.</p>
+        </div>
+
+        <div class="action-grid" aria-label="Demo actions">
+          <button type="button" class="primary-action" id="render-button">Render teaser</button>
+          <button type="button" id="checks-button">Run checks</button>
+          <button type="button" id="copy-button">Copy teaser</button>
+          <button type="button" id="download-button">Download JSON</button>
+          <button type="button" id="print-button">Print / save PDF</button>
+        </div>
+
+        <div class="feedback-line" id="feedback-line" role="status" aria-live="polite">Awaiting action.</div>
+
+        <section class="status-stack" aria-labelledby="workflow-title">
+          <h3 id="workflow-title">Approval workflow</h3>
+          <ol class="workflow-list">
+            <li><span></span><div><strong>Structured data</strong><small>Five source claims loaded</small></div></li>
+            <li><span></span><div><strong>Anonymity check</strong><small>No direct identifiers detected</small></div></li>
+            <li><span></span><div><strong>Seller confirmation</strong><small>15 Oct 2026 · 10:30 CST</small></div></li>
+            <li><span></span><div><strong>Internal approval</strong><small>16 Oct 2026 · deal manager</small></div></li>
+          </ol>
+        </section>
+
+        <section class="wechat-preview" aria-labelledby="wechat-title">
+          <div class="wechat-chrome">
+            <span></span><span></span><span></span>
+          </div>
+          <h3 id="wechat-title">WeChat alert card</h3>
+          <div class="wechat-card">
+            <small>New matching listing</small>
+            <strong>Project Willow</strong>
+            <p>Industrial services · East China</p>
+            <dl>
+              <div><dt>Revenue</dt><dd>RMB 25m–40m</dd></div>
+              <div><dt>Adjusted EBITDA</dt><dd>RMB 4m–7m</dd></div>
+            </dl>
+            <a href="#teaser-preview">Review teaser</a>
+          </div>
+          <p class="panel-note">Illustrative alert only. Production WeChat delivery requires the verified account and active user subscription.</p>
+        </section>
+
+        <div class="panel-tabs" role="tablist" aria-label="Technical panels">
+          <button type="button" role="tab" aria-selected="true" aria-controls="tab-checks" id="tab-button-checks" data-tab="tab-checks">Checks</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="tab-data" id="tab-button-data" data-tab="tab-data">Data</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="tab-rules" id="tab-button-rules" data-tab="tab-rules">Rules</button>
+        </div>
+
+        <section class="tab-panel" role="tabpanel" id="tab-checks" aria-labelledby="tab-button-checks">
+          <div id="check-results" class="check-results">Run checks to inspect the current teaser record.</div>
+        </section>
+
+        <section class="tab-panel is-hidden" role="tabpanel" id="tab-data" aria-labelledby="tab-button-data">
+          <pre><code id="json-preview">Loading JSON…</code></pre>
+        </section>
+
+        <section class="tab-panel is-hidden" role="tabpanel" id="tab-rules" aria-labelledby="tab-button-rules">
+          <ul class="rule-list">
+            <li>Every public figure must match the approved input record.</li>
+            <li>Demo highlights reference illustrative claim IDs; this does not verify supporting evidence.</li>
+            <li>Verification wording is inserted deterministically.</li>
+            <li>Seller and internal approvals are required in the server-side workflow before real publication.</li>
+            <li>Any post-approval edit creates a new teaser version.</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <section class="specification-section" id="specification" aria-labelledby="specification-title">
+      <div class="section-heading">
+        <p class="eyebrow">Structured contract</p>
+        <h2 id="specification-title">Data specification</h2>
+        <p>The public teaser is assembled from controlled field groups rather than free-form AI output.</p>
+      </div>
+      <div class="spec-grid">
+        <article>
+          <span>01</span>
+          <h3>Identity</h3>
+          <p>Project code, headline, sector, broad region, service categories and customer mix.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Transaction</h3>
+          <p>Transaction type, stake description, process timeline, buyer types and NDA requirement.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Financial</h3>
+          <p>Period, currency, revenue range, profit metric, employee range and site range.</p>
+        </article>
+        <article>
+          <span>04</span>
+          <h3>Verification</h3>
+          <p>Claim IDs, reviewer role, checks completed, information date and approval records.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="deployment-section" id="deployment" aria-labelledby="deployment-title">
+      <div>
+        <p class="eyebrow">Tencent Lighthouse demo</p>
+        <h2 id="deployment-title">Deployment boundary</h2>
+      </div>
+      <div class="deployment-copy">
+        <p>This is Kimi’s original standalone fictional-data prototype, now served inside the passcode-gated mamatch Tencent Lighthouse demo. Its layout, rendering controls, JSON download and print/PDF view are preserved. It contains no real seller information, AI calls or confidential documents.</p>
+        <p>Browser checks here are demonstrations only. Real claim/evidence review, version-bound approval and publication gates belong to the separate server-side mandate workflow. This page never calls those publication actions.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Demonstration teaser using fictional data. Not an offer, recommendation, valuation or guarantee.</p>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="assets/app.js" defer></script>
+</body>
+</html>

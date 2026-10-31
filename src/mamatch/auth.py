@@ -10,7 +10,7 @@ import hmac
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from .models import AuditEvent, User, UserSession
@@ -54,8 +54,16 @@ def create_user(session: Session, *, email: str, password: str, role: str, name:
 
 
 def authenticate(session: Session, email: str, password: str) -> User | None:
-    user = session.scalar(select(User).where(User.email == email.strip().lower()))
+    normalized = email.strip().lower()
+    since = datetime.now(timezone.utc) - timedelta(minutes=15)
+    attempts = session.scalar(select(func.count(AuditEvent.id)).where(
+        AuditEvent.action == 'sign_in_failed', AuditEvent.created_at >= since,
+        AuditEvent.detail['email'].as_string() == normalized))
+    if attempts >= 10:
+        return None
+    user = session.scalar(select(User).where(User.email == normalized))
     if user is None or not user.active or not check_password(password, user.password_hash):
+        log(session, None, 'sign_in_failed', email=normalized)
         return None
     return user
 
