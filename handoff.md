@@ -8,6 +8,21 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Internal language cleanup — 31 October 2026
+
+Joe reported mixed Chinese/English on 试点数据 and other internal pages; each edition must be monolingual.
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/17 (unmerged, cumulative over #16).
+Converted legacy hard-coded bilingual templates for metrics, adviser/buyer checks, mandates, pipeline,
+new-mandate form, audit, target workspace and shared fee panels to explicit selected-edition labels.
+Localised status dictionaries, controls, accessible labels, placeholders and audit captions. Added display
+aliases for known fictional seed labels only; original records and audit JSON remain unchanged. Registry,
+licence, invoice and contact identifiers remain data. Original source disclosures remain editable data.
+Teaser/memo lists show only the selected edition. Locale links and original dropdown submission values
+are preserved. 209 tests passed, including language checks on seven internal routes, document filtering,
+immutable saved records and English province-label/Chinese canonical-value regression coverage.
+Deploy branch kimi/internal-language-cleanup for Tencent review and check laptop/mobile pages.
+MFA remains disabled; the local scanner remains active. Do not merge older cumulative PRs independently.
+
 ## MFA prepared but not live — 31 October 2026
 
 Joe: "got it. set it up but no need to make it live. so i don't ned to send an email".
