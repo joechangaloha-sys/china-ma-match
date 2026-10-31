@@ -519,3 +519,47 @@ class ReleaseClaim(Base):
     evidence_ref: Mapped[str] = mapped_column(Text)
     reviewed_by: Mapped[str] = mapped_column(String(200))
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class DealHandoff(Base):
+    """One NDA/access workflow per introduction. Providers remain mock-only until connected."""
+    __tablename__ = 'deal_handoffs'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    match_id: Mapped[int] = mapped_column(ForeignKey('matches.id'), unique=True)
+    provider: Mapped[str] = mapped_column(String(30), default='mock')
+    nda_state: Mapped[str] = mapped_column(String(30), default='draft')
+    template_version: Mapped[str] = mapped_column(String(100), default='')
+    template_hash: Mapped[str] = mapped_column(String(64), default='')
+    party_hash: Mapped[str] = mapped_column(String(64), default='')
+    envelope_id: Mapped[str] = mapped_column(String(100), default='')
+    signed_document_hash: Mapped[str] = mapped_column(String(64), default='')
+    evidence_ref: Mapped[str] = mapped_column(String(200), default='')
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    nda_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    authority_review_ref: Mapped[str] = mapped_column(Text, default='')
+    reviewed_by: Mapped[str] = mapped_column(String(100), default='')
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    room_ref: Mapped[str] = mapped_column(String(100), default='')
+    access_role: Mapped[str] = mapped_column(String(30), default='viewer')
+    vdr_state: Mapped[str] = mapped_column(String(30), default='not_requested')
+    access_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    seller_approved_hash: Mapped[str] = mapped_column(String(64), default='')
+    seller_approved_by: Mapped[str] = mapped_column(String(100), default='')
+    seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    provisioned_by: Mapped[str] = mapped_column(String(100), default='')
+    provisioned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    match: Mapped['Match'] = relationship()
+
+
+class HandoffEvent(Base):
+    """Append-only application audit; no confidential documents or signature credentials."""
+    __tablename__ = 'handoff_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    handoff_id: Mapped[int] = mapped_column(ForeignKey('deal_handoffs.id'))
+    action: Mapped[str] = mapped_column(String(50))
+    actor: Mapped[str] = mapped_column(String(100))
+    provider_event_id: Mapped[str | None] = mapped_column(String(150), nullable=True, unique=True)
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -92,7 +92,16 @@ def test_interest_from_board_and_name_disclosure(seeded):
     assert offers.express_interest(seeded, kiln, free) is m  # no duplicates
     with pytest.raises(ValueError, match="NDA"):
         offers.disclose_names(m)
+    from mamatch import handoff
+    from mamatch.models import User
+    manager = seeded.scalar(select(User).where(User.role == 'deal_manager'))
+    offers.analyst_decision(seeded, m, manager, accept=True)
     pipeline.move(seeded, m, "nda_signed")
+    with pytest.raises(ValueError, match="evidence"):
+        offers.disclose_names(m)  # a stage label alone is insufficient
+    h = handoff.start(m, manager)
+    handoff.apply_completion(h, handoff.MockSignatureProvider.completion(h), manager)
+    handoff.review_authority(h, manager, 'Fictional signing-authority evidence')
     offers.disclose_names(m)
     assert m.name_disclosed_at is not None
 
