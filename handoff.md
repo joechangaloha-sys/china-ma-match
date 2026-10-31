@@ -309,3 +309,8 @@ on primary actions, working teaser checks and no horizontal overflow at 375px.
 Branch `kimi/institutional-palette` includes prior review work; no merge to main.
 
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/7.
+
+Tencent deployed `5b3c75f`: shared palette verified on nine live English/Chinese
+home/teaser/document-demo views; new teaser CSS and favicon verified. Passcode gate
+remains active. Existing counts: 3 targets / 40 buyers / 13 matches / 0 documents /
+2 handoffs / 6 events.
