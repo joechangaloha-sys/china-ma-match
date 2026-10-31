@@ -24,6 +24,8 @@ BRANCH="$1"
 REPO_URL="$2"
 SRC=/opt/mamatch-src
 ENV_FILE=/opt/mamatch/.env
+exec 9>/opt/mamatch/deploy.lock
+flock -n 9 || { echo "Another deployment is running"; exit 1; }
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing $ENV_FILE. Run the original Lighthouse installer once first."
@@ -43,13 +45,21 @@ git reset --quiet --hard "origin/$BRANCH"
 
 COMPOSE=(docker compose --env-file "$ENV_FILE"
   -f deploy/lighthouse/compose.lighthouse.yaml -f deploy/lighthouse/compose.git.yaml)
-"${COMPOSE[@]}" up -d --build
+# Keep a recoverable application image. Schema changes must remain backward compatible.
+if docker inspect mamatch-lighthouse-web-1 >/dev/null 2>&1; then
+  OLD_IMAGE=$(docker inspect --format '{{.Image}}' mamatch-lighthouse-web-1)
+  docker tag "$OLD_IMAGE" "mamatch-rollback:$(date -u +%Y%m%dT%H%M%SZ)"
+fi
+"${COMPOSE[@]}" build web
+python3 deploy/lighthouse/recovery_check.py
+"${COMPOSE[@]}" run --rm --no-deps web python -m mamatch.migrations upgrade --adopt-existing
+"${COMPOSE[@]}" up -d --no-build
 
 for attempt in $(seq 1 60); do
   if "${COMPOSE[@]}" exec -T web python -c \
     "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=3)" \
     >/dev/null 2>&1; then
-    docker image prune -f >/dev/null
+    # Rollback images and verified backups are intentionally retained.
     echo "Deployed $(git log -1 --format='%h %s'). Website: $(grep '^MAMATCH_PUBLIC_URL=' "$ENV_FILE" | cut -d= -f2-)"
     exit 0
   fi

@@ -1,61 +1,55 @@
 import sqlite3
-
-from sqlalchemy import select
-
+import pytest
+from sqlalchemy import inspect,text
 from mamatch import db
-from mamatch.models import Buyer
+from mamatch.migrations import check,upgrade,head,downgrade_index
+from mamatch.migrations.baseline_schema import Base as Baseline
 
 
-def test_init_db_adds_new_columns_to_an_old_database(tmp_path):
-    path = tmp_path / "old.db"
-    con = sqlite3.connect(path)
-    con.execute("CREATE TABLE buyers (id INTEGER PRIMARY KEY, name VARCHAR(200), kind VARCHAR(20), source VARCHAR(20), "
-                "external_id VARCHAR(40), province VARCHAR(20), sectors JSON, target_sectors JSON, target_regions JSON, "
-                "deal_size_min FLOAT, deal_size_max FLOAT, rationale TEXT, is_example BOOLEAN, updated_at DATETIME)")
-    con.execute("INSERT INTO buyers (name, kind, source, external_id, province, sectors, target_sectors, target_regions,"
-                " rationale, is_example) VALUES ('老买方', 'listed', 'cninfo', '600000', '', '[]', '[]', '[]', '', 0)")
-    con.commit()
-    con.close()
-
-    url = f"sqlite:///{path}"
-    db.init_db(url)
-    with db.session_scope(url) as s:
-        b = s.scalar(select(Buyer))
-        assert b.status == "suggested" and b.target_deal_types == [] and b.excluded_sectors == []
+def test_partial_legacy_database_requires_review_and_is_not_modified(tmp_path):
+    path=tmp_path/'old.db'
+    con=sqlite3.connect(path)
+    con.execute('CREATE TABLE buyers (id INTEGER PRIMARY KEY, name VARCHAR(200))')
+    con.execute("INSERT INTO buyers VALUES (1,'原始记录')");con.commit();con.close()
+    engine=db.get_engine(f'sqlite:///{path}')
+    with pytest.raises(RuntimeError,match='adoption required'):upgrade(engine)
+    with pytest.raises(RuntimeError,match='missing tables'):upgrade(engine,adopt_existing=True)
+    assert [c['name'] for c in inspect(engine).get_columns('buyers')]==['id','name']
+    with engine.connect() as c:assert c.scalar(text('SELECT name FROM buyers'))=='原始记录'
 
 
-def test_legacy_files_quarantined_and_sessions_invalidated(tmp_path):
-    path = tmp_path / 'legacy-security.db'
-    con = sqlite3.connect(path)
-    con.execute('CREATE TABLE documents (id INTEGER PRIMARY KEY, target_id INTEGER, uploaded_by INTEGER, kind VARCHAR(30), filename VARCHAR(200), stored_path VARCHAR(300), content_type VARCHAR(100), size INTEGER, sha256 VARCHAR(64), text TEXT, in_data_room BOOLEAN, created_at DATETIME)')
-    con.execute("INSERT INTO documents (id, target_id, filename, stored_path) VALUES (1, 1, 'old.txt', '/old.txt')")
-    con.execute('CREATE TABLE user_sessions (token VARCHAR(64) PRIMARY KEY, user_id INTEGER, created_at DATETIME, expires_at DATETIME)')
-    con.execute("INSERT INTO user_sessions VALUES ('old-token', 1, '2026-10-01', '2026-12-01')")
-    con.commit(); con.close()
-    url = f'sqlite:///{path}'
-    db.init_db(url)
-    from mamatch.models import Document, UserSession
-    with db.session_scope(url) as s:
-        doc = s.get(Document, 1)
-        assert doc.security_status == 'quarantined' and doc.scanned_sha256 == ''
-        assert s.get(UserSession, 'old-token').last_seen_at is None
+def test_explicit_baseline_adoption_preserves_records(tmp_path):
+    engine=db.get_engine(f'sqlite:///{tmp_path/"baseline.db"}')
+    Baseline.metadata.create_all(engine)
+    with engine.begin() as c:c.execute(text("INSERT INTO adviser_firms (id,name,city,created_at) VALUES (1,'原始顾问','上海','2026-10-31')"))
+    with pytest.raises(RuntimeError,match='adoption required'):upgrade(engine)
+    upgrade(engine,adopt_existing=True);check(engine)
+    with engine.connect() as c:
+        assert c.scalar(text('SELECT name FROM adviser_firms'))=='原始顾问'
+        assert c.scalar(text('SELECT version_num FROM alembic_version'))==head()
 
 
-def test_boolean_migration_uses_portable_sql_literals():
-    from mamatch.models import Base
-    from sqlalchemy.dialects import postgresql
-    statements = []
-    class Inspector:
-        def get_columns(self, name):
-            return [{'name':c.name} for c in Base.metadata.tables[name].columns if c.name != 'is_demo']
-    class Connection:
-        def __enter__(self):return self
-        def __exit__(self,*args):pass
-        def execute(self,statement):statements.append(str(statement))
-    class Engine:
-        dialect = postgresql.dialect()
-        def begin(self):return Connection()
-    from unittest.mock import patch
-    with patch('sqlalchemy.inspect',return_value=Inspector()):
-        db._add_missing_columns(Engine())
-    assert 'ALTER TABLE users ADD COLUMN is_demo BOOLEAN DEFAULT FALSE' in statements
+def test_fresh_upgrades_idempotence_and_reversible_index(db_url):
+    engine=db.get_engine(db_url);check(engine);upgrade(engine);check(engine)
+    assert 'ix_audit_events_created_at' in {i['name'] for i in inspect(engine).get_indexes('audit_events')}
+    downgrade_index(engine)
+    with pytest.raises(RuntimeError,match='upgrade required'):check(engine)
+    upgrade(engine);check(engine)
+
+
+def test_unknown_revision_and_schema_drift_fail_closed(db_url):
+    engine=db.get_engine(db_url)
+    with engine.begin() as c:c.execute(text("UPDATE alembic_version SET version_num='unknown_future'"))
+    with pytest.raises(Exception):upgrade(engine)
+    with pytest.raises(RuntimeError):check(engine)
+    with engine.begin() as c:
+        c.execute(text('UPDATE alembic_version SET version_num=:v'),{'v':head()})
+        c.execute(text('ALTER TABLE buyers ADD COLUMN unreviewed_column INTEGER'))
+    with pytest.raises(RuntimeError,match='columns differ'):check(engine)
+    with pytest.raises(RuntimeError,match='columns differ'):upgrade(engine)
+
+
+def test_web_startup_does_not_initialise_missing_database(tmp_path):
+    engine=db.get_engine(f'sqlite:///{tmp_path/"empty.db"}')
+    with pytest.raises(RuntimeError,match='upgrade required'):check(engine)
+    assert inspect(engine).get_table_names()==[]
