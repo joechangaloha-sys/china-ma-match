@@ -396,3 +396,6 @@ Browser QA: 180 public/demo checks across both editions at 320/390/768/1024/1366
 No page-level horizontal overflow found. Wide tables intentionally scroll inside
 their containers. Local QA uses fictional isolated data, not live account mutations.
 Branch `kimi/responsive-layouts`.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/12. All 151 tests pass.
+Browser checks confirm 44px phone actions and a working document-controls shortcut.
