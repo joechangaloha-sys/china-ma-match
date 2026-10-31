@@ -30,19 +30,23 @@
       <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/decline"><button class="ghost">{{ T('不考虑', 'Decline') }}</button></form>
     </div>
     {% elif nda_available(m) %}
+    <p class="small muted">{{ T('仅为虚构演示，不代表已核验的电子签名。真实交易须通过经审核的电子签名服务。', 'Fictional demonstration only; this is not a verified electronic signature. Real deals require an approved e-signature service.') }}</p>
     <details open><summary>{{ T('保密承诺', 'Confidentiality undertaking') }}</summary><p class="small nda">{{ L(nda_text) }}</p></details>
-    <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/nda"><button>{{ T('接受并签署', 'Accept and sign') }}</button></form>
+    <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/nda"><button>{{ T('演示：接受保密承诺', 'Demo: accept undertaking') }}</button></form>
     {% elif m.stage == 'interested' %}<p class="small muted">{{ T('交易经理审核中。', 'The deal manager is reviewing this.') }}</p>
     {% endif %}
 
-    {% if m.stage in after_nda %}
+    {% if m.stage in after_nda and m.target.is_example %}
+      {% set hand = handoff.get(m) %}
+      {% if handoff.access_active(hand) %}
       {% set im = shared_memo(m.target, lang) %}
       {% if im %}<details><summary>{{ T('信息备忘录', 'Info memo') }}</summary>{{ memo_view(im) }}</details>{% endif %}
-      {% if m.data_room_granted_at %}
       <h4>{{ T('资料室', 'Data room') }}</h4>
       <ul class="small">{% for d in m.target.documents if d.in_data_room %}<li><a href="{{ P }}/buyer/documents/{{ d.id }}">{{ d.filename }}</a> <span class="muted">{{ L(CHECKLIST[d.kind]) }}</span></li>{% else %}<li class="muted">{{ T('暂无文件', 'No documents yet') }}</li>{% endfor %}</ul>
       <p class="small muted">{{ T('每次查看都会被记录。', 'Every view is logged.') }}</p>
-      {% else %}<p class="small muted">{{ T('资料室待卖方开放。', 'The seller has not opened the data room yet.') }}</p>{% endif %}
+      {% else %}<p class="small muted">{{ T('资料室访问状态：', 'Room access: ') }}{{ L(HANDOFF_ACCESS_LABELS[handoff.access_status(hand)]) }}</p>{% endif %}
+      {% if hand %}<p class="small muted">{{ T('签署与资料室均为离线模拟，未连接外部服务。', 'Signing and room access are offline simulations; external services are not connected.') }}</p>{% endif %}
+      {% if handoff.evidence_reviewed(hand) %}
       {% set o = latest_offer(m) %}
       <details class="offer" id="offer-{{ m.id }}" {{ 'open' if not o }}>
         <summary>{{ T('意向报价（非约束性）', 'Indicative offer (non-binding)') }}{% if o %} · {{ T('已提交', 'submitted') }} {{ o.submitted_at.strftime('%Y-%m-%d') }}{% endif %}</summary>
@@ -63,6 +67,7 @@
           <div class="wide"><button>{{ T('提交意向报价', 'Submit indicative offer') if not o else T('更新报价', 'Update offer') }}</button></div>
         </form>
       </details>
+      {% endif %}
     {% endif %}
   </div>
   {% else %}

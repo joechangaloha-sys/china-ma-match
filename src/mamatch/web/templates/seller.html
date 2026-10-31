@@ -67,7 +67,7 @@
     <h3>{{ latest_teaser.body.headline }}</h3>
     <p>{{ latest_teaser.body.summary }}</p>
     <ul>{% for h in latest_teaser.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
-    {% if latest_teaser.seller_approved_at %}<span class="pill">{{ T('您已确认', 'You approved this') }} ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
+    {% if release.seller_current(latest_teaser) %}<span class="pill">{{ T('您已确认', 'You approved this') }} ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
     {% else %}
     <form method="post" action="{{ P }}/seller/{{ t.id }}/teasers/{{ latest_teaser.id }}/approve"><button>{{ T('确认此简介', 'Approve this teaser') }}</button></form>
     <p class="small muted">{{ T('确认前不会公开或发送给任何买方。', 'Nothing is published or sent before you approve.') }}</p>
@@ -127,9 +127,14 @@
     {% for m in sent %}
     <tr>
       <td>{% if m.name_disclosed_at %}<b>{{ m.buyer.name }}</b>{% else %}{{ anon_buyer(m.buyer, lang) }}{% endif %}</td>
-      <td>{{ L(STAGES[m.stage]) }}{% if m.data_room_granted_at %}<br><span class="pill">{{ T('资料室已开放', 'data room open') }}</span>{% endif %}</td>
+      <td>{{ L(STAGES[m.stage]) }}{% set hand = handoff.get(m) %}{% if hand %}<br><span class="pill">{{ L(HANDOFF_ACCESS_LABELS[handoff.access_status(hand)]) }}</span>{% endif %}</td>
       <td class="actions">{% if m.stage in after_nda %}
-        {% if not m.data_room_granted_at %}<form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">{{ T('开放资料室', 'Open data room') }}</button></form>{% endif %}
+        {% if hand and handoff.access_status(hand) == 'awaiting_seller' %}
+        <p class="small">{{ T('虚构资料室，只读权限，到期时间：', 'Fictional room, read-only access, expires: ') }}{{ hand.access_expires_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
+        <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/grant"><button class="ghost">{{ T('批准此范围，等待开通', 'Approve this scope; await provisioning') }}</button></form>
+        {% elif hand and hand.vdr_state == 'active' %}
+        <form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/revoke"><button class="ghost">{{ T('撤销演示访问', 'Revoke demo access') }}</button></form>
+        {% elif not hand or hand.vdr_state == 'not_requested' %}<p class="small muted">{{ T('等待交易经理核对签署证据并准备资料室请求。', 'Awaiting signature-evidence review and a room-access request from the deal manager.') }}</p>{% endif %}
         {% if not m.name_disclosed_at %}<form method="post" action="{{ P }}/seller/{{ t.id }}/matches/{{ m.id }}/disclose"><button class="ghost">{{ T('互相披露名称', 'Disclose names') }}</button></form>{% endif %}
         {% endif %}</td>
     </tr>
@@ -180,6 +185,12 @@
 <section class="panel" id="memo">
   <h2>{{ T('信息备忘录', 'Info memo') }} <span class="pill">{{ T('已审核', 'approved') if memo.status == 'approved' else T('草稿', 'draft') }}</span></h2>
   {{ memo_view(memo) }}
+  {% if release.seller_current(memo) %}
+  <p class="small">{{ T('您已确认此版本。内容或来源变更后须重新审核。', 'You approved this version. Changes to content or source data require a new review.') }}</p>
+  {% elif release.analyst_current(memo) %}
+  <p class="small">{{ T('请核对上述版本。确认前不会向买方提供。', 'Review the version above. It stays unavailable to buyers until you approve.') }}</p>
+  <form method="post" action="{{ P }}/seller/{{ t.id }}/memos/{{ memo.id }}/approve"><button>{{ T('确认此版本备忘录', 'Approve this memo version') }}</button></form>
+  {% else %}<p class="small muted">{{ T('待交易经理审核当前版本。', 'The current version needs deal-manager review.') }}</p>{% endif %}
 </section>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,16 @@
+/* Shared institutional palette. Reference: Japan IR Index's current navy edition.
+   White paper, navy structure, cool neutral surfaces; colour signals are semantic. */
+:root {
+  --house-paper: #ffffff;
+  --house-wash: #f7f8fa;
+  --house-ink: #1a1f2b;
+  --house-ink-2: #3a414c;
+  --house-muted: #5b6472;
+  --house-rule: #dfe0e1;
+  --house-rule-hair: #ebeced;
+  --house-navy: #0b2545;
+  --house-blue: #1f4e8c;
+  --house-tint: #eef2f8;
+  --house-on-dark: #ffffff;
+  --house-on-dark-soft: #c9d6e8;
+}

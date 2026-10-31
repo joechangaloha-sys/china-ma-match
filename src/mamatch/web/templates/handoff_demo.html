@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ T('保密协议与资料室交接', 'NDA and VDR handoff') }}{% endblock %}
+{% block body %}
+<p class="small muted">{{ T('虚构流程演示 · Project Willow', 'Fictional workflow · Project Willow') }}</p>
+<h1>{{ T('签署完成之后，还需要批准。', 'A signature is one step. Access needs approval.') }}</h1>
+<p class="sub">{{ T('从保密协议到限时资料室访问，每一步均有独立检查。', 'From NDA to time-limited room access, each step has its own checks.') }}</p>
+<p class="panel small">{{ T('离线模拟：未连接腾讯电子签或任何资料室。没有真实合同、通知、邀请或文件分发。每次切换场景均使用隔离的临时数据库，不会更改项目记录。', 'Offline simulation: Tencent eSign and VDR services are not connected. No real contract, notification, invitation or document is issued. Each scenario uses an isolated temporary database and cannot change mandate records.') }}</p>
+<div class="workflow-steps">
+{% for key,num,zh,en in [('signature','01','模拟签署凭据','Mock signing receipt'),('evidence','02','签署权限人工审核','Authority review'),('seller','03','卖方批准此范围','Seller scope approval'),('access','04','模拟资料室开通','Mock room provisioning')] %}
+<div class="workflow-step"><span class="small muted">{{ num }}</span><strong>{{ T(zh,en) }}</strong><span class="pill {{ 'low' if checks[key] else 'medium' }}">{{ T('通过','Passed') if checks[key] else T('未满足','Not satisfied') }}</span></div>
+{% endfor %}
+</div>
+<h2>{{ T('尝试交接场景', 'Try a handoff scenario') }}</h2>
+<div class="scenario-links">
+{% for key,zh,en in [('awaiting-signature','等待签署','Awaiting signature'),('missing-review','缺少权限审核','Missing authority review'),('awaiting-seller','等待卖方批准','Awaiting seller'),('pending-provisioning','批准但未开通','Approved, not provisioned'),('active','访问有效','Access active'),('expired','访问到期','Access expired'),('revoked','卖方撤销','Access revoked'),('changed-parties','签约主体变化','Parties changed'),('cancelled','签署已取消','Signing cancelled')] %}
+<a class="button {{ 'ghost' if scenario != key }}" href="{{ P }}/handoff?scenario={{ key }}" {{ 'aria-current=page' if scenario == key }}>{{ T(zh,en) }}</a>
+{% endfor %}
+</div>
+<div class="cols">
+<section class="panel">
+<h2>{{ T('当前交接状态', 'Current handoff status') }}</h2>
+<p><span class="pill {{ 'low' if checks.access else 'high' }}">{{ L(HANDOFF_ACCESS_LABELS[access_status]) }}</span></p>
+<dl class="small"><dt>{{ T('保密协议', 'NDA') }}</dt><dd>{{ L(NDA_LABELS[h.nda_state]) }}</dd><dt>{{ T('访问范围', 'Access scope') }}</dt><dd>{{ T('独立买方组 · 只读 · 七天演示期限', 'Separate participant group · read-only · seven-day demo period') }}</dd><dt>{{ T('到期时间', 'Expiry') }}</dt><dd>{{ h.access_expires_at.strftime('%Y-%m-%d %H:%M') ~ ' ' ~ T('协调世界时', 'UTC') if h.access_expires_at else '—' }}</dd></dl>
+<p>{{ T('只有收到当前协议的模拟凭据、完成人工权限审核、取得卖方批准并确认开通，演示访问才会生效。', 'Demo access activates only after the current NDA receipt, human authority review, seller approval and provisioning confirmation.') }}</p>
+<p class="small muted">{{ T('到期或撤销后，服务器立即拒绝演示文件请求；旧签署凭据重放不会恢复访问。', 'After expiry or revocation, the server rejects demo file requests. Replaying an old signing receipt cannot restore access.') }}</p>
+</section>
+<section class="panel">
+<h2>{{ T('留下证据，保留控制。', 'Keep the evidence. Keep control.') }}</h2>
+<ul class="small"><li>{{ T('协议版本与主体绑定，不能套用到另一方。', 'NDA version and parties are bound together; proof cannot be reused for another party.') }}</li><li>{{ T('签署完成不等于已核验签署权限。', 'Signing completion does not establish authority to bind a company.') }}</li><li>{{ T('卖方批准绑定资料室、只读权限及到期时间。', 'Seller approval binds the room, read-only role and expiry.') }}</li><li>{{ T('批准后仍须确认资料室已开通。', 'Approval is followed by a separate provisioning confirmation.') }}</li><li>{{ T('真实签署与资料室连接保留为待办，不会自动开通。', 'Real signing and VDR connections remain deferred to-dos; none are activated automatically.') }}</li></ul>
+<p class="small">{{ T('此场景记录了 %s 个模拟审计事件。', 'This scenario records %s simulated audit events.')|format(event_count) }}</p>
+<details><summary>{{ T('模拟文件指纹', 'Mock document fingerprint') }}</summary><code class="hash">{{ h.signed_document_hash or '—' }}</code></details>
+</section>
+</div>
+<p><a href="{{ P }}/workflow">← {{ T('资料与版本批准演示', 'Evidence and version approval demo') }}</a> · <a href="{{ P }}/security">{{ T('保密与安全', 'Confidentiality and security') }}</a></p>
+{% endblock %}
