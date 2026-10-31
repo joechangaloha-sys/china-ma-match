@@ -8,6 +8,19 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Main merged and Tencent deployment — 31 October 2026
+
+Joe explicitly instructed: "merge the new pages with main so the website will show all the changes".
+Cumulative PR #9 was merged as `fae4f62` and `main` deployed to Tencent Lighthouse.
+This includes the teaser, information memo, NDA and LOI demos, both language editions,
+shared institutional palette, approval controls and deferred NDA/VDR workflow.
+The code is identical to the reviewed version that passed 150 tests.
+The old rule against agent merges remains the default for future tasks; this merge
+was explicitly authorised by Joe. Older review PRs contain superseded copies of
+these changes and should not be merged over main. External providers remain deferred.
+
+
+
 ## NDA/VDR mock workflow and deferred connections (31 Oct 2026)
 
 - Joe: "lets set up external connections later. record them as to-dos and continue building".
