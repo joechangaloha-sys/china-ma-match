@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import matching, pipeline, plans
+from . import matching, pipeline, plans, release
 from .models import Buyer, DealEvent, Match, Target, Teaser
 
 AFTER_NDA = {"nda_signed", "im_sent", "loi", "closing", "closed"}
@@ -28,8 +28,8 @@ def outreach_candidates(target: Target) -> list[Match]:
 
 
 def shared_teaser(target: Target, language: str = "zh") -> Teaser | None:
-    approved = [t for t in target.teasers if t.status == "approved"]
-    return next((t for t in approved if t.language == language), approved[0] if approved else None)
+    approved = [t for t in target.teasers if release.ready(t)]
+    return next((t for t in approved if t.language == language), None)
 
 
 def approve_and_send(session: Session, match: Match) -> DealEvent:
@@ -115,6 +115,8 @@ def public_inquiry(session: Session, target: Target, *, name: str, company: str,
 
 
 def disclose_names(match: Match) -> None:
+    if not match.target.is_example:
+        raise ValueError("Real name disclosure requires a verified NDA and external VDR handoff.")
     if match.stage not in AFTER_NDA:
         raise ValueError("Names are disclosed only after an NDA is signed.")
     match.name_disclosed_at = datetime.now(timezone.utc)
@@ -162,6 +164,8 @@ def nda_available(match: Match) -> bool:
 def accept_nda(session: Session, match: Match, user) -> None:
     from . import auth
 
+    if not match.target.is_example:
+        raise ValueError("A verified e-signature provider is required for real mandates.")
     if not nda_available(match):
         raise ValueError("保密协议尚不可签署 The NDA is not available yet.")
     match.nda_accepted_at = datetime.now(timezone.utc)
@@ -174,6 +178,8 @@ def grant_data_room(session: Session, match: Match, user) -> None:
     """Seller-approved disclosure: this buyer may open the documents marked for the data room."""
     from . import auth
 
+    if not match.target.is_example:
+        raise ValueError("Real documents must be shared through an approved professional VDR.")
     if match.stage not in AFTER_NDA:
         raise ValueError("Documents are shared only after an NDA.")
     match.data_room_granted_at = datetime.now(timezone.utc)
@@ -181,7 +187,7 @@ def grant_data_room(session: Session, match: Match, user) -> None:
 
 
 def can_view_document(match: Match | None, doc) -> bool:
-    return (match is not None and doc.in_data_room and match.target_id == doc.target_id
+    return (match is not None and match.target.is_example and doc.in_data_room and match.target_id == doc.target_id
             and match.data_room_granted_at is not None and match.stage in AFTER_NDA)
 
 
@@ -206,6 +212,8 @@ def submit_offer(session: Session, match: Match, user, *, price_low: float | Non
     from .models import IndicativeOffer
     from .taxonomy import FOUNDER_TRANSITION, TIMING
 
+    if not match.target.is_example:
+        raise ValueError("A verified NDA workflow is required for real mandates.")
     if match.stage not in AFTER_NDA or match.stage == "closed":
         raise ValueError("签署保密协议后才能提交意向报价 Offers can be submitted only after the NDA.")
     if price_low is None or price_high is None or price_low <= 0 or price_high < price_low:

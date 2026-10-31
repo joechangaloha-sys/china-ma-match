@@ -15,6 +15,17 @@
     <tr><td>{{ T('律师、会计、税务、尽调', 'Legal, accounting, tax, diligence') }}</td><td colspan="2">{{ T('合作专业机构固定报价，单独签约', 'Fixed prices from partner firms, contracted separately') }}</td></tr>
   </table>
 </section>
+<section class="panel">
+  <h2>{{ T('成功费示例', 'Success-fee examples') }}</h2>
+  <p>{{ T('仅适用于推介服务客户。未成交不收取成功费；准备费与推介费另按约定收取。以下为税前示例，假设此前已支付一次准备包与一期推介费；抵扣减少成交时应付余额，不重复收费。', 'For outreach clients only. No success fee without closing; preparation and outreach fees are charged separately as agreed. These pre-tax examples assume one preparation pack and one outreach period already paid. Credits reduce the balance due at closing.') }}</p>
+  <div class="tbl"><table class="small"><tr><th>{{ T('成交价', 'Deal value') }}</th><th>{{ T('成功费（抵扣前）', 'Gross success fee') }}</th><th>{{ T('实际费率', 'Effective rate') }}</th><th>{{ T('此前费用抵扣', 'Earlier-fee credit') }}</th><th>{{ T('成交时余额', 'Balance at closing') }}</th></tr>
+  {% for deal in [2000000, 7500000, 20000000] %}
+  {% set gross = [deal * cfg.SUCCESS_FEE_RATE, cfg.SUCCESS_FEE_MIN_RMB]|max %}
+  {% set credit = [cfg.PREP_PACK_FEE_RMB + cfg.SELLER_PLAN_FEE_RMB, gross]|min %}
+  <tr><td>RMB {{ '{:,.0f}'.format(deal) }}</td><td>RMB {{ '{:,.0f}'.format(gross) }}</td><td>{{ '%g'|format(gross / deal * 100) }}%</td><td>RMB {{ '{:,.0f}'.format(credit) }}</td><td>RMB {{ '{:,.0f}'.format(gross - credit) }}</td></tr>
+  {% endfor %}</table></div>
+  <p class="small muted">{{ T('最低成功费对小额交易的实际费率较高。价格仍为试点方案，请在委托前确认。', 'The minimum creates a higher effective rate on smaller transactions. Pricing remains a pilot proposal to confirm before engagement.') }}</p>
+</section>
 <section class="panel small">
   <h2>{{ T('利益冲突', 'Conflicts') }}</h2>
   <p>{{ T('平台撮合买卖双方，可能同时与双方有服务关系。我们会在引荐前披露收费安排；交易经理不得持有所推介项目的权益；合作专业机构的转介关系会事先告知。',

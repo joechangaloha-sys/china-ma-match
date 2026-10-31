@@ -201,10 +201,10 @@ def target_teaser(target_id: int, language: str = Form("zh"), user: User = Depen
 def teaser_approve(teaser_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
     tz = s.get(Teaser, teaser_id) or not_found()
     try:
-        teaser.approve(tz)
+        teaser.approve(tz, user)
     except ValueError as exc:
         return back(f"{I}/targets/{tz.target_id}#teasers", str(exc))
-    auth.log(s, user, "teaser_approve", target_id=tz.target_id, teaser_id=tz.id)
+    auth.log(s, user, "teaser_approve", target_id=tz.target_id, teaser_id=tz.id, content_hash=tz.analyst_content_hash)
     if tz.target.status in ("draft", "documents_requested", "extraction_review"):
         tz.target.status = "seller_approval"
     return back(f"{I}/targets/{tz.target_id}#teasers", "已批准，等待卖方确认 Approved; waiting for the seller")
@@ -281,10 +281,10 @@ def target_memo(target_id: int, language: str = Form("zh"), user: User = Depends
 def memo_approve(memo_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
     m = s.get(InfoMemo, memo_id) or not_found()
     try:
-        infomemo.approve(m)
+        infomemo.approve(m, user)
     except ValueError as exc:
         return back(f"{I}/targets/{m.target_id}#memo", str(exc))
-    auth.log(s, user, "memo_approve", target_id=m.target_id, memo_id=m.id)
+    auth.log(s, user, "memo_approve", target_id=m.target_id, memo_id=m.id, content_hash=m.analyst_content_hash)
     return back(f"{I}/targets/{m.target_id}#memo", "Info memo approved")
 
 
@@ -417,3 +417,33 @@ def pipeline_view(request: Request, user: User = Depends(dm), s: Session = Depen
     rows = s.scalars(select(Match).where(Match.stage != "suggested").order_by(Match.updated_at.desc())).all()
     by_stage = {k: [m for m in rows if m.stage == k] for k in pipeline.STAGES if k != "suggested"}
     return render(request, "pipeline.html", user, portal="internal", by_stage=by_stage, allowed_next=pipeline.allowed_next)
+
+
+@router.get("/review/{kind}/{artifact_id}", response_class=HTMLResponse)
+def document_review(kind: str, artifact_id: int, request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
+    from .. import release
+    artifact = _review_artifact(s, kind, artifact_id)
+    checked = {r.claim_path: r for r in release.reviews(artifact)}
+    return render(request, "document_review.html", user, portal="internal", a=artifact, kind=kind,
+                  claims=release.assertions(artifact.body), checked=checked,
+                  errors=release.validation_errors(artifact))
+
+
+def _review_artifact(s, kind, artifact_id):
+    if kind not in ('teaser', 'memo'):
+        not_found()
+    return s.get(Teaser if kind == 'teaser' else InfoMemo, artifact_id) or not_found()
+
+
+@router.post("/review/{kind}/{artifact_id}")
+def review_assertion(kind: str, artifact_id: int, claim_path: str = Form(''), evidence_ref: str = Form(''), document_id: int = Form(0),
+                     user: User = Depends(dm), s: Session = Depends(get_session)):
+    from .. import release
+    artifact = _review_artifact(s, kind, artifact_id)
+    try:
+        record = release.review_claim(artifact, claim_path, evidence_ref, user, document_id)
+        auth.log(s, user, 'claim_evidence_reviewed', target_id=artifact.target_id,
+                 claim_path=claim_path, content_hash=record.content_hash, evidence_ref=record.evidence_ref)
+    except ValueError as exc:
+        return back(f'{I}/review/{kind}/{artifact_id}', str(exc))
+    return back(f'{I}/review/{kind}/{artifact_id}', '证据审核已记录 Evidence review recorded')

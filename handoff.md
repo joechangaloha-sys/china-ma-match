@@ -8,6 +8,41 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Evidence-bound document release (31 Oct 2026, branch kimi/release-controls)
+
+- Joe approved the review recommendations and asked to build and show them on the website. First
+  implementation: bilingual `/workflow` fictional walkthrough, clearer fee wording and worked examples,
+  `ReleaseClaim` evidence records linked to mandate documents and hashes, analyst/seller approval hashes,
+  seller info-memo approval, and release checks on public listing/detail pages and teaser distribution.
+- Source/content/evidence changes invalidate release. Every assertion and public card field needs human
+  evidence review. Fictional reviews are labelled and isolated from real mandates. Legacy hashless
+  approvals are not trusted; example documents are regenerated, real documents require review.
+- Document AI calls are disabled. Real mandates cannot use demo click NDAs, in-app buyer document downloads,
+  name disclosure, post-NDA memo display or indicative offers until the verified-signature/external-VDR
+  handoff is integrated. Fictional examples retain their demonstration flow.
+- CSRF tokens protect signed-in forms; cross-origin submissions are rejected. Account sign-ins are limited
+  after ten failures in a rolling 15-minute window. Docker now installs `uv.lock` with pinned uv.
+- Prices are unchanged; the fee page explicitly shows the 15% effective minimum at RMB 2m and credits.
+- Pending integrations: signature provider and signer authority proof; external VDR expiry/revocation;
+  MFA, malware scanning, formal migrations, legal/data review; opt-in alerts/WeChat. The website labels
+  these limits. Do not present this as a production launch or mainland CloudBase deployment.
+- Validation: full offline test suite, legacy SQLite upgrade preserving 3 targets/40 buyers/13 matches,
+  browser scenario checks and 375px layouts. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/2. All 117 offline tests pass. Existing seller FAQ PR #1 is included
+  in this branch; no merge or direct main push. The review branch is deployed to Lighthouse.
+- Live HTTPS verification passed all 14 zh/en workflow scenarios, fee examples, seller wording, internal
+  evidence view and a CSRF-protected form round-trip. PostgreSQL still has 3 targets, 40 buyers, 13 matches
+  and 0 uploaded documents. A restricted database backup was saved under `/opt/mamatch/backups/` before
+  the additive upgrade. Real-data/provider prerequisites above remain open.
+
+## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
+
+- Added a "Questions from sellers" / 卖方常见问题 section to the public seller page (`page_sell.html`), with one
+  bilingual entry explaining the success fee for outreach clients: 4% of the deal value, minimum RMB 300,000,
+  earlier preparation and outreach fees credited, charged only at closing; free-listing sellers pay no success
+  fee. Amounts come from `config.py` (`SUCCESS_FEE_RATE`, `SUCCESS_FEE_MIN_RMB`), so they stay in step with the
+  fees page, and the entry links to `/fees`. All 104 tests pass (`uv run pytest`); both editions render with no
+  language leakage. PR: pending push access from this environment.
+
 ## Live fictional demo and Git updates (29 Oct 2026)
 
 - **Lighthouse demo:** Singapore server `43.153.223.242`, temporary HTTPS address

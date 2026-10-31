@@ -9,8 +9,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, authority, documents, listing, offers, plans, teaser
-from ..models import MandateAuthorization, Match, Target, Teaser, User
+from .. import auth, authority, documents, listing, offers, plans, teaser, infomemo
+from ..models import MandateAuthorization, Match, Target, Teaser, InfoMemo, User
 from .common import anon_buyer, back, get_lang, get_session, not_found, num, render, require, save_data, seller_reasons
 
 router = APIRouter(prefix="/seller")
@@ -58,10 +58,10 @@ def seller_teaser_approve(target_id: int, teaser_id: int, user: User = Depends(s
     if tz is None or tz.target_id != t.id:
         not_found()
     try:
-        teaser.seller_approve(tz)
+        teaser.seller_approve(tz, user)
     except ValueError as exc:
         return back(f"/seller/{t.id}#teaser", str(exc))
-    auth.log(s, user, "teaser_seller_approve", target_id=t.id, teaser_id=tz.id)
+    auth.log(s, user, "teaser_seller_approve", target_id=t.id, teaser_id=tz.id, content_hash=tz.seller_content_hash)
     return back(f"/seller/{t.id}#teaser", "已确认简介 Teaser approved")
 
 
@@ -169,3 +169,17 @@ def seller_revoke(target_id: int, auth_id: int, user: User = Depends(seller_only
     except ValueError as exc:
         return back(f"/seller/{t.id}#authority", str(exc))
     return back(f"/seller/{t.id}#authority", "已撤回授权 Authorisation revoked")
+
+
+@router.post("/{target_id}/memos/{memo_id}/approve")
+def seller_memo_approve(target_id: int, memo_id: int, user: User = Depends(seller_only), s: Session = Depends(get_session)):
+    t = _mine(s, user, target_id)
+    memo = s.get(InfoMemo, memo_id)
+    if memo is None or memo.target_id != t.id:
+        not_found()
+    try:
+        infomemo.seller_approve(memo, user)
+    except ValueError as exc:
+        return back(f'/seller/{t.id}#memo', str(exc))
+    auth.log(s, user, 'memo_seller_approve', target_id=t.id, memo_id=memo.id, content_hash=memo.seller_content_hash)
+    return back(f'/seller/{t.id}#memo', '已确认此版本 Version approved')

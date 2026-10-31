@@ -41,4 +41,12 @@
   <div class="wide"><button>{{ T('提交', 'Send') }}</button></div>
 </form>
 </div>
+<section class="faq">
+  <h2>{{ T('卖方常见问题', 'Questions from sellers') }}</h2>
+  <details><summary>{{ T('成交后的成功费是多少？', 'What is the success fee when a deal closes?') }}</summary>
+    <p>{{ T('使用主动推介服务的卖方，成交时按成交价的 %g%% 支付成功费，最低 %s 元；此前已付的出售准备包和推介服务费全额抵扣。仅在成交时收取成功费；未成交不收取成功费，准备费和推介服务费另按约定收取；仅免费挂牌、未使用推介服务的卖方不收取成功费。详见费用页面。',
+            'For sellers using the active outreach service, the success fee at closing is %g%% of the deal value, with a minimum of RMB %s; the preparation pack and outreach fees already paid are credited in full. No success fee is charged without a closing; preparation and outreach fees are charged separately as agreed. Sellers on the free listing who do not use outreach pay no success fee. See the fees page.')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}
+      <a href="{{ P }}/fees">{{ T('费用说明', 'Fees') }}</a></p>
+  </details>
+</section>
 {% endblock %}
