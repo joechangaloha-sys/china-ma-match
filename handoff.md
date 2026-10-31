@@ -338,3 +338,11 @@ bytes match; Chinese data packaged and numeric ranges/claim IDs unchanged. Live
 Chinese page rendered fully in the visible browser using the existing demo gate.
 Screenshot saved for Joe. Saved counts remain 3/40/13/0 targets/buyers/matches/documents
 and 2 handoffs/6 events. No real provider connection or transaction action added.
+
+## Document-demo layout parity — 31 October 2026
+
+Information memo, NDA and LOI editions share one template and now a dedicated
+`web/static/document-demos.css` using the institutional palette. Added structural
+parity checks for all nine stages in both languages, including controls and print
+styles. Chinese download filenames identify the document type. No document terms,
+workflow permissions or provider connections changed. Branch: `kimi/document-layout-parity`.

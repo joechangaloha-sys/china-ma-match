@@ -222,3 +222,29 @@ def test_chinese_teaser_uses_the_same_shell_controls_and_styles_as_english(demo_
     for key in ('revenue_min','revenue_max','profit_min','profit_max','employee_count_min','site_count_max'):
         assert data[0][key] == data[1][key]
     assert data[1]['project_code'] == '柳树项目'
+
+
+def test_document_editions_share_structure_styles_and_controls_in_every_stage(demo_app):
+    from html.parser import HTMLParser
+    class Structure(HTMLParser):
+        def __init__(self): super().__init__(); self.items=[]
+        def handle_starttag(self, tag, attrs):
+            a=dict(attrs)
+            # Only the language selector's current-edition marker should differ.
+            if a.get('hreflang'):
+                a.pop('class', None)
+            self.items.append((tag,a.get('class'),a.get('id'),a.get('role')))
+    c=TestClient(demo_app);c.post('/demo-access',data={'access_key':PASSCODE})
+    for kind, states in {'info-memo':('draft','review','buyer'),'nda':('draft','sent','complete'),'loi':('draft','review','revised')}.items():
+        for state in states:
+            structures=[]
+            for lang in ('en','zh'):
+                page=c.get(f'/{lang}/document-demos/{kind}?state={state}')
+                assert page.status_code==200
+                assert '/static/palette.css?v=navy-20261031' in page.text
+                assert '/static/document-demos.css?v=layout-parity-20261031' in page.text
+                assert 'id="document-download"' in page.text and 'id="document-print"' in page.text
+                parser=Structure();parser.feed(page.text);structures.append(parser.items)
+            assert structures[0]==structures[1],(kind,state)
+    css=c.get('/static/document-demos.css')
+    assert css.status_code==200 and '@media print' in css.text and 'var(--navy)' in css.text
