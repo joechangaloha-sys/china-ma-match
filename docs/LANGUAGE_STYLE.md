@@ -26,3 +26,10 @@ Primary public references consulted for terminology (not templates or legal advi
   https://www.sse.com.cn/disclosure/fund/announcement/c/new/2025-04-18/508085_20250418_ZIAL.pdf
 - Shenzhen Stock Exchange transaction disclosure, equity consideration:
   https://disc.static.szse.cn/disc/disk03/finalpage/2025-08-12/3779a5ab-1283-4a6f-93b0-45ef692191e0.pdf
+
+## Standing instruction confirmed
+
+On 31 October 2026 Joe explicitly confirmed that language isolation, matching
+English/Chinese layouts, mainland investment-banking terminology and the Japan IR
+Index-inspired Wall Street palette are standing instructions for the main site and
+all related document/demo pages. They are also recorded in AGENTS.md and Codex memory.

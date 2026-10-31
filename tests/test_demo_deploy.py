@@ -171,7 +171,7 @@ def test_public_and_document_editions_do_not_mix_language(demo_app):
     c = TestClient(demo_app)
     c.post('/demo-access', data={'access_key': PASSCODE})
     paths = ['/', '/sell', '/buy', '/fees', '/security', '/conduct', '/faq',
-             '/opportunities', '/workflow', '/handoff', '/login', '/register', '/demo-access', '/document-demos']
+             '/opportunities', '/workflow', '/handoff', '/login', '/register', '/register/adviser', '/demo-access', '/document-demos']
     from mamatch.db import session_scope
     from mamatch.models import Target
     from sqlalchemy import select
@@ -248,3 +248,28 @@ def test_document_editions_share_structure_styles_and_controls_in_every_stage(de
             assert structures[0]==structures[1],(kind,state)
     css=c.get('/static/document-demos.css')
     assert css.status_code==200 and '@media print' in css.text and 'var(--navy)' in css.text
+
+
+def test_main_public_editions_share_layout_and_institutional_styles(demo_app):
+    from html.parser import HTMLParser
+    class Structure(HTMLParser):
+        def __init__(self): super().__init__(); self.items=[]
+        def handle_starttag(self,tag,attrs):
+            a=dict(attrs)
+            if a.get('hreflang'): a.pop('class',None)
+            self.items.append((tag,a.get('class'),a.get('id'),a.get('role')))
+    c=TestClient(demo_app);c.post('/demo-access',data={'access_key':PASSCODE})
+    paths=['/','/opportunities','/sell','/buy','/fees','/security','/faq','/conduct',
+           '/login','/register','/register/adviser','/document-demos']
+    for path in paths:
+        structures=[]
+        for lang in ('en','zh'):
+            r=c.get(f'/{lang}{path}');assert r.status_code==200
+            assert '/static/palette.css?v=navy-20261031' in r.text
+            parser=Structure();parser.feed(r.text);structures.append(parser.items)
+        assert structures[0]==structures[1],path
+    zh=c.get('/zh/').text
+    assert '中小企业股权转让与并购服务' in zh and '项目负责人' in zh
+    assert '当前演示未启用人工智能模型调用' in zh
+    palette=c.get('/static/palette.css').text
+    assert '--house-navy: #0b2545' in palette and '--house-paper: #ffffff' in palette

@@ -30,3 +30,16 @@ access to that repository (a GitHub connection or a token Joe provides); without
 6. Do NOT push to `main` directly and do not merge. Joe merges after review: every push to `main` redeploys the
    public demo at https://joechangaloha-sys.github.io/china-ma-match/.
 7. Add a short note to handoff.md saying what you did and the PR link, in the same branch.
+
+## Joe's standing language and visual instructions
+- English and Chinese editions must have matching layouts and shared visual styling.
+- Use the Japan IR Index-inspired institutional Wall Street style: navy, white,
+  cool greys, serif headlines, fine rules and restrained controls. Use the shared palette.
+- English pages are English-only and Chinese pages Chinese-only, including controls,
+  notices, document content and downloads. Avoid cross-language fallback.
+- Chinese finance copy must use a formal mainland investment-banking register,
+  comparable to CICC, CITIC Securities and Guotai, without implying affiliation.
+- Apply these rules to the main website and document/demo pages as ongoing standards.
+  See docs/LANGUAGE_STYLE.md and docs/VISUAL_STYLE.md.
+- When asked to show Chinese pages, open the actual Chinese live URLs and provide
+  clear links and visual proof.

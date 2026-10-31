@@ -5,7 +5,7 @@ Only application-authored labels pass through here; stored deal data is not rewr
 import re
 
 TERMS = {
-    'Project Willow': '柳树项目', 'Project Delta': '德尔塔项目', 'Project Kiln': '窑炉项目',
+    'Project Willow': '柳树项目', 'Project Jade': '玉石项目', 'Project Delta': '德尔塔项目', 'Project Kiln': '窑炉项目',
     'Project Harbour': '港湾项目', 'Project Harbor': '港湾项目',
     'BizBuySell': '美国企业买卖平台', 'Axial': '美国中型企业交易平台',
     'business broker': '企业转让经纪机构', 'Kimi': '原型',
@@ -22,4 +22,5 @@ def mainland(text):
         return text
     for source, target in TERMS.items():
         text = re.sub(r'(?<![A-Za-z])' + re.escape(source) + r'(?![A-Za-z])', target, text)
+    text = text.replace('交易经理', '项目负责人').replace('尽调', '尽职调查').replace('成交价', '交易对价')
     return re.sub(r'(?<=[\u4e00-\u9fff]) +(?=[\u4e00-\u9fff])', '', text)

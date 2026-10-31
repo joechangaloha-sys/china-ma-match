@@ -397,7 +397,7 @@ def test_detailed_search_page(app):
 def test_faq_and_why_section_in_both_languages(app):
     en = client(app, lang="en-US")
     home = en.get("/en/").text
-    assert "Why we built this" in home and "Joe Chang" not in home
+    assert "Our approach" in home and "Joe Chang" not in home
     assert "Hand your company on to the right owner" in home
     assert "把企业交棒给对的人" in client(app).get("/zh/").text
     assert "bulge-bracket investment banks, major law firms and Big Four accounting firms" in home
