@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ T('证据与版本审核', 'Evidence and version review') }}{% endblock %}
+{% block body %}
+<p><a href="{{ I }}/targets/{{ a.target_id }}">← {{ a.target.code_name }}</a></p>
+<h1>{{ T('证据与版本审核', 'Evidence and version review') }}</h1>
+<p class="sub">{{ kind }} · {{ a.language }} · v{{ a.version }} · {{ T('仅供内部审核', 'Internal review only') }}</p>
+{% if a.target.is_example %}<p class="demo-banner">{{ T('虚构演示：示例引用不代表真实文件核验。', 'Fictional example: illustrative references are not verification of real documents.') }}</p>{% endif %}
+<section class="panel">
+<h2>{{ T('分发检查', 'Release checks') }}</h2>
+<p><span class="pill {{ 'low' if release.ready(a) else 'medium' }}">{{ T('可分发', 'Ready to share') if release.ready(a) else T('分发已锁定', 'Release locked') }}</span></p>
+<ul class="small">
+<li>{{ T('证据完整', 'Evidence complete') }}: {{ release.evidence_complete(a) }}</li>
+<li>{{ T('交易经理已批准当前版本', 'Deal manager approved current version') }}: {{ release.analyst_current(a) }}</li>
+<li>{{ T('卖方已确认当前版本', 'Seller approved current version') }}: {{ release.seller_current(a) }}</li>
+<li>{{ T('出售权限已核验', 'Authority verified') }}: {{ a.target.authority_verified_at is not none }}</li>
+</ul>
+{% for error in errors %}<p class="small flash">{{ error }}</p>{% endfor %}
+<p class="small">{{ T('每个陈述均须人工对照资料审核。系统只核对审核记录与版本一致性，不能替代真实性判断。任何内容或来源变更都会锁定分发。', 'A person must check every assertion against its source. The system checks review records and version consistency; it cannot determine whether the evidence is true. Content or source changes lock release.') }}</p>
+<details><summary>{{ T('版本与审核记录', 'Version and approval records') }}</summary>
+<p class="small">SHA-256: <code class="hash">{{ release.content_digest(a) }}</code></p>
+<p class="small">{{ a.analyst_approved_by or '—' }} · {{ a.analyst_approved_at or '—' }}<br>{{ a.seller_approved_by or '—' }} · {{ a.seller_approved_at or '—' }}</p>
+</details>
+</section>
+<section class="panel">
+<h2>{{ T('逐项证据', 'Evidence for each assertion') }}</h2>
+{% for path, statement in claims %}
+<article class="claim-review">
+<p class="small muted">{{ path }}</p><p>{{ statement }}</p>
+{% if path in checked %}<p class="small">{{ checked[path].evidence_ref }}<br><span class="muted">{{ checked[path].reviewed_by }} · {{ checked[path].reviewed_at }}</span></p>{% endif %}
+<form class="grid" method="post" action="{{ I }}/review/{{ kind }}/{{ a.id }}">
+<input type="hidden" name="claim_path" value="{{ path }}">
+<label class="wide">{{ T('来源文件', 'Source document') }}<select name="document_id" required><option value="">—</option>{% for doc in a.target.documents %}<option value="{{ doc.id }}">{{ doc.filename }}</option>{% endfor %}</select></label>
+<label class="wide">{{ T('来源文件、页码或段落及核对说明（仅内部可见）', 'Source document, page/section and review note (internal only)') }}<textarea name="evidence_ref" required maxlength="2000" rows="2"></textarea></label>
+<div class="wide"><button class="ghost">{{ T('已人工核对并记录', 'Record human evidence review') }}</button></div>
+</form>
+</article>
+{% endfor %}
+</section>
+{% endblock %}

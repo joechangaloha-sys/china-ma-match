@@ -56,7 +56,8 @@ def opportunities(request: Request, sector: str = "", macro: str = "", user: Use
 
 def _listed(s: Session, target_id: int) -> Target:
     t = s.get(Target, target_id)
-    if t is None or t.visibility != "listed":
+    from .. import release
+    if t is None or t.visibility != "listed" or t.authority_verified_at is None or not any(release.ready(tz) for tz in t.teasers):
         not_found()
     return t
 

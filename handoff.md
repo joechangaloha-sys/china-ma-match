@@ -8,6 +8,28 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Evidence-bound document release (31 Oct 2026, branch kimi/release-controls)
+
+- Joe approved the review recommendations and asked to build and show them on the website. First
+  implementation: bilingual `/workflow` fictional walkthrough, clearer fee wording and worked examples,
+  `ReleaseClaim` evidence records linked to mandate documents and hashes, analyst/seller approval hashes,
+  seller info-memo approval, and release checks on public listing/detail pages and teaser distribution.
+- Source/content/evidence changes invalidate release. Every assertion and public card field needs human
+  evidence review. Fictional reviews are labelled and isolated from real mandates. Legacy hashless
+  approvals are not trusted; example documents are regenerated, real documents require review.
+- Document AI calls are disabled. Real mandates cannot use demo click NDAs, in-app buyer document downloads,
+  name disclosure, post-NDA memo display or indicative offers until the verified-signature/external-VDR
+  handoff is integrated. Fictional examples retain their demonstration flow.
+- CSRF tokens protect signed-in forms; cross-origin submissions are rejected. Account sign-ins are limited
+  after ten failures in a rolling 15-minute window. Docker now installs `uv.lock` with pinned uv.
+- Prices are unchanged; the fee page explicitly shows the 15% effective minimum at RMB 2m and credits.
+- Pending integrations: signature provider and signer authority proof; external VDR expiry/revocation;
+  MFA, malware scanning, formal migrations, legal/data review; opt-in alerts/WeChat. The website labels
+  these limits. Do not present this as a production launch or mainland CloudBase deployment.
+- Validation: full offline test suite, legacy SQLite upgrade preserving 3 targets/40 buyers/13 matches,
+  browser scenario checks and 375px layouts. PR: pending creation. Existing seller FAQ PR #1 is included
+  in this branch; no merge or direct main push. Deploy only the pushed review branch to Lighthouse.
+
 ## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
 
 - Added a "Questions from sellers" / 卖方常见问题 section to the public seller page (`page_sell.html`), with one
