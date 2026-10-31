@@ -15,6 +15,8 @@ No email, invitation, personal account or phone enrollment is needed now. Keep M
 but set MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false on Tencent. The feature switch hides
 links and disables all enrollment/challenge/activation routes. Existing enrolled users must never be
 downgraded to password-only access; confirmed live enrollment count is zero. Local scanner stays active.
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/16 (unmerged).
+Verified on Tencent: both flags false, MFA routes return 404, links absent, no enrolled accounts, scanner ready.
 199 offline tests pass. Branch kimi/mfa-staged is cumulative over #15; do not merge older PRs independently.
 Enable MFA only after a new explicit activation instruction. No merge authorised for this task.
 
