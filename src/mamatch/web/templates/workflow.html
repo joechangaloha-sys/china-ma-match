@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ T('从资料到获批简介', 'From evidence to approved teaser') }}{% endblock %}
+{% block body %}
+<p class="small muted">{{ T('虚构流程演示 · Project Willow', 'Fictional workflow · Project Willow') }}</p>
+<h1>{{ T('每个陈述，都有来源。', 'Every assertion has a source.') }}</h1>
+<p><a class="button ghost" href="/teaser-demo/">{{ T('打开Kimi的独立简介演示（英文）', 'Open Kimi’s standalone teaser demo') }} →</a></p>
+<p class="sub">{{ T('查看证据、人工审核与卖方确认如何共同控制简介分发。', 'See how evidence, human review and seller approval control teaser release.') }}</p>
+<p class="panel small">{{ T('所有公司、数字及审核均为虚构。每次切换场景均在隔离的临时数据库中运行真实的服务器端分发检查，不会修改项目记录，也不会发送文件。', 'Every company, figure and review is fictional. Each scenario runs the actual server-side release checks in an isolated temporary database. No mandate is changed and no document is sent.') }}</p>
+<div class="workflow-steps">
+{% for key, number, zh, en in [('evidence','01','逐项证据','Evidence'),('analyst','02','交易经理审核','Human review'),('seller','03','卖方确认此版本','Seller approval'),('authority','04','出售权限核验','Authority check')] %}
+<div class="workflow-step"><span class="small muted">{{ number }}</span><strong>{{ T(zh,en) }}</strong><span class="pill {{ 'low' if checks[key] else 'medium' }}">{{ T('通过','Passed') if checks[key] else T('待处理','Action needed') }}</span></div>
+{% endfor %}
+</div>
+<h2>{{ T('尝试一个场景', 'Try a scenario') }}</h2>
+<div class="scenario-links">
+{% for key,zh,en in [('approved','全部获批','All approved'),('missing-evidence','新增陈述无证据','Unsupported assertion'),('changed-content','批准后修改内容','Content changed'),('changed-source','来源数字变化','Source changed'),('missing-seller','缺少卖方确认','No seller approval'),('negative-revenue','无效收入','Invalid revenue'),('loss-making','如实披露亏损','Disclosed loss')] %}
+<a class="button {{ 'ghost' if scenario != key }}" href="{{ P }}/workflow?scenario={{ key }}" {{ 'aria-current=page' if scenario == key }}>{{ T(zh,en) }}</a>
+{% endfor %}
+</div>
+<div class="cols">
+<section class="panel">
+<p class="small muted">{{ T('当前简介预览 · 不代表已分发', 'Current draft preview · not a distributed document') }}</p>
+<h2>{{ content.headline }}</h2><p>{{ content.summary }}</p>
+<ul>{% for item in content.highlights %}<li>{{ item }}</li>{% endfor %}</ul>
+<p><span class="pill {{ 'low' if releasable else 'high' }}">{{ T('演示版本可分发','Demo version ready') if releasable else T('分发已锁定','Release locked') }}</span></p>
+<p class="small">{{ T('只有全部检查通过才可分发。亏损本身不构成拒绝理由；数字必须真实且经审核。', 'Release requires every check to pass. A disclosed loss is allowed; figures must still be supported and reviewed.') }}</p>
+</section>
+<section class="panel">
+<h2>{{ T('证据与审核记录', 'Evidence and review') }}</h2>
+<p class="small">{{ T('每项陈述均绑定当前版本。记录审核人、时间与来源。自动检查不会证明来源真实，仍需人工判断。', 'Each assertion is tied to the current version, with reviewer, time and source recorded. Automated checks do not establish that evidence is true; a person must judge it.') }}</p>
+{% if evidence %}<ul class="small">{% for record in evidence %}<li>{{ record.statement }}<br><span class="muted">{{ T('来源：虚构示例资料；审核：示例交易经理', 'Source: fictional example material; review: demonstration deal manager') }}</span></li>{% endfor %}</ul>
+{% else %}<p class="flash">{{ T('当前内容没有对应的证据审核记录。', 'No evidence reviews match the current content.') }}</p>{% endif %}
+<details><summary>{{ T('当前版本指纹', 'Current version fingerprint') }}</summary><code class="hash">{{ fingerprint }}</code></details>
+</section>
+</div>
+<section class="panel">
+<h2>{{ T('保密协议与资料室', 'NDA and data-room handoff') }}</h2>
+<p>{{ T('真实交易：核验买方及签署权限 → 经审核的电子签名服务 → 卖方明确批准 → 专业资料室限时授权。', 'For real deals: verify the buyer and signing authority → approved e-signature service → explicit seller approval → time-limited access to a professional VDR.') }}</p>
+<p class="small muted">{{ T('电子签名服务与外部资料室尚未连接。演示中的点击接受不代表已核验的签名，平台不会向真实交易的买方提供上传文件。AI 文档生成已关闭。', 'E-signature and external VDR services are not connected. Demo click acceptance is not a verified signature. Uploaded documents are not served to buyers on real mandates. AI document generation is off.') }}</p>
+<a class="button ghost" href="{{ P }}/handoff">{{ T('试用签署与资料室交接', 'Try the NDA and VDR handoff') }} →</a>
+<a href="{{ P }}/fees">{{ T('查看成功费示例', 'See success-fee examples') }} →</a>
+</section>
+{% endblock %}

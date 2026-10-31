@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid
+from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid, release, handoff, connections
 from ..models import AdviserFirm, Buyer, Match, Target, User
 from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, INVENTORY, MACRO_REGIONS, PAYMENT_TERMS,
                         PERMITS, PREMISES, REGIONS, SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
@@ -31,7 +31,8 @@ templates.env.globals.update(
     CONSIDERATION=offers.CONSIDERATION, FINANCING=offers.FINANCING, latest_offer=offers.latest_offer, sector_label=sector_label, risk_label=reid.risk_label,
     macro_region=macro_region, FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES,
     SEVERITY=datacheck.SEVERITY, CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees, cfg=config,
-    I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
+    HANDOFF_ACCESS_LABELS=connections.ACCESS_LABELS, NDA_LABELS=connections.NDA_LABELS,
+    handoff=handoff, release=release, I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
 )
 
 
@@ -93,7 +94,16 @@ def render(request: Request, name: str, user: User | None = None, **ctx) -> HTML
            "T": lambda zh, en: zh if lang == "zh" else en,
            "L": lambda s: i18n.tr(s, lang), "V": lambda s: i18n.val(s, lang),
            "R": lambda s: i18n.reason(s, lang), **ctx}
-    return templates.TemplateResponse(request, name, ctx)
+    response = templates.TemplateResponse(request, name, ctx)
+    from .security import csrf_token
+    import re
+    token = csrf_token(request.cookies.get(COOKIE, ''))
+    if token:
+        html = re.sub(r'(<form\b[^>]*\bmethod=["\']post["\'][^>]*>)',
+                      lambda m: m.group(1) + f'<input type="hidden" name="csrf_token" value="{token}">',
+                      response.body.decode(), flags=re.IGNORECASE)
+        return HTMLResponse(html, status_code=response.status_code)
+    return response
 
 
 def back(url: str, msg: str = "") -> RedirectResponse:
