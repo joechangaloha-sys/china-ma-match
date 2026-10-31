@@ -235,6 +235,8 @@ def seed(session: Session) -> None:
         _seed_language_versions(session, t)
     if "Project Jade" in have:
         _seed_offers(session, have["Project Jade"])
+    from . import handoff
+    handoff.seed_examples(session)
     session.flush()
 
 
@@ -283,11 +285,16 @@ def _seed_offers(session: Session, t: Target) -> None:
                     if o.conditions and spec["conditions"].startswith(o.conditions) and o.conditions != spec["conditions"]:
                         o.conditions = spec["conditions"]
         return
+    from . import handoff
+    handoff.seed_examples(session)
     after = [m for m in t.matches if m.stage in offers.AFTER_NDA]
     for m in offers.outreach_candidates(t)[: max(0, 2 - len(after))]:
         offers.approve_and_send(session, m)
         offers.buyer_respond(session, m, interested=True)
-        offers.accept_nda(session, m, None)
+        manager = session.scalar(select(User).where(User.role == 'deal_manager'))
+        offers.accept_nda(session, m, manager)
+        from . import handoff
+        handoff.review_authority(handoff.get(m), manager, 'FICTIONAL SEED: illustrative signatory-authority review')
         after.append(m)
     for m, spec in zip(after, EXAMPLE_OFFERS):
         offers.submit_offer(session, m, None, **spec)

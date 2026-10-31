@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ T('外部连接待办', 'External connection to-dos') }}{% endblock %}
+{% block body %}
+<h1>{{ T('外部连接，稍后设置。', 'External connections, deferred.') }}</h1>
+<p class="sub">{{ T('根据您的决定，当前继续建设离线流程，不开通服务、不创建账号、不购买套餐。', 'Following your decision, development continues offline. No services, accounts or subscriptions are being activated.') }}</p>
+<section class="panel">
+<p>{{ T('电子签与专业资料室均未连接。当前所有签署及访问状态均为虚构模拟，不代表真实合同、邀请或权限。', 'E-signature and professional VDR services are not connected. All signing and access states are fictional simulations, not real contracts, invitations or permissions.') }}</p>
+{% for key,title,detail in todos %}
+<article class="claim-review"><span class="pill medium">{{ T('已推迟 · 待办', 'Deferred · to-do') }}</span><h2>{{ L(title) }}</h2><p>{{ L(detail) }}</p></article>
+{% endfor %}
+</section>
+<p><a href="{{ I }}">← {{ T('卖方项目', 'Mandates') }}</a>{% if cfg.DEMO_MODE %} · <a href="{{ P }}/handoff">{{ T('虚构交接演示', 'Fictional handoff demo') }}</a>{% endif %}</p>
+{% endblock %}
