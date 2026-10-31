@@ -328,3 +328,7 @@ English: `/en/teaser-demo/`; Chinese: `/zh/teaser-demo/`.
 Checks compare shell and rendered-body structure, require Chinese-only rendered
 copy/export, preserve validation regressions and verify unchanged numeric values.
 Branch `kimi/chinese-teaser-layout` includes prior review work; no merge to main.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/8.
+149 tests passed; browser checked Chinese controls/data tab, JSON download and 375px
+layout. Chinese rendered body and export contain no English prose or abbreviations.
