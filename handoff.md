@@ -8,6 +8,15 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
+
+- Added a "Questions from sellers" / 卖方常见问题 section to the public seller page (`page_sell.html`), with one
+  bilingual entry explaining the success fee for outreach clients: 4% of the deal value, minimum RMB 300,000,
+  earlier preparation and outreach fees credited, charged only at closing; free-listing sellers pay no success
+  fee. Amounts come from `config.py` (`SUCCESS_FEE_RATE`, `SUCCESS_FEE_MIN_RMB`), so they stay in step with the
+  fees page, and the entry links to `/fees`. All 104 tests pass (`uv run pytest`); both editions render with no
+  language leakage. PR: pending push access from this environment.
+
 ## Live fictional demo and Git updates (29 Oct 2026)
 
 - **Lighthouse demo:** Singapore server `43.153.223.242`, temporary HTTPS address
