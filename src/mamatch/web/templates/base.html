@@ -49,6 +49,7 @@
     <a href="{{ P }}/buy" class="{{ 'on' if request.url.path == '/buy' }}">{{ T('收购企业', 'Buy') }}</a>
     <a href="{{ P }}/fees" class="{{ 'on' if request.url.path == '/fees' }}">{{ T('费用', 'Fees') }}</a>
     <a href="{{ P }}/security" class="{{ 'on' if request.url.path == '/security' }}">{{ T('保密', 'Confidentiality') }}</a>
+    {% if cfg.DEMO_MODE %}<a href="{{ P }}/workflow" class="{{ 'on' if request.url.path == '/workflow' }}">{{ T('流程演示', 'Workflow demo') }}</a>{% endif %}
     <a href="{{ P }}/faq" class="{{ 'on' if request.url.path == '/faq' }}">{{ T('常见问题', 'FAQ') }}</a>
   {% endif %}
   </nav>

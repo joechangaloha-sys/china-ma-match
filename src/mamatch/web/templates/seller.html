@@ -67,7 +67,7 @@
     <h3>{{ latest_teaser.body.headline }}</h3>
     <p>{{ latest_teaser.body.summary }}</p>
     <ul>{% for h in latest_teaser.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
-    {% if latest_teaser.seller_approved_at %}<span class="pill">{{ T('您已确认', 'You approved this') }} ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
+    {% if release.seller_current(latest_teaser) %}<span class="pill">{{ T('您已确认', 'You approved this') }} ({{ latest_teaser.seller_approved_at.strftime('%Y-%m-%d') }})</span>
     {% else %}
     <form method="post" action="{{ P }}/seller/{{ t.id }}/teasers/{{ latest_teaser.id }}/approve"><button>{{ T('确认此简介', 'Approve this teaser') }}</button></form>
     <p class="small muted">{{ T('确认前不会公开或发送给任何买方。', 'Nothing is published or sent before you approve.') }}</p>
@@ -180,6 +180,12 @@
 <section class="panel" id="memo">
   <h2>{{ T('信息备忘录', 'Info memo') }} <span class="pill">{{ T('已审核', 'approved') if memo.status == 'approved' else T('草稿', 'draft') }}</span></h2>
   {{ memo_view(memo) }}
+  {% if release.seller_current(memo) %}
+  <p class="small">{{ T('您已确认此版本。内容或来源变更后须重新审核。', 'You approved this version. Changes to content or source data require a new review.') }}</p>
+  {% elif release.analyst_current(memo) %}
+  <p class="small">{{ T('请核对上述版本。确认前不会向买方提供。', 'Review the version above. It stays unavailable to buyers until you approve.') }}</p>
+  <form method="post" action="{{ P }}/seller/{{ t.id }}/memos/{{ memo.id }}/approve"><button>{{ T('确认此版本备忘录', 'Approve this memo version') }}</button></form>
+  {% else %}<p class="small muted">{{ T('待交易经理审核当前版本。', 'The current version needs deal-manager review.') }}</p>{% endif %}
 </section>
 {% endif %}
 {% endblock %}
