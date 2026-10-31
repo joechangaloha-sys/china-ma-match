@@ -28,7 +28,11 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   these limits. Do not present this as a production launch or mainland CloudBase deployment.
 - Validation: full offline test suite, legacy SQLite upgrade preserving 3 targets/40 buyers/13 matches,
   browser scenario checks and 375px layouts. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/2. All 117 offline tests pass. Existing seller FAQ PR #1 is included
-  in this branch; no merge or direct main push. Deploy only the pushed review branch to Lighthouse.
+  in this branch; no merge or direct main push. The review branch is deployed to Lighthouse.
+- Live HTTPS verification passed all 14 zh/en workflow scenarios, fee examples, seller wording, internal
+  evidence view and a CSRF-protected form round-trip. PostgreSQL still has 3 targets, 40 buyers, 13 matches
+  and 0 uploaded documents. A restricted database backup was saved under `/opt/mamatch/backups/` before
+  the additive upgrade. Real-data/provider prerequisites above remain open.
 
 ## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
 
