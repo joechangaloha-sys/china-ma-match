@@ -21,7 +21,9 @@ before upgrading live. Table counts/digests, upload bytes, corruption refusal, c
 synthetic file recovery and injected migration rollback are checked. Scratch names/cleanup are guarded;
 there is no live-restore command. Backups stay private on Tencent; off-host DR/PITR and recurring schedules
 are not configured. Private env/MFA encryption key must be retained separately. See docs/DATABASE_RECOVERY.md.
-218 local tests pass. Deploy branch for review and record actual Tencent rehearsal evidence below.
+219 local tests pass. The first 25-table restore rehearsal passed; a deployment-stdin handling
+issue stopped before the live migration, leaving live data untouched. Child command input is now explicitly
+isolated and regression-tested; the guarded deployment is repeated after that fix. Deploy branch for review and record actual Tencent rehearsal evidence below.
 Do not merge without a new instruction. Keep MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false.
 
 ## Internal language cleanup — 31 October 2026

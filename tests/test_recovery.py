@@ -56,3 +56,16 @@ def test_snapshot_file_export_checks_hash_and_path(tmp_path):
         assert archive.extractfile('fixture.txt').read()==body
     with pytest.raises(RuntimeError,match='integrity'):export_referenced([{**ref,'sha256':'bad'}],root,io.BytesIO())
     with pytest.raises(RuntimeError,match='Invalid document'):export_referenced([ref],root/'other',io.BytesIO())
+
+
+def test_child_commands_cannot_consume_deployment_stdin(monkeypatch):
+    import subprocess
+    seen=[]
+    def run(args,**kwargs):seen.append(kwargs);return subprocess.CompletedProcess(args,0)
+    monkeypatch.setattr(recovery.subprocess,'run',run)
+    recovery.run(['true'])
+    assert seen[-1]['stdin']==subprocess.DEVNULL
+    recovery.run(['consumer'],input=b'explicit payload')
+    assert 'stdin' not in seen[-1] and seen[-1]['input']==b'explicit payload'
+    script=(Path(__file__).parents[1]/'deploy/lighthouse/deploy.sh').read_text()
+    assert 'mamatch.migrations upgrade --adopt-existing </dev/null' in script

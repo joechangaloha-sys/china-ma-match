@@ -19,6 +19,8 @@ COMPOSE=['docker','compose','--env-file','/opt/mamatch/.env','-f','deploy/lighth
 
 
 def run(args, **kw):
+    # Child Docker commands must never consume the SSH deployment script's stdin.
+    if 'stdin' not in kw and 'input' not in kw:kw['stdin']=subprocess.DEVNULL
     return subprocess.run(args,check=True,**kw)
 
 
@@ -102,7 +104,7 @@ def main():
         if scratch==production:raise RuntimeError('Scratch database equals live database')
         snapshot=source.query('SELECT pg_export_snapshot();')[0]
         tables=[json.loads(row) for row in source.query("SELECT to_json(tablename) FROM pg_tables WHERE schemaname='public' ORDER BY tablename;")]
-        manifest={'format':1,'tables':inventory(source,tables),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+        manifest={'format':1,'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],stdin=subprocess.DEVNULL,text=True).strip(),'tables':inventory(source,tables),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
         refs=json.loads(source.query("SELECT coalesce(json_agg(json_build_object('path',stored_path,'sha256',sha256)),'[]'::json) FROM documents;")[0])
         with (bundle/'database.dump').open('xb') as output:
             run(db_command('pg_dump',['-Fc','--snapshot='+snapshot]),stdout=output,stderr=subprocess.PIPE)
@@ -134,9 +136,15 @@ def main():
         workspace=bundle/'restored-files';workspace.mkdir()
         verify_files(bundle/'uploads.tar',manifest['documents'],workspace)
         shutil.rmtree(workspace)
-        run([*COMPOSE,'run','--rm','--no-deps','web','python','-m','mamatch.recovery_probe',scratch],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        probe=run([*COMPOSE,'run','--rm','--no-deps','web','python','-m','mamatch.recovery_probe',scratch],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        manifest['migration_verification']=probe.stdout.decode('utf-8').strip()
+        restored=Snapshot(scratch)
+        business=[table for table in tables if table!='alembic_version']
+        if inventory(restored,business)!={t:manifest['tables'][t] for t in business}:
+            raise RuntimeError('Migration changed restored business records')
+        restored.close();restored=None
         manifest['result']='passed'
-        manifest['checks']=['snapshot_row_counts_and_sha256','archive_sha256','document_sha256','corruption_rejected','isolated_upgrade','constraints','sequences','ddl_rollback','synthetic_file_roundtrip']
+        manifest['checks']=['snapshot_row_counts_and_sha256','archive_sha256','document_sha256','corruption_rejected','isolated_upgrade','constraints','sequences','ddl_rollback','synthetic_file_roundtrip','post_upgrade_data_unchanged']
         manifest['duration_seconds']=round(time.monotonic()-started,2)
         (bundle/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
         print(f'Backup/restore rehearsal passed: {len(tables)} tables, {len(refs)} documents; {bundle}')

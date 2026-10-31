@@ -52,7 +52,7 @@ if docker inspect mamatch-lighthouse-web-1 >/dev/null 2>&1; then
 fi
 "${COMPOSE[@]}" build web
 python3 deploy/lighthouse/recovery_check.py
-"${COMPOSE[@]}" run --rm --no-deps web python -m mamatch.migrations upgrade --adopt-existing
+"${COMPOSE[@]}" run --rm --no-deps -T web python -m mamatch.migrations upgrade --adopt-existing </dev/null
 "${COMPOSE[@]}" up -d --no-build
 
 for attempt in $(seq 1 60); do
