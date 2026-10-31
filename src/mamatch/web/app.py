@@ -21,7 +21,7 @@ HERE = Path(__file__).parent
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     config.validate_runtime()
-    db.init_db()
+    db.check_schema()
     if config.SEED_DEMO:
         from ..seed import seed
 

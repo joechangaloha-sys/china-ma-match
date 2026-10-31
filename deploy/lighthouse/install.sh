@@ -81,7 +81,10 @@ else
 fi
 
 # Keep the existing database, demo passcode and uploads on repeat installations.
-docker compose -f compose.lighthouse.yaml up -d --build
+docker compose -f compose.lighthouse.yaml build web
+docker compose -f compose.lighthouse.yaml up -d --wait db
+docker compose -f compose.lighthouse.yaml run --rm --no-deps -T web python -m mamatch.migrations upgrade </dev/null
+docker compose -f compose.lighthouse.yaml up -d --no-build
 
 READY=0
 for attempt in $(seq 1 60); do

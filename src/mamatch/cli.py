@@ -59,7 +59,7 @@ def cmd_export(args) -> None:
 def cmd_serve(args) -> None:
     import uvicorn
 
-    db.init_db()
+    db.check_schema()
     uvicorn.run("mamatch.web.app:app", host=args.host, port=args.port, reload=args.reload)
 
 
