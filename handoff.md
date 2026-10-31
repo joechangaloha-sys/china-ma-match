@@ -27,8 +27,14 @@ Private account settings: /zh/account/mfa and /en/account/mfa. See docs/MFA.md a
 the previous review build was restored, and the helper now uses portable TRUE/FALSE literals with regression coverage. User's personal email was requested; the user must choose their password and
 scan/confirm their own authenticator. Do not enroll an agent-owned device, print seeds/recovery codes,
 send an invitation email or create an administrator without the user's chosen email.
-Deploy review branch kimi/scanner-mfa; verify real clean/EICAR scanner behavior, rollback-only PostgreSQL
-MFA checks, bilingual pages and laptop/mobile layouts. External signing/VDR connections remain deferred.
+Deployed review branch kimi/scanner-mfa as 2364a9c. Actual clean-file/EICAR detection and rollback-only
+PostgreSQL MFA enrollment/replay/recovery checks passed. Preserved 3 targets, 40 buyers, 13 matches,
+0 documents, 2 handoffs, 6 handoff events and 5 existing users. Both language editions passed 320/390/1366
+layout and monolingual checks. Loaded daemon database timestamps are rendered in UTC explicitly;
+Ubuntu's read-only VERSION command is enabled for freshness checks, while shutdown/reload remain disabled.
+Joe replied "WHAT IS MFA" to the personal-email question; explain password plus phone authenticator
+codes. No personal email was supplied, no invitation/account was created, and no personal device was enrolled.
+Your next user-dependent step is explaining enrollment and obtaining Joe's chosen personal email. External signing/VDR connections remain deferred.
 
 ## Upload quarantine and session controls — 31 October 2026
 
