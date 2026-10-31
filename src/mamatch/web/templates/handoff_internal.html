@@ -20,7 +20,7 @@
 <label class="wide">{{ T('模拟签署权限审核说明（仅内部）', 'Fictional signatory-authority review (internal only)') }}<textarea name="reference" required maxlength="2000">{{ h.authority_review_ref }}</textarea></label>
 <div class="wide"><button class="ghost">{{ T('记录人工审核', 'Record human review') }}</button></div></form>
 {% endif %}
-{% if handoff.evidence_reviewed(h) %}<form class="inline" method="post" action="{{ I }}/handoffs/{{ m.id }}/request-access"><label>{{ T('只读访问天数', 'View-only access days') }}<input name="days" type="number" min="1" max="30" value="7" required></label><button class="ghost">{{ T('申请访问并等待卖方批准', 'Request access; await seller approval') }}</button></form>{% endif %}
+{% if handoff.evidence_reviewed(h) %}<form class="inline" method="post" action="{{ I }}/handoffs/{{ m.id }}/request-access"><label>{{ T('只读访问天数', 'Read-only access days') }}<input name="days" type="number" min="1" max="30" value="7" required></label><button class="ghost">{{ T('申请访问并等待卖方批准', 'Request access; await seller approval') }}</button></form>{% endif %}
 <h2>{{ L(HANDOFF_ACCESS_LABELS[handoff.access_status(h)]) }}</h2>
 <p class="small">{{ h.room_ref or '—' }} · {{ h.access_role }} · {{ T('到期', 'Expires') }} {{ h.access_expires_at or '—' }}</p>
 {% if h.vdr_state == 'awaiting_seller' %}<p>{{ T('请由项目所属卖方在其卖方页面批准此范围。交易经理不能代替卖方批准。', 'The mandate owner must approve this scope in their seller portal. A deal manager cannot substitute for seller approval.') }}</p>{% endif %}
