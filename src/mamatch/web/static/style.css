@@ -237,3 +237,24 @@ details.offer form { margin-top: 8px; }
 .workflow-step { border-top: 3px solid var(--navy); background: #fff; padding: 18px; }
 .workflow-step strong { display: block; margin: 8px 0; }
 .scenario-links { display:flex; flex-wrap:wrap; gap:8px; margin: 20px 0; }
+
+/* Laptop and phone ergonomics shared by public pages and signed-in portals. */
+main > *, .cols > *, .cards > *, .board > *, .adv-grid > * { min-width: 0; }
+.tbl { max-width:100%; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; }
+.tbl:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media(max-width:640px) {
+  button, a.button, header.bar nav a, .langs a, .who > a {
+    min-height:44px; display:inline-flex; align-items:center; justify-content:center;
+  }
+  header.bar nav a { font-size:.75rem; letter-spacing:.04em; }
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]), select, textarea {
+    font-size:16px; min-height:44px; width:100%;
+  }
+  input[type=checkbox], input[type=radio] { width:20px; height:20px; flex:0 0 auto; }
+  label.check { min-height:44px; align-items:center; }
+  .hero .actions { display:grid; grid-template-columns:1fr; }
+  .hero .actions > * { width:100%; justify-self:stretch; text-align:center; }
+  .search-row button { width:100%; }
+  .pill { max-width:100%; white-space:normal; }
+  .stat { flex-basis:auto; }
+}

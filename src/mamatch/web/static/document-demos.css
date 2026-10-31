@@ -1,2 +1,14 @@
 /* Shared document layout for both language editions. Uses the institutional palette. */
 .doc-demo-head{padding:2rem 0}.doc-demo-kicker{font:700 .8rem monospace;letter-spacing:.12em;text-transform:uppercase}.doc-demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.doc-demo-card{border:1px solid var(--line,#ccc);padding:1.4rem;border-radius:2px;background:var(--paper,#fff)}.doc-demo-tabs{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}.doc-demo-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:1.5rem;align-items:start}.doc-demo-paper{padding:2rem;background:var(--paper);color:var(--ink);border:1px solid var(--rule);box-shadow:none;overflow-wrap:anywhere}.doc-demo-paper h2{font-size:1.25rem}.doc-demo-paper section{border-top:1px solid var(--rule);margin-top:1.4rem;padding-top:.6rem}.doc-demo-banner{padding:1rem;background:var(--accent-soft);color:var(--navy);border:1px solid var(--rule);border-left:3px solid var(--navy)}.doc-demo-paper .doc-demo-watermark{font:700 .75rem monospace;letter-spacing:.09em;border-bottom:2px solid var(--navy);padding-bottom:1rem}.doc-demo-paper p{line-height:1.8}.doc-demo-controls button{margin:.3rem .3rem .3rem 0}.doc-demo-status{min-height:1.5em;font-size:.9rem}@media(max-width:760px){.doc-demo-grid,.doc-demo-layout{grid-template-columns:1fr}.doc-demo-paper{padding:1.2rem}.doc-demo-head{padding:1rem 0}}@media print{body>*{display:none!important}body>main{display:block!important}main>*{display:none!important}main>.doc-demo-layout{display:block!important}.doc-demo-layout>*{display:none!important}.doc-demo-layout>.doc-demo-paper{display:block!important;box-shadow:none;border:0;padding:0}.doc-demo-paper{font-size:10pt}.doc-demo-paper section{break-inside:avoid}a{color:inherit!important}}
+/* Keep every action reachable without scrolling through the entire document. */
+.doc-demo-controls-jump{display:none}
+.doc-demo-layout>*{min-width:0}
+#document-controls{scroll-margin-top:1rem}
+@media(max-width:760px){
+ .doc-demo-controls-jump{display:inline-flex;align-items:center;min-height:44px}
+ .doc-demo-controls button{min-height:44px;width:100%;margin:.3rem 0}
+ .doc-demo-tabs a{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+ .doc-demo-card{padding:1.1rem}
+ .doc-demo-paper{padding:1rem;line-height:1.75}
+}
+@media print{.doc-demo-controls-jump{display:none!important}}

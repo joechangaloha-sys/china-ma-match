@@ -998,3 +998,9 @@ button:hover { background:var(--house-navy); color:var(--house-on-dark); }
 .release-card { min-height:260px; }
 @media(max-width:1080px) { .intro-copy, .release-card { min-height:auto; } }
 @media print { .document-banner { background:white; color:#1a1f2b; } }
+
+.mobile-control-jump { display:none; }
+@media(max-width:1080px){
+ .mobile-control-jump { display:inline-flex; align-items:center; min-height:44px; margin-top:1rem; color:var(--house-navy); font-size:.9rem; }
+}
+@media print { .mobile-control-jump { display:none; } }

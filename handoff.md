@@ -384,3 +384,18 @@ Branch: `kimi/main-site-standards`.
 PR: https://github.com/joechangaloha-sys/china-ma-match/pull/11. All 151 tests pass.
 Targets the main website as Joe requested; standing rules are persisted in memory
 and repository instructions. Public-page structures and language isolation verified.
+
+## Laptop and phone formatting — 31 October 2026
+
+Added 44px phone touch targets, 16px form inputs, stacked home actions, safer grid
+shrinking and keyboard-focusable table scroll regions. Document demos and teaser
+have phone shortcuts to their action panels; document controls become full-width.
+Existing desktop structure, shared palette and language parity are preserved.
+Browser QA: 180 public/demo checks across both editions at 320/390/768/1024/1366px, plus
+28 representative signed-in views at 390/1366px across manager/seller/buyer/adviser.
+No page-level horizontal overflow found. Wide tables intentionally scroll inside
+their containers. Local QA uses fictional isolated data, not live account mutations.
+Branch `kimi/responsive-layouts`.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/12. All 151 tests pass.
+Browser checks confirm 44px phone actions and a working document-controls shortcut.

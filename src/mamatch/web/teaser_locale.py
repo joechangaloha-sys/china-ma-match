@@ -8,7 +8,7 @@ ZH = {
 'mamatch navigation':'平台导航','← Back to mamatch':'← 返回并购平台',
 'Kimi’s original standalone teaser · English · fictional data':'独立项目简介 · 中文版 · 虚构资料',
 'Chinese edition →':'英文版 →','Info memo · NDA · LOI →':'信息备忘录 · 保密协议 · 收购意向书 →','Approval workflow →':'审核流程 →',
-'Skip to teaser':'跳至项目简介','M&A Match demonstration platform':'中小企业并购演示平台','MA':'并购','M&A Match':'中小企业并购',
+'Jump to controls':'跳至文档操作','Skip to teaser':'跳至项目简介','M&A Match demonstration platform':'中小企业并购演示平台','MA':'并购','M&A Match':'中小企业并购',
 'Demo sections':'演示栏目','Teaser':'项目简介','Automation':'自动编排','Data spec':'数据说明','Deployment':'部署说明','Fictional data':'虚构资料',
 'Teaser automation v0.1':'项目简介自动编排 · 版本0.1','Project Willow':'柳树项目',
 'A fictional teaser rendered from structured demonstration data. The layout separates buyer-facing content from provenance, checks and release controls.':'本页根据结构化虚构资料生成项目简介，分别展示投资方阅览内容、资料来源、核查结果及对外提供控制。',

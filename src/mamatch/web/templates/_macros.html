@@ -49,7 +49,7 @@
 
 {% macro fees_panel(t, operator=false, closable=[]) %}
 {% set est = fees.estimate(t) %}
-<div class="tbl"><table class="small">
+<div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
   <tr><th>项目 Item</th><th>价格 Price (RMB, ex VAT)</th><th>状态 Status</th></tr>
   <tr><td>匿名简介与匿名挂牌 Teaser and anonymous listing</td><td>免费 Free</td><td>—</td></tr>
   <tr><td>出售准备包：资料核查 + 信息备忘录 Preparation pack: data check + info memo</td><td class="num">{{ '{:,}'.format(cfg.PREP_PACK_FEE_RMB) }}</td>
@@ -65,7 +65,7 @@
   {% if operator %}<span class="muted">（平台分成 platform share {{ '{:,.0f}'.format(est.platform_share) }}）</span>{% endif %}</p>
 {% endif %}
 {% if t.charges %}
-<div class="tbl"><table class="small">
+<div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
   <tr><th>日期 Date</th><th>项目 Item</th><th class="num">金额 Amount</th><th>发票 Invoice</th>{% if operator %}<th class="num">平台分成 Platform</th>{% endif %}</tr>
   {% for c in t.charges %}
   <tr><td>{{ c.created_at.strftime('%Y-%m-%d') }}</td><td>{{ CHARGE_KINDS[c.kind] }}{% if c.kind == 'success' %}<br><span class="muted">成交 RMB {{ '{:,.0f}'.format(c.detail.deal_value_rmb) }} · gross {{ '{:,.0f}'.format(c.detail.gross) }} − credited {{ '{:,.0f}'.format(c.detail.credited) }}</span>{% endif %}</td>
@@ -97,7 +97,7 @@
 
 {% macro data_form(target, action) %}
 <form method="post" action="{{ action }}" class="dataform">
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>{{ T('百万元', 'RMB m') }}</th>{% for y in fin_years() %}<th>{{ y }}</th>{% endfor %}</tr>
     {% for key, label in FIN_FIELDS.items() %}
     <tr><td>{{ L(label) }}</td>
@@ -145,7 +145,7 @@
   <h4>{{ sec.heading }}</h4>
   {% for para in sec.paragraphs %}<p>{{ para }}</p>{% endfor %}
   {% if sec.table %}
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr>{% for c in sec.table.columns %}<th class="{{ 'num' if not loop.first }}">{{ c }}</th>{% endfor %}</tr>
     {% for row in sec.table.rows %}<tr>{% for c in row %}<td class="{{ 'num' if not loop.first }}">{{ c }}</td>{% endfor %}</tr>{% endfor %}
   </table></div>

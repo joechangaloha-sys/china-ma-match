@@ -28,3 +28,12 @@ panels. Red/amber/green remain available for meaningful error/warning/success st
 The main site, English standalone teaser, Chinese teaser and document demos share
 the palette. Their differing layouts are intentional; language and workflow controls
 remain as previously verified.
+
+## Laptop and phone layouts
+
+Check narrow phones at 320px, common phones at 390px and laptop screens at 1366px.
+Keep page-level horizontal overflow at zero; wide data tables may scroll within
+labelled, keyboard-focusable regions. Phone controls should have 44px touch targets,
+form fields should use 16px text, and long document previews need quick links to
+their controls. Preserve the shared language layouts, institutional colours and print
+views. Test public/document pages and representative views for all four signed-in roles.
