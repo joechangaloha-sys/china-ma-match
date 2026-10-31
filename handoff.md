@@ -266,3 +266,8 @@ All pages share the passcode gate and are disabled outside demo mode. Branch:
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/5.
 Validation: 146 tests passed; browser stage switching, downloaded watermark/content,
 Chinese LOI and 375px no-overflow layout checked.
+
+Tencent deployed commit `695e5fc`: all 18 bilingual document stages, navigation/homepage
+links, teaser cross-link, installed export script and passcode gate passed live HTTPS
+checks. Saved records remain 3 targets / 40 buyers / 13 matches / 0 documents /
+2 handoffs / 6 events. No provider connections or real signing/sending performed.
