@@ -8,6 +8,69 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## NDA/VDR mock workflow and deferred connections (31 Oct 2026)
+
+- Joe: "lets set up external connections later. record them as to-dos and continue building".
+  Deferred checklist: `docs/INTEGRATIONS_TODO.md` and private `/internal/connections`. Intended account
+  owner is a mainland company; pilot signers are mainland companies/individuals. No accounts, credentials,
+  subscriptions, real signatures or external invitations were requested or created.
+- Added persisted `DealHandoff` + append-only `HandoffEvent` ledger, mock request/completion/cancellation,
+  agreement/party hashes, duplicate/stale receipt checks, human signatory-authority review, owner approval
+  bound to room/viewer role/expiry, separate mock provisioning, expiry and revocation.
+- Internal mandate match rows link to `/internal/handoffs/{match_id}`; owners approve/revoke in their
+  seller portal. Old timestamp-only data-room grants no longer suffice. Every demo download and memo view
+  rechecks active/current/unexpired access. Real mandates remain blocked. Cancellation applies only to
+  unsigned pending requests; an old completion replay cannot revive revoked access.
+- `/zh/handoff` and `/en/handoff` demonstrate nine scenarios in isolated temporary databases, linked from
+  the existing workflow demo. Internal to-do/handoff screens are included in the static export too.
+- External callbacks, provider-side enforcement, provider accounts and procurement remain deferred.
+  Do not confuse a mock completion or local access flag with a real provider acknowledgement.
+- Branch `kimi/nda-vdr-handoff` includes prior review work because main is still unchanged.
+  PR: https://github.com/joechangaloha-sys/china-ma-match/pull/3. All 143 offline tests pass.
+  Prior-version upgrade preserved 3 targets, 40 buyers, 13 matches and 0 documents; mock records/events
+  were seeded once. Browser checks passed pending/revoked states and 375px Chinese/checklist layouts.
+  Validate offline suite, legacy database upgrade, live zh/en scenarios, role checks and phone layouts;
+  back up existing Tencent PostgreSQL before deploying the pushed review branch. Never merge for Joe.
+- Live Lighthouse checks passed all 18 zh/en handoff scenarios, internal checklist/handoff views, role
+  restrictions and CSRF denial. Existing records remain 3 targets/40 buyers/13 matches/0 documents;
+  walkthroughs did not mutate saved handoffs. Mock records/events: 2/6. The pushed review branch is live;
+  a restricted PostgreSQL backup was saved under `/opt/mamatch/backups/` before the upgrade.
+
+## Evidence-bound document release (31 Oct 2026, branch kimi/release-controls)
+
+- Joe approved the review recommendations and asked to build and show them on the website. First
+  implementation: bilingual `/workflow` fictional walkthrough, clearer fee wording and worked examples,
+  `ReleaseClaim` evidence records linked to mandate documents and hashes, analyst/seller approval hashes,
+  seller info-memo approval, and release checks on public listing/detail pages and teaser distribution.
+- Source/content/evidence changes invalidate release. Every assertion and public card field needs human
+  evidence review. Fictional reviews are labelled and isolated from real mandates. Legacy hashless
+  approvals are not trusted; example documents are regenerated, real documents require review.
+- Document AI calls are disabled. Real mandates cannot use demo click NDAs, in-app buyer document downloads,
+  name disclosure, post-NDA memo display or indicative offers until the verified-signature/external-VDR
+  handoff is integrated. Fictional examples retain their demonstration flow.
+- CSRF tokens protect signed-in forms; cross-origin submissions are rejected. Account sign-ins are limited
+  after ten failures in a rolling 15-minute window. Docker now installs `uv.lock` with pinned uv.
+- Prices are unchanged; the fee page explicitly shows the 15% effective minimum at RMB 2m and credits.
+- Pending integrations: signature provider and signer authority proof; external VDR expiry/revocation;
+  MFA, malware scanning, formal migrations, legal/data review; opt-in alerts/WeChat. The website labels
+  these limits. Do not present this as a production launch or mainland CloudBase deployment.
+- Validation: full offline test suite, legacy SQLite upgrade preserving 3 targets/40 buyers/13 matches,
+  browser scenario checks and 375px layouts. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/2. All 117 offline tests pass. Existing seller FAQ PR #1 is included
+  in this branch; no merge or direct main push. The review branch is deployed to Lighthouse.
+- Live HTTPS verification passed all 14 zh/en workflow scenarios, fee examples, seller wording, internal
+  evidence view and a CSRF-protected form round-trip. PostgreSQL still has 3 targets, 40 buyers, 13 matches
+  and 0 uploaded documents. A restricted database backup was saved under `/opt/mamatch/backups/` before
+  the additive upgrade. Real-data/provider prerequisites above remain open.
+
+## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
+
+- Added a "Questions from sellers" / 卖方常见问题 section to the public seller page (`page_sell.html`), with one
+  bilingual entry explaining the success fee for outreach clients: 4% of the deal value, minimum RMB 300,000,
+  earlier preparation and outreach fees credited, charged only at closing; free-listing sellers pay no success
+  fee. Amounts come from `config.py` (`SUCCESS_FEE_RATE`, `SUCCESS_FEE_MIN_RMB`), so they stay in step with the
+  fees page, and the entry links to `/fees`. All 104 tests pass (`uv run pytest`); both editions render with no
+  language leakage. PR: pending push access from this environment.
+
 ## Live fictional demo and Git updates (29 Oct 2026)
 
 - **Lighthouse demo:** Singapore server `43.153.223.242`, temporary HTTPS address

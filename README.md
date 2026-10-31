@@ -7,6 +7,63 @@ a secure operating system for a concierge pilot, not an open marketplace.
 
 Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
+## NDA/VDR workflow with connections deferred (31 Oct 2026)
+
+Joe explicitly deferred external setup. The full checklist is in `docs/INTEGRATIONS_TODO.md` and on the
+signed-in deal-manager page `/internal/connections`. No provider account, credentials, subscription,
+real signing process or external room invitation has been created.
+
+The dynamic demo adds `/zh/handoff` and `/en/handoff`: nine isolated scenarios covering pending signing,
+missing authority review, seller approval, pending provisioning, active/expired/revoked access, changed
+parties and cancellation of an unsigned request. These use the same offline state machine as the private
+portals and do not change saved mandates.
+
+Open **NDA / VDR handoff** from a buyer row in an internal mandate to operate the persisted mock workflow:
+prepare a request → simulate a receipt → review signatory authority → request read-only access for 1–30 days
+→ mandate owner approves room/role/expiry in their seller portal → deal manager confirms mock provisioning.
+Owner approval alone does not activate access. Owner/deal manager may revoke it; the demo can also advance
+past expiry. Every action is recorded in `handoff_events`; duplicate/stale signing receipts cannot revive a
+grant. Changed parties, agreement version, room, role or expiry invalidate the corresponding approvals.
+Completed NDA evidence is retained; cancellation applies to unsigned requests, not executed contracts.
+
+The mock adapter is rejected for real mandates. It produces only labelled illustrative hashes/references,
+not signed PDFs, legal signatures or real VDR acknowledgements. Buyer demo downloads and memo display
+require an active, current, unexpired grant on every request, replacing the old timestamp-only control.
+Real provider callbacks, reconciliation, provider-side expiry/revocation, durable evidence archives and
+external room connections remain deferred. A future real adapter must not treat mock state as production
+proof or treat a local flag as confirmation that an external provider has revoked access.
+
+## Evidence and approval controls (31 Oct 2026)
+
+The dynamic fictional demo includes `/zh/workflow` and `/en/workflow`: a read-only walkthrough of
+server-enforced release checks, including unsupported assertions, content/source changes, missing seller
+approval, invalid revenue and supported loss-making businesses. Each request uses a throwaway database;
+it cannot alter mandates or distribute documents. The page is unavailable outside demo mode.
+
+Deal managers can open **Review evidence and version** under each teaser/memo in the internal mandate
+page. Every non-empty assertion, including public-listing fields, needs a review linked to an existing
+source document on the same mandate, its SHA256, and a page/section review note. Evidence reviews and
+analyst/seller approvals bind to the document's content, version, language and source snapshot. Changed
+content, changed source figures or replaced evidence locks release. Real reviews require authenticated
+roles; clearly labelled fictional seed reviews are used only for example records. Legacy approvals without
+hashes are untrusted; fictional seed documents are regenerated, and real documents require a new review.
+
+Sellers now approve the current info-memo version in their portal. Public listing/detail pages and teaser
+outreach recheck the release gate. Templates generate teasers and memos with AI calls disabled pending
+provider/data-transfer review. A claim review records a human's judgement; it does not prove authenticity.
+
+The fee page shows worked examples and credits; no-closing language applies only to the success fee.
+The agreed pilot minimum remains unchanged. Signed-in mutations require a session-bound CSRF token,
+cross-origin submissions are rejected, and ten failed account sign-ins trigger a 15-minute rolling limit.
+The container installs the tested `uv.lock` using a pinned uv version.
+
+**Remaining before real-data use:** reliable e-signature integration and signer-authority evidence,
+external professional VDR grants/expiry/revocation, MFA, upload malware scanning, formal database
+migrations and legal/data-processing review. Click acceptance is explicitly a fictional demonstration;
+real mandates cannot use click acceptance, in-app buyer document downloads, name disclosure or indicative
+offers as a substitute for that integration. Real post-NDA memos are not displayed in the buyer portal.
+Opt-in alerts and WeChat integration remain later work. No new Tencent resources were created.
+
 ## Who sees what
 
 | Area | URL | Who | What |
