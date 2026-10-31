@@ -24,8 +24,16 @@ def app(db_url, monkeypatch, tmp_path):
     return app
 
 
+class BrowserClient(TestClient):
+    def request(self, method, url, **kwargs):
+        from mamatch.web.security import csrf_token
+        if method.upper() in {'POST', 'PUT', 'PATCH', 'DELETE'} and self.cookies.get('mm_session'):
+            kwargs['headers'] = {**(kwargs.get('headers') or {}), 'X-CSRF-Token': csrf_token(self.cookies.get('mm_session'))}
+        return super().request(method, url, **kwargs)
+
+
 def client(app, email: str | None = None, lang: str = "zh-CN") -> TestClient:
-    c = TestClient(app, headers={"Accept-Language": lang})
+    c = BrowserClient(app, headers={"Accept-Language": lang})
     if email:
         r = c.post("/login", data={"email": email, "password": DEMO_PASSWORD})
         assert r.status_code == 200, r.text
@@ -212,10 +220,10 @@ def test_buyer_request_then_analyst_approval_then_nda(app, db_url):
     buyer = client(app, BUYER)
     assert "已提交引荐申请" in buyer.post(f"/opportunities/{delta.id}/request").text
     m = _get(db_url, Match, target_id=delta.id, buyer_id=_get(db_url, Buyer, external_id="EX000").id)
-    assert "接受并签署" not in buyer.get("/buyer").text
+    assert "演示：接受保密承诺" not in buyer.get("/buyer").text
     client(app, DM).post(f"{I}/matches/{m.id}/decision", data={"decision": "accept"})
-    assert "接受并签署" in buyer.get("/buyer").text
-    assert "Accept and sign" in buyer.get("/en/buyer").text
+    assert "演示：接受保密承诺" in buyer.get("/buyer").text
+    assert "Demo: accept undertaking" in buyer.get("/en/buyer").text
     buyer.post(f"/buyer/deals/{m.id}/nda")
     m = _get(db_url, Match, id=m.id)
     assert m.stage == "nda_signed" and m.nda_version
@@ -232,7 +240,10 @@ def test_data_room_needs_nda_seller_grant_and_flag(app, db_url):
     dm.post(f"{I}/documents/{doc.id}/data-room")
     assert buyer.get(f"/buyer/documents/{doc.id}").status_code == 404  # seller has not granted access
     nda = next(mid for mid, st in _matches(db_url, jade.id) if st == "nda_signed")
+    dm.post(f"/internal/handoffs/{nda}/request-access", data={"days": 7})
     client(app, SELLER).post(f"/seller/{jade.id}/matches/{nda}/grant")
+    assert buyer.get(f"/buyer/documents/{doc.id}").status_code == 404  # approval alone is not provisioning
+    dm.post(f"/internal/handoffs/{nda}/provision")
     r = buyer.get(f"/buyer/documents/{doc.id}")
     assert r.status_code == 200 and r.content == "营业执照".encode()
     assert other.get(f"/buyer/documents/{doc.id}").status_code == 404  # another buyer
@@ -260,6 +271,16 @@ def test_deal_manager_mandate_flow(app, db_url):
     assert "10–20百万元" in r.text and "60–70%" in r.text
     r = dm.post(f"{url}/teaser", data={"language": "zh"})
     tz = int(re.search(rf"{I}/teasers/(\d+)/approve", r.text).group(1))
+    from mamatch import release
+    from mamatch.models import Teaser
+    with db.session_scope(db_url) as review_session:
+        artifact = review_session.get(Teaser, tz)
+        claim_paths = [path for path, _ in release.assertions(artifact.body)]
+    dm.post(f"{url}/documents", data={"kind": "other"}, files={"file": ("review-source.txt", b"Fictional test source", "text/plain")})
+    with db.session_scope(db_url) as review_session:
+        source_id = review_session.scalar(select(Document.id).where(Document.target_id == tid))
+    for path in claim_paths:
+        dm.post(f"{I}/review/teaser/{tz}", data={"claim_path": path, "evidence_ref": "Test fixture supporting material, page 1", "document_id": source_id})
     dm.post(f"{I}/teasers/{tz}/approve")
     assert "seller must approve" in dm.post(f"{url}/visibility", data={"visibility": "listed"}).text
     # The seller opens their account from the invite link, states their authority and approves the teaser.
@@ -599,3 +620,108 @@ def test_code_of_conduct_and_new_faq_questions(app):
         assert q in faq, q
     zh = client(app).get("/zh/conduct").text
     assert "行为准则" in zh and "个人账户" in zh
+
+
+def test_workflow_demo_uses_real_release_checks_without_mandate_changes(app, db_url, monkeypatch):
+    monkeypatch.setattr(config, 'DEMO_MODE', True)
+    monkeypatch.setattr(config, 'DEMO_ACCESS_KEY', 'test-workflow-gate')
+    c = client(app, lang='en')
+    c.post('/demo-access', data={'access_key': 'test-workflow-gate'})
+    with db.session_scope(db_url) as s:
+        before = len(s.scalars(select(Target)).all())
+    for lang in ('en', 'zh'):
+        for scenario in ('approved', 'missing-evidence', 'changed-content', 'changed-source',
+                         'missing-seller', 'negative-revenue', 'loss-making'):
+            r = c.get(f'/{lang}/workflow?scenario={scenario}')
+            assert r.status_code == 200
+            assert ('Demo version ready' if lang == 'en' else '演示版本可分发') in r.text if scenario in ('approved','loss-making') else ('Release locked' if lang == 'en' else '分发已锁定') in r.text
+    with db.session_scope(db_url) as s:
+        assert len(s.scalars(select(Target)).all()) == before
+    assert c.get('/en/workflow?scenario=unknown').status_code == 400
+    monkeypatch.setattr(config, 'DEMO_MODE', False)
+    assert c.get('/en/workflow').status_code == 404
+
+
+def test_csrf_blocks_mutations_without_token_and_accepts_rendered_form(app):
+    c = TestClient(app)
+    c.post('/login', data={'email': DM, 'password': DEMO_PASSWORD})
+    assert c.post('/logout').status_code == 403
+    page = c.get('/internal').text
+    token = re.search(r'name="csrf_token" value="([a-f0-9]+)"', page).group(1)
+    assert c.post('/logout', data={'csrf_token': token}, headers={'Origin': 'https://attacker.invalid'}).status_code == 403
+    assert c.post('/logout', data={'csrf_token': token}).status_code == 200
+
+
+def test_evidence_review_is_private_and_fee_examples_are_clear(app, db_url):
+    from mamatch.models import Teaser
+    tz = _get(db_url, Teaser, target_id=_get(db_url, Target, code_name='Project Jade').id)
+    url = f'/internal/review/teaser/{tz.id}'
+    assert client(app, BUYER).get(url).status_code == 403
+    assert client(app, SELLER).get(url).status_code == 403
+    assert client(app, DM).get(url).status_code == 200
+    page = client(app, lang='en').get('/en/fees').text
+    assert '15%' in page and '240,000' in page and '740,000' in page
+    assert 'No success fee without closing' in page
+    assert '不成交不收费' not in client(app).get('/zh/sell').text
+
+
+def test_deferred_connection_checklist_is_internal_only(app):
+    assert client(app, BUYER).get('/internal/connections').status_code == 403
+    assert client(app, SELLER).get('/internal/connections').status_code == 403
+    public = client(app).get('/internal/connections', follow_redirects=False)
+    assert public.status_code == 303
+    for lang in ('zh', 'en'):
+        page = client(app, DM).get(f'/{lang}/internal/connections')
+        assert page.status_code == 200
+        assert 'Docutone' in page.text and ('Deferred' if lang == 'en' else '已推迟') in page.text
+
+
+def test_handoff_scenarios_are_bilingual_isolated_and_demo_only(app, db_url, monkeypatch):
+    from mamatch.models import DealHandoff
+    from sqlalchemy import func
+    monkeypatch.setattr(config, 'DEMO_MODE', True)
+    monkeypatch.setattr(config, 'DEMO_ACCESS_KEY', 'handoff-test-passcode')
+    c = client(app)
+    c.post('/demo-access', data={'access_key':'handoff-test-passcode'})
+    with db.session_scope(db_url) as s:
+        before = (s.scalar(select(func.count(DealHandoff.id))), s.scalar(select(func.count(Target.id))))
+    for lang in ('zh','en'):
+        for scenario in ('awaiting-signature','missing-review','awaiting-seller','pending-provisioning',
+                         'active','expired','revoked','changed-parties','cancelled'):
+            r = c.get(f'/{lang}/handoff?scenario={scenario}')
+            assert r.status_code == 200, (lang,scenario)
+            if scenario == 'active':
+                assert ('Demo access active' if lang=='en' else '演示访问有效') in r.text
+            elif scenario == 'expired':
+                assert ('Access expired' if lang=='en' else '访问已到期') in r.text
+            elif scenario == 'revoked':
+                assert ('Access revoked' if lang=='en' else '访问已撤销') in r.text
+    with db.session_scope(db_url) as s:
+        assert before == (s.scalar(select(func.count(DealHandoff.id))), s.scalar(select(func.count(Target.id))))
+    assert c.get('/en/handoff?scenario=unknown').status_code == 400
+    monkeypatch.setattr(config, 'DEMO_MODE', False)
+    assert c.get('/en/handoff').status_code == 404
+
+
+def test_handoff_roles_and_owner_approval_cannot_be_bypassed(app, db_url):
+    from mamatch import handoff
+    from mamatch.models import DealHandoff
+    jade = _get(db_url, Target, code_name='Project Jade')
+    mid = next(mid for mid,st in _matches(db_url,jade.id) if st=='nda_signed')
+    url = f'/internal/handoffs/{mid}'
+    assert client(app, BUYER).get(url).status_code == 403
+    assert client(app, SELLER).post(url+'/provision').status_code == 403
+    manager = client(app, DM)
+    assert manager.get(url).status_code == 200
+    manager.post(url+'/request-access',data={'days':7})
+    manager.post(url+'/provision')
+    assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'awaiting_seller'
+    client(app,SELLER).post(f'/seller/{jade.id}/matches/{mid}/grant')
+    assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'pending_provisioning'
+    manager.post(url+'/provision')
+    assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'active'
+    manager.post(url+'/expire')
+    with db.session_scope(db_url) as s:
+        assert not handoff.access_active(handoff.get(s.get(Match,mid)))
+    client(app,SELLER).post(f'/seller/{jade.id}/matches/{mid}/revoke')
+    assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'revoked'

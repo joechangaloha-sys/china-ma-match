@@ -33,12 +33,15 @@
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
   <nav>
+  {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("文件演示：备忘录 / NDA / LOI", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
+  {% if cfg.DEMO_MODE %}<a href="/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('独立简介演示（英文）', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}
     <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
     <a href="{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>
     <a href="{{ I }}/advisers" class="{{ 'on' if request.url.path.startswith(I + '/advisers') }}">{{ T('顾问审核', 'Adviser checks') }}</a>
     <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
     <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
+    <a href="{{ I }}/connections">{{ T('外部连接待办', 'Connection to-dos') }}</a>
     <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
   {% else %}
     {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
@@ -49,6 +52,7 @@
     <a href="{{ P }}/buy" class="{{ 'on' if request.url.path == '/buy' }}">{{ T('收购企业', 'Buy') }}</a>
     <a href="{{ P }}/fees" class="{{ 'on' if request.url.path == '/fees' }}">{{ T('费用', 'Fees') }}</a>
     <a href="{{ P }}/security" class="{{ 'on' if request.url.path == '/security' }}">{{ T('保密', 'Confidentiality') }}</a>
+    {% if cfg.DEMO_MODE %}<a href="{{ P }}/workflow" class="{{ 'on' if request.url.path == '/workflow' }}">{{ T('流程演示', 'Workflow demo') }}</a>{% endif %}
     <a href="{{ P }}/faq" class="{{ 'on' if request.url.path == '/faq' }}">{{ T('常见问题', 'FAQ') }}</a>
   {% endif %}
   </nav>

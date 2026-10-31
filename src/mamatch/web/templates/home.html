@@ -8,6 +8,8 @@
                      'Verified sellers, staged disclosure and human-checked AI help owners prepare a confidential sale, and help qualified buyers find, evaluate and complete acquisitions.') }}</p>
   <div class="actions">
     <a class="button" href="{{ P }}/sell">{{ T('我想出售企业', 'I want to sell') }}</a>
+    {% if cfg.DEMO_MODE %}<a class="button" href="{{ P }}/document-demos">{{ T("信息备忘录、NDA与LOI演示", "Info memo, NDA and LOI demos") }}</a>{% endif %}
+    {% if cfg.DEMO_MODE %}<a class="button ghost" href="/teaser-demo/">{{ T('查看独立简介演示（英文）', 'Open the standalone teaser demo') }}</a>{% endif %}
     <a class="button ghost" href="{{ P }}/buy">{{ T('我想收购企业', 'I want to buy') }}</a>
   </div>
 </section>
