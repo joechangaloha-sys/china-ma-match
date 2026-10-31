@@ -12,7 +12,8 @@ settings={'LocalSocket':'/run/clamav/clamd.ctl', 'LocalSocketGroup':'clamav', 'L
           'MaxThreads':'1', 'MaxQueue':'2', 'ConcurrentDatabaseReload':'false', 'StreamMaxLength':'20M',
           'MaxScanSize':'80M', 'MaxFileSize':'20M', 'MaxRecursion':'10', 'AlertExceedsMax':'true',
           'AlertEncrypted':'true', 'CommandReadTimeout':'10', 'ReadTimeout':'60', 'SendBufTimeout':'60',
-          'SelfCheck':'600'}
+          'SelfCheck':'600', 'EnableVersionCommand':'true', 'EnableShutdownCommand':'false',
+          'EnableReloadCommand':'false', 'EnableStatsCommand':'false'}
 lines=p.read_text().splitlines()
 lines=[line for line in lines if not line.split(' ',1)[0] in settings and not line.startswith(('TCPSocket ', 'TCPAddr '))]
 p.write_text('\n'.join(lines)+'\n'+'\n'.join(f'{k} {v}' for k,v in settings.items())+'\n')
