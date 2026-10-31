@@ -7,6 +7,63 @@ a secure operating system for a concierge pilot, not an open marketplace.
 
 Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
+## NDA/VDR workflow with connections deferred (31 Oct 2026)
+
+Joe explicitly deferred external setup. The full checklist is in `docs/INTEGRATIONS_TODO.md` and on the
+signed-in deal-manager page `/internal/connections`. No provider account, credentials, subscription,
+real signing process or external room invitation has been created.
+
+The dynamic demo adds `/zh/handoff` and `/en/handoff`: nine isolated scenarios covering pending signing,
+missing authority review, seller approval, pending provisioning, active/expired/revoked access, changed
+parties and cancellation of an unsigned request. These use the same offline state machine as the private
+portals and do not change saved mandates.
+
+Open **NDA / VDR handoff** from a buyer row in an internal mandate to operate the persisted mock workflow:
+prepare a request → simulate a receipt → review signatory authority → request read-only access for 1–30 days
+→ mandate owner approves room/role/expiry in their seller portal → deal manager confirms mock provisioning.
+Owner approval alone does not activate access. Owner/deal manager may revoke it; the demo can also advance
+past expiry. Every action is recorded in `handoff_events`; duplicate/stale signing receipts cannot revive a
+grant. Changed parties, agreement version, room, role or expiry invalidate the corresponding approvals.
+Completed NDA evidence is retained; cancellation applies to unsigned requests, not executed contracts.
+
+The mock adapter is rejected for real mandates. It produces only labelled illustrative hashes/references,
+not signed PDFs, legal signatures or real VDR acknowledgements. Buyer demo downloads and memo display
+require an active, current, unexpired grant on every request, replacing the old timestamp-only control.
+Real provider callbacks, reconciliation, provider-side expiry/revocation, durable evidence archives and
+external room connections remain deferred. A future real adapter must not treat mock state as production
+proof or treat a local flag as confirmation that an external provider has revoked access.
+
+## Evidence and approval controls (31 Oct 2026)
+
+The dynamic fictional demo includes `/zh/workflow` and `/en/workflow`: a read-only walkthrough of
+server-enforced release checks, including unsupported assertions, content/source changes, missing seller
+approval, invalid revenue and supported loss-making businesses. Each request uses a throwaway database;
+it cannot alter mandates or distribute documents. The page is unavailable outside demo mode.
+
+Deal managers can open **Review evidence and version** under each teaser/memo in the internal mandate
+page. Every non-empty assertion, including public-listing fields, needs a review linked to an existing
+source document on the same mandate, its SHA256, and a page/section review note. Evidence reviews and
+analyst/seller approvals bind to the document's content, version, language and source snapshot. Changed
+content, changed source figures or replaced evidence locks release. Real reviews require authenticated
+roles; clearly labelled fictional seed reviews are used only for example records. Legacy approvals without
+hashes are untrusted; fictional seed documents are regenerated, and real documents require a new review.
+
+Sellers now approve the current info-memo version in their portal. Public listing/detail pages and teaser
+outreach recheck the release gate. Templates generate teasers and memos with AI calls disabled pending
+provider/data-transfer review. A claim review records a human's judgement; it does not prove authenticity.
+
+The fee page shows worked examples and credits; no-closing language applies only to the success fee.
+The agreed pilot minimum remains unchanged. Signed-in mutations require a session-bound CSRF token,
+cross-origin submissions are rejected, and ten failed account sign-ins trigger a 15-minute rolling limit.
+The container installs the tested `uv.lock` using a pinned uv version.
+
+**Remaining before real-data use:** reliable e-signature integration and signer-authority evidence,
+external professional VDR grants/expiry/revocation, MFA, upload malware scanning, formal database
+migrations and legal/data-processing review. Click acceptance is explicitly a fictional demonstration;
+real mandates cannot use click acceptance, in-app buyer document downloads, name disclosure or indicative
+offers as a substitute for that integration. Real post-NDA memos are not displayed in the buyer portal.
+Opt-in alerts and WeChat integration remain later work. No new Tencent resources were created.
+
 ## Who sees what
 
 | Area | URL | Who | What |
@@ -142,3 +199,68 @@ recorded), durable COS uploads, and production database migrations. PostgreSQL a
 prepared and locally smoke-tested, but no cloud resource has been deployed. Production hosting, ICP and
 data-location setup in China are handled by Joe outside this code. The NDA text in `offers.py` is a template for
 counsel to review.
+
+## Kimi standalone teaser integration — 31 October 2026
+
+The original Project Willow page from Kimi's ZIP is served at `/teaser-demo/` inside
+the existing demo passcode gate. Open **Teaser demo** in the main navigation or
+**Open the standalone teaser demo** on the homepage. Chinese navigation labels
+the original English page clearly. The approval workflow also links to it.
+
+The original rendering, checks, data/rules panels, copy, JSON download and print/PDF
+controls remain available. This is fictional demonstration data; browser checks
+and illustrative approval fields do not approve or publish real deals. External
+e-signature and VDR connections remain deferred. Assets are packaged with the app;
+the routes are disabled outside demo mode. Work branch: `kimi/standalone-teaser`.
+
+## Information memo, NDA and LOI demos — 31 October 2026
+
+Bilingual `/en/document-demos` and `/zh/document-demos` provide three fictional
+Project Willow documents: `info-memo`, `nda`, and `loi`. Linked from the main menu,
+homepage and original teaser. Each has three read-only stage previews, a labelled
+text export and print/PDF layout. They never query or mutate mandates, sign/send
+agreements, submit offers or grant VDR access. No external connections were added.
+The memo uses the teaser's financial bands and discloses diligence gaps; the NDA
+contains illustrative terms and unresolved legal items; the LOI distinguishes
+enterprise value, equity value and the acquired stake. All new transaction terms
+are fictional assumptions. Counsel review remains outstanding for real use.
+All pages share the passcode gate and are disabled outside demo mode. Branch:
+`kimi/document-demos`; cumulative review includes PRs #1–#4, with no merge to main.
+
+## Language editions and Chinese transaction style — 31 October 2026
+
+Joe requests English-only English pages and Chinese-only Chinese pages, with a formal
+mainland investment-banking register. `docs/LANGUAGE_STYLE.md` records the convention.
+Public page labels, project names, currency labels, demo stages and documents are
+localised; Chinese teaser links now open `/zh/teaser-demo/`, with the same fictional
+financial bands in Chinese. The original English Kimi page remains `/en/teaser-demo/`.
+Chinese text exports and filenames are localised. No cross-language fallback for
+product descriptions. Stored identities, records, economics and release controls
+are not changed. Public/demo language isolation checks include all document stages.
+Branch: `kimi/language-editions`, cumulative prior review work, no merge to main.
+
+## Institutional palette — 31 October 2026
+
+Joe requested a Wall Street style closer to Japan IR Index. The original mamatch
+house palette and Japan IR Index's current last-loaded navy edition were inspected.
+Shared `web/static/palette.css` now supplies navy/white/cool-grey tokens to the main
+site and Kimi teaser. Removed bright yellow, sky-blue and olive fills, gold accents,
+oversized condensed headings and pill controls. Serif headings and restrained navy
+actions align the teaser and document demos. `docs/VISUAL_STYLE.md` records the guide.
+147 tests pass; browser checks confirm matching navy headers/white paper, white text
+on primary actions, working teaser checks and no horizontal overflow at 375px.
+Branch `kimi/institutional-palette` includes prior review work; no merge to main.
+
+## Matching Chinese/English teaser layout — 31 October 2026
+
+The Chinese teaser now uses the canonical standalone teaser shell and the same
+CSS, JavaScript renderer, sidebar, actions, tabs and print layout as the English
+version. Removed the separate generic Chinese document preview. An explicit
+Chinese shell dictionary translates visible copy and accessibility labels; Chinese
+fictional data, dates, validation feedback and labelled JSON export are localised.
+Financial ranges and source-claim relationships remain the same in both editions.
+Chinese data is bundled explicitly in the Docker context and wheel.
+English: `/en/teaser-demo/`; Chinese: `/zh/teaser-demo/`.
+Checks compare shell and rendered-body structure, require Chinese-only rendered
+copy/export, preserve validation regressions and verify unchanged numeric values.
+Branch `kimi/chinese-teaser-layout` includes prior review work; no merge to main.

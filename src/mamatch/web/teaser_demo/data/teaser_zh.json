@@ -1,0 +1,90 @@
+{
+  "teaser_spec_version": "0.1",
+  "listing_id": "demo-listing-0001",
+  "project_code": "柳树项目",
+  "public_headline": "工业设备维护企业控股权转让项目",
+  "industry_l1": "工业服务",
+  "industry_l2": "设备维护及维修",
+  "region_public": "华东地区",
+  "business_summary_public": "标的公司主要面向制造业及仓储行业客户，提供工业设备预防性维护、应急维修及零部件更换安装服务。",
+  "service_categories_public": [
+    "预防性维护",
+    "应急设备维修",
+    "零部件更换安装"
+  ],
+  "customer_mix_public": "制造业、物流及工业领域的多元化客户群体",
+  "operating_history_public": "超过十年",
+  "transaction_type_public": "控股权转让",
+  "stake_description_public": "卖方拟考虑转让控股权或全部股权",
+  "reason_for_sale_public": "出售意向与创始股东接班安排及逐步退休计划有关。",
+  "target_buyer_types": [
+    "产业投资者",
+    "工业服务行业整合方",
+    "具备经营管理经验的收购方"
+  ],
+  "process_timeline_public": "拟持续受理并分批审核初步投资意向。",
+  "nda_required": true,
+  "next_step_text": "潜在投资方应先完成资格审核，再签署保密协议。资料室访问权限须另行取得卖方授权。",
+  "financial_period_start": "2025-01-01",
+  "financial_period_end": "2025-12-31",
+  "financial_period_public": "2025年度",
+  "currency": "CNY",
+  "revenue_min": 25000000,
+  "revenue_max": 40000000,
+  "profit_metric_type": "经调整的息税折旧及摊销前利润",
+  "profit_min": 4000000,
+  "profit_max": 7000000,
+  "financial_basis_public": "卖方提供的管理口径资料",
+  "employee_count_min": 40,
+  "employee_count_max": 60,
+  "site_count_min": 3,
+  "site_count_max": 5,
+  "recurring_revenue_min_pct": 55,
+  "recurring_revenue_max_pct": 65,
+  "revenue_quality_public": "部分收入来自持续性或重复性服务安排。",
+  "margin_comment_public": "盈利水平反映标的公司的服务组合及区域客户基础。",
+  "highlights": [
+    {
+      "text": "经营年限超过十年",
+      "source_claim_id": "claim-demo-001"
+    },
+    {
+      "text": "2025年度营业收入区间为人民币2,500万元至4,000万元",
+      "source_claim_id": "claim-demo-002"
+    },
+    {
+      "text": "2025年度经调整的息税折旧及摊销前利润区间为人民币400万元至700万元",
+      "source_claim_id": "claim-demo-003"
+    },
+    {
+      "text": "持续性或重复性服务收入占比的示例区间为55%至65%",
+      "source_claim_id": "claim-demo-004"
+    },
+    {
+      "text": "区域服务网络包含3处至5处经营网点",
+      "source_claim_id": "claim-demo-005"
+    }
+  ],
+  "information_as_of": "2026-09-30",
+  "verification_label": "示例标注为已按指定支持性资料核对，未提供真实核查底稿",
+  "checks_completed_public": [
+    "示例工商登记信息与指定登记资料核对",
+    "示例2025年度营业收入区间与指定管理报表核对",
+    "示例盈利指标区间与指定管理报表调节明细核对"
+  ],
+  "reviewer_role": "项目负责人",
+  "reviewer_id": "user-demo-101",
+  "seller_confirmed_at": "2026-10-15T10:30:00+08:00",
+  "internal_approved_at": "2026-10-16T14:00:00+08:00",
+  "publication_approved_by": "user-demo-101",
+  "anonymity_review_status": "passed",
+  "ai_assisted": false,
+  "ai_disclosure_required": false,
+  "source_claim_ids": [
+    "claim-demo-001",
+    "claim-demo-002",
+    "claim-demo-003",
+    "claim-demo-004",
+    "claim-demo-005"
+  ]
+}

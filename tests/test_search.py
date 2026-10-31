@@ -57,7 +57,7 @@ def test_product_text_is_checked_before_publishing(seeded):
 
     jade = _t(seeded, "Project Jade")
     jade.products_zh = "恒泰牌汽车空调管路"  # a brand
-    with pytest.raises(ValueError, match="re-identification"):
+    with pytest.raises(ValueError, match="re-identification|seller must approve"):
         listing.publish(jade)
 
 

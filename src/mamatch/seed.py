@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import buyers as buyer_reg
-from . import auth, authority, config
+from . import auth, authority, config, release
 from . import datacheck, fees, infomemo, listing, matching, offers, pipeline, plans, teaser
 from .models import Adviser, AdviserFirm, Buyer, BuyerSignal, SellerCharge, Target, User
 
@@ -235,6 +235,8 @@ def seed(session: Session) -> None:
         _seed_language_versions(session, t)
     if "Project Jade" in have:
         _seed_offers(session, have["Project Jade"])
+    from . import handoff
+    handoff.seed_examples(session)
     session.flush()
 
 
@@ -253,10 +255,11 @@ def _seed_language_versions(session: Session, t: Target) -> None:
     """Each example has an approved teaser in both languages (and the memo, where there is one), drafted in
     one language each; older example drafts that mixed both languages are replaced."""
     def mixed(body) -> bool:
-        return "Full sale" in str(body) or "successor" in str(body) or "Majority stake" in str(body)
+        text = str({k: v for k, v in body.items() if k not in {"facts", "listing_claims"}})
+        return "Full sale" in text or "successor" in text or "Majority stake" in text
 
     for lang in ("zh", "en"):
-        tz = next((x for x in t.teasers if x.language == lang and x.status == "approved"), None)
+        tz = next((x for x in t.teasers if x.language == lang and release.ready(x)), None)
         if tz is None or (lang == "zh" and mixed(tz.body)):
             new = teaser.draft(session, t, lang, use_llm=False)
             teaser.approve(new)
@@ -264,10 +267,11 @@ def _seed_language_versions(session: Session, t: Target) -> None:
             if tz is not None:
                 tz.status = "draft"
         if fees.prep_pack_paid(t):
-            m = next((x for x in t.memos if x.language == lang), None)
+            m = next((x for x in t.memos if x.language == lang and release.ready(x)), None)
             if m is None or (lang == "zh" and mixed(m.body)):
                 new_m = infomemo.draft(session, t, lang, use_llm=False)
                 infomemo.approve(new_m)
+                infomemo.seller_approve(new_m)
                 if m is not None:
                     m.status = "draft"
     session.flush()
@@ -281,11 +285,16 @@ def _seed_offers(session: Session, t: Target) -> None:
                     if o.conditions and spec["conditions"].startswith(o.conditions) and o.conditions != spec["conditions"]:
                         o.conditions = spec["conditions"]
         return
+    from . import handoff
+    handoff.seed_examples(session)
     after = [m for m in t.matches if m.stage in offers.AFTER_NDA]
     for m in offers.outreach_candidates(t)[: max(0, 2 - len(after))]:
         offers.approve_and_send(session, m)
         offers.buyer_respond(session, m, interested=True)
-        offers.accept_nda(session, m, None)
+        manager = session.scalar(select(User).where(User.role == 'deal_manager'))
+        offers.accept_nda(session, m, manager)
+        from . import handoff
+        handoff.review_authority(handoff.get(m), manager, 'FICTIONAL SEED: illustrative signatory-authority review')
         after.append(m)
     for m, spec in zip(after, EXAMPLE_OFFERS):
         offers.submit_offer(session, m, None, **spec)
