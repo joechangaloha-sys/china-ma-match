@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid, release
+from .. import auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid, release, handoff, connections
 from ..models import AdviserFirm, Buyer, Match, Target, User
 from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, INVENTORY, MACRO_REGIONS, PAYMENT_TERMS,
                         PERMITS, PREMISES, REGIONS, SALE_REASONS, SECTORS, TIMING, macro_region, sector_label)
@@ -31,7 +31,8 @@ templates.env.globals.update(
     CONSIDERATION=offers.CONSIDERATION, FINANCING=offers.FINANCING, latest_offer=offers.latest_offer, sector_label=sector_label, risk_label=reid.risk_label,
     macro_region=macro_region, FIN_FIELDS=datacheck.FIN_FIELDS, DISCLOSURES=datacheck.DISCLOSURES,
     SEVERITY=datacheck.SEVERITY, CHARGE_KINDS=fees.CHARGE_KINDS, fin_years=datacheck.years, fees=fees, cfg=config,
-    release=release, I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
+    HANDOFF_ACCESS_LABELS=connections.ACCESS_LABELS, NDA_LABELS=connections.NDA_LABELS,
+    handoff=handoff, release=release, I=I, css_version=int((HERE / "static" / "style.css").stat().st_mtime),
 )
 
 

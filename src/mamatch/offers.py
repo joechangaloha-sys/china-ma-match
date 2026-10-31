@@ -119,6 +119,10 @@ def disclose_names(match: Match) -> None:
         raise ValueError("Real name disclosure requires a verified NDA and external VDR handoff.")
     if match.stage not in AFTER_NDA:
         raise ValueError("Names are disclosed only after an NDA is signed.")
+    from . import handoff
+    handoff.require_demo(match)
+    if not handoff.evidence_reviewed(handoff.get(match)):
+        raise ValueError('Current NDA evidence and signatory-authority review are required.')
     match.name_disclosed_at = datetime.now(timezone.utc)
 
 
@@ -168,9 +172,13 @@ def accept_nda(session: Session, match: Match, user) -> None:
         raise ValueError("A verified e-signature provider is required for real mandates.")
     if not nda_available(match):
         raise ValueError("保密协议尚不可签署 The NDA is not available yet.")
+    from . import handoff
+    h = handoff.start(match, user)
+    handoff.apply_completion(h, handoff.MockSignatureProvider.completion(h), user)
     match.nda_accepted_at = datetime.now(timezone.utc)
     match.nda_version = NDA_VERSION
-    pipeline.move(session, match, "nda_signed", f"NDA {NDA_VERSION} accepted online")
+    if match.stage == "interested":
+        pipeline.move(session, match, "nda_signed", f"Demo NDA {NDA_VERSION} accepted offline")
     auth.log(session, user, "nda_accept", target_id=match.target_id, match_id=match.id, version=NDA_VERSION)
 
 
@@ -182,13 +190,19 @@ def grant_data_room(session: Session, match: Match, user) -> None:
         raise ValueError("Real documents must be shared through an approved professional VDR.")
     if match.stage not in AFTER_NDA:
         raise ValueError("Documents are shared only after an NDA.")
-    match.data_room_granted_at = datetime.now(timezone.utc)
-    auth.log(session, user, "data_room_grant", target_id=match.target_id, match_id=match.id)
+    from . import handoff
+    h = handoff.get(match)
+    if h is None:
+        raise ValueError("The deal manager must prepare the NDA and room-access request first.")
+    handoff.seller_approve(h, user)
+    auth.log(session, user, "data_room_approval", target_id=match.target_id, match_id=match.id,
+             scope_hash=h.seller_approved_hash)
 
 
 def can_view_document(match: Match | None, doc) -> bool:
+    from . import handoff
     return (match is not None and match.target.is_example and doc.in_data_room and match.target_id == doc.target_id
-            and match.data_room_granted_at is not None and match.stage in AFTER_NDA)
+            and match.stage in AFTER_NDA and handoff.access_active(handoff.get(match)))
 
 
 # ---------------------------------------------------------------- indicative offers (after NDA)
@@ -216,6 +230,10 @@ def submit_offer(session: Session, match: Match, user, *, price_low: float | Non
         raise ValueError("A verified NDA workflow is required for real mandates.")
     if match.stage not in AFTER_NDA or match.stage == "closed":
         raise ValueError("签署保密协议后才能提交意向报价 Offers can be submitted only after the NDA.")
+    from . import handoff
+    handoff.require_demo(match)
+    if not handoff.evidence_reviewed(handoff.get(match)):
+        raise ValueError('Current NDA evidence and signatory-authority review are required.')
     if price_low is None or price_high is None or price_low <= 0 or price_high < price_low:
         raise ValueError("请填写有效的价格区间 Enter a valid price range.")
     stake = stake_pct if stake_pct is not None else 100.0
