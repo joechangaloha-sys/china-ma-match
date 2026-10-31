@@ -14,9 +14,16 @@ The deployment operator must build a scanner-capable web image (the default demo
 No file is sent to an external scanning service. Scanner absence, signatures older than two days,
 timeout, resource-limit alert, threat, malformed package or integrity change cannot produce a clean result.
 Results are audited; there is no manual clean override. A clean result does not guarantee a file is safe.
-The Tencent review environment deliberately has no scanner configured: all uploads remain quarantined.
-No provider account or external connection was created. Do not enable real uploads until the local
-scanner/signature updater and operational monitoring are configured and tested with EICAR fixtures.
+The Tencent deployment uses a host ClamAV daemon over a group-restricted Unix socket, mounted into
+the web container; no scanner TCP port is opened. FreshClam maintains official signature updates.
+`scanner_health()` checks the daemon's loaded database build time and blocks scanning when it is
+unavailable or over 48 hours old. SelfCheck reloads updated definitions; concurrent database reload
+is disabled to avoid a second signature copy on the 2 GiB host. Scan limits, single-thread processing
+and systemd memory limits bound resource use. Files never leave this Tencent server for scanning.
+The private queue shows operational/unavailable/stale state. EICAR and clean-file integration checks
+must pass after installation and after scanner configuration changes. Initial host setup is
+`deploy/lighthouse/setup-scanner-mfa.sh` (root, on the existing server). It preserves the MFA key.
+
 
 Text extraction follows a clean scan in a separate process with a 15-second timeout, ten-second CPU
 limit, 100-page cap and 200,000-character output cap. Linux deployment also enforces a 512 MiB address
@@ -29,4 +36,4 @@ without a last-seen timestamp require a fresh sign-in. `/account/sessions` lets 
 all of their own sessions, including the current one, with CSRF protection and an audit event. Existing
 role and matter checks, account lockout window and session-bound CSRF checks remain in force.
 Request bodies are bounded before form/CSRF parsing, even without Content-Length.
-MFA and a managed migration process remain prerequisites for a real-data pilot.
+Personal-account MFA is implemented; see MFA.md. Managed migrations and the remaining provider/legal controls still precede real-data use.

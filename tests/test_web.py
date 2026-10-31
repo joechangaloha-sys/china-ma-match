@@ -29,8 +29,8 @@ def app(db_url, monkeypatch, tmp_path):
 class BrowserClient(TestClient):
     def request(self, method, url, **kwargs):
         from mamatch.web.security import csrf_token
-        if method.upper() in {'POST', 'PUT', 'PATCH', 'DELETE'} and self.cookies.get('mm_session'):
-            kwargs['headers'] = {**(kwargs.get('headers') or {}), 'X-CSRF-Token': csrf_token(self.cookies.get('mm_session'))}
+        if method.upper() in {'POST', 'PUT', 'PATCH', 'DELETE'} and (self.cookies.get('mm_session') or self.cookies.get('mm_mfa')):
+            kwargs['headers'] = {**(kwargs.get('headers') or {}), 'X-CSRF-Token': csrf_token(self.cookies.get('mm_session') or self.cookies.get('mm_mfa'))}
         return super().request(method, url, **kwargs)
 
 

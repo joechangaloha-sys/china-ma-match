@@ -117,3 +117,42 @@ def test_failed_signin_limit_counts_ten_attempts_once(seeded):
     for event in failures:
         event.created_at = datetime.now(timezone.utc) - timedelta(minutes=16)
     assert auth.authenticate(seeded, user.email, DEMO_PASSWORD) == user
+
+
+@pytest.mark.parametrize('reply,expected', [(b'stream: OK\0','clean'),(b'stream: Eicar-Test-Signature FOUND\0','infected'),(b'ERROR\0','error')])
+def test_local_clamd_stream_protocol(seeded, clean_file, monkeypatch, reply, expected):
+    import socket
+    from datetime import datetime, timezone
+    doc = clean_file(Document(target_id=1, kind='other', filename='x.txt'))
+    monkeypatch.setattr(config, 'CLAMD_SOCKET', '/local/scanner/socket')
+    version = ('ClamAV 1.4/12345/'+datetime.now(timezone.utc).strftime('%a %b %d %H:%M:%S %Y')).encode()+b'\0'
+    replies = iter([version,reply])
+    sent = []
+    class LocalSocket:
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def settimeout(self,value):pass
+        def connect(self,path):assert path == '/local/scanner/socket'
+        def sendall(self,value):sent.append(value)
+        def recv(self,size):return next(replies)
+    monkeypatch.setattr(socket,'socket',lambda *a,**kw:LocalSocket())
+    assert upload_security.scan(doc) == expected
+    assert b'zVERSION\0' in sent and b'zINSTREAM\0' in sent
+    assert sent[-1] == b'\x00\x00\x00\x00'
+
+
+def test_stale_or_offline_daemon_keeps_quarantine(monkeypatch):
+    import socket
+    monkeypatch.setattr(config,'CLAMD_SOCKET','/missing/socket')
+    assert upload_security.scanner_health() == 'unavailable'
+    class Stale:
+        def __enter__(self):return self
+        def __exit__(self,*a):pass
+        def settimeout(self,v):pass
+        def connect(self,v):pass
+        def sendall(self,v):pass
+        def recv(self,v):return b'ClamAV 1.4/12345/Fri Oct 23 00:00:00 2020\0'
+    monkeypatch.setattr(socket,'socket',lambda *a,**k:Stale())
+    assert upload_security.scanner_health() == 'stale'
+    from pathlib import Path
+    assert upload_security._scan_stream(Path('/not-read')) == 'error'

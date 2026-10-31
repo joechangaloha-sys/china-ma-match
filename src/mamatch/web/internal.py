@@ -471,7 +471,7 @@ def review_assertion(kind: str, artifact_id: int, claim_path: str = Form(''), ev
 @router.get('/upload-security', response_class=HTMLResponse)
 def upload_queue(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
     return render(request, 'upload_security.html', user, portal='internal', omit_profile_name=True,
-                  scanner_configured=bool(config.CLAMSCAN_PATH),
+                  scanner_configured=bool(config.CLAMSCAN_PATH or config.CLAMD_SOCKET), scanner_health=upload_security.scanner_health(),
                   docs=s.scalars(select(Document).order_by(Document.created_at.desc())).all())
 
 

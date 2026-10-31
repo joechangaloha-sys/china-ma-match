@@ -34,6 +34,12 @@ SECURE_COOKIES = os.environ.get("MAMATCH_SECURE_COOKIES", "").lower() in ("1", "
 
 
 def validate_runtime() -> None:
+    if MFA_REQUIRED:
+        from cryptography.fernet import Fernet
+        try:
+            Fernet(MFA_ENCRYPTION_KEY.encode())
+        except (ValueError, TypeError):
+            raise RuntimeError('MFA requires a valid persistent encryption key')
     if DEMO_MODE and len(DEMO_ACCESS_KEY) < 12:
         raise RuntimeError("MAMATCH_DEMO_ACCESS_KEY must contain at least 12 characters in demo mode")
     if DEMO_MODE and not 1 <= DEMO_ACCESS_HOURS <= 168:
@@ -47,3 +53,9 @@ PUBLIC_BASE_URL = os.environ.get("MAMATCH_PUBLIC_URL", "")
 
 # Optional trusted, locally installed ClamAV executable. No scanner means no file release.
 CLAMSCAN_PATH = os.environ.get("MAMATCH_CLAMSCAN_PATH", "")
+
+# MFA secrets are encrypted separately from database records. Keep this key in the private server env.
+MFA_ENCRYPTION_KEY = os.environ.get('MAMATCH_MFA_ENCRYPTION_KEY', '')
+MFA_REQUIRED = os.environ.get('MAMATCH_MFA_REQUIRED', '').lower() in ('1', 'true', 'yes')
+CLAMD_SOCKET = os.environ.get('MAMATCH_CLAMD_SOCKET', '')
+CLAMD_DATABASE_DIR = os.environ.get('MAMATCH_CLAMD_DATABASE_DIR', '/var/lib/clamav')

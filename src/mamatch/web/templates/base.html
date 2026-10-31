@@ -34,7 +34,7 @@
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
   <nav>
-  {% if user %}<a href="{{ P }}/account/sessions">{{ T("登录安全", "Session security") }}</a>{% endif %}
+  {% if user %}<a href="{{ P }}/account/mfa">{{ T("多因素认证", "MFA") }}</a><a href="{{ P }}/account/sessions">{{ T("登录安全", "Session security") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("交易文件演示", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('项目简介演示', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}

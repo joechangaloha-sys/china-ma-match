@@ -25,7 +25,7 @@
 <section class="panel small">
   <h2>{{ T('当前演示的边界', 'Current demonstration limits') }}</h2>
   <p>{{ T('简介及信息备忘录采用模板生成，AI 调用已关闭。证据审核与双重批准绑定具体版本；内容或来源变化后须重新审核。签名服务和专业资料室尚未连接，真实交易的买方无法下载平台上传文件。', 'Teasers and info memos use templates; AI calls are disabled. Evidence reviews and both approvals are tied to a specific version; content or source changes require review again. Signature and professional VDR services are not connected, and buyers cannot download platform uploads on real mandates.') }}</p>
-  <p>{{ T('已加入登录失败限制、表单防伪校验、会话到期及文件隔离。真实资料试点前仍须部署多因素认证、本地恶意软件扫描与病毒库更新、正式数据库迁移，并完成法律及数据处理审查。', 'Sign-in limits, CSRF checks, session expiry and upload quarantine are in place. MFA, an operational local scanner and signature updates, managed migrations, and legal/data-processing review remain prerequisites for a real-data pilot.') }}</p>
+  <p>{{ T('已加入登录失败限制、表单防伪校验、会话到期及文件隔离。个人账户须启用多因素认证，本地扫描服务自动更新病毒库。真实资料试点前仍须完成正式数据库迁移、外部服务接入及法律与数据处理审查。', 'Sign-in limits, CSRF checks, session expiry and upload quarantine are in place. Personal accounts require MFA, and the local scanner maintains signature updates. Managed migrations, external integrations and legal/data-processing review still precede a real-data pilot.') }}</p>
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/workflow">{{ T('查看虚构流程演示', 'Explore the fictional workflow') }} →</a>{% endif %}
 </section>
 {% endblock %}

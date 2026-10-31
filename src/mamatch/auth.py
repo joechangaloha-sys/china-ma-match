@@ -69,10 +69,13 @@ def authenticate(session: Session, email: str, password: str) -> User | None:
     return user
 
 
-def start_session(session: Session, user: User) -> str:
+def start_session(session: Session, user: User, *, mfa_verified=False) -> str:
+    from . import mfa
+    if mfa.required(user) and not mfa_verified:
+        raise ValueError("MFA verification required")
     token = secrets.token_urlsafe(32)
     now = datetime.now(timezone.utc)
-    session.add(UserSession(token=token, user_id=user.id, last_seen_at=now, expires_at=now + timedelta(hours=SESSION_HOURS)))
+    session.add(UserSession(token=token, user_id=user.id, last_seen_at=now, mfa_verified_at=now if mfa_verified else None, mfa_version=user.mfa_version, expires_at=now + timedelta(hours=SESSION_HOURS)))
     user.last_login_at = now
     log(session, user, "sign_in")
     return token
@@ -90,6 +93,9 @@ def user_for_token(session: Session, token: str | None) -> User | None:
     if seen and not seen.tzinfo:
         seen = seen.replace(tzinfo=timezone.utc)
     if expires <= now or not seen or now - seen >= timedelta(minutes=IDLE_MINUTES) or not us.user.active:
+        return None
+    from . import mfa
+    if mfa.required(us.user) and (not us.mfa_verified_at or us.mfa_version != us.user.mfa_version):
         return None
     us.last_seen_at = now
     return us.user

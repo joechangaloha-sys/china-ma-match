@@ -20,7 +20,7 @@ class RequestProtection(BaseHTTPMiddleware):
                 return PlainTextResponse('Cross-origin submission denied', status_code=403)
             if request.headers.get('sec-fetch-site') == 'cross-site':
                 return PlainTextResponse('Cross-site submission denied', status_code=403)
-            token = request.cookies.get('mm_session')
+            token = request.cookies.get('mm_session') or request.cookies.get('mm_mfa')
             if token:
                 provided = request.headers.get('x-csrf-token', '')
                 if not provided:

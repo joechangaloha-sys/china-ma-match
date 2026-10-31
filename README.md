@@ -11,11 +11,10 @@ Background research and design notes are kept privately, outside this repository
 
 Uploads are quarantined before any parsing, review or download. The private **Upload security**
 queue shows their status and lets a deal manager run a configured local scanner. Missing/failed scans
-cannot release files; source hashes are checked again at use. The Tencent review environment has no
-scanner configured, so uploads remain blocked. See [operating notes](docs/UPLOAD_SECURITY.md).
+cannot release files; source hashes are checked again at use. Tencent uses a local ClamAV daemon with automatic signature updates; unavailable or stale scans keep files quarantined. See [operating notes](docs/UPLOAD_SECURITY.md).
 Sessions expire after thirty idle minutes or twelve hours; **Session security** can sign out every
 session belonging to the current account. Existing sessions require a fresh login after this upgrade.
-External signing and VDR integration remain deferred; MFA remains outstanding for real-data use.
+Personal-account MFA is required on Tencent; shared fictional demo accounts remain separate. See [MFA setup](docs/MFA.md). External signing and VDR integration remain deferred.
 
 ## NDA/VDR workflow with connections deferred (31 Oct 2026)
 

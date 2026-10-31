@@ -100,12 +100,12 @@ def render(request: Request, name: str, user: User | None = None, **ctx) -> HTML
     response = templates.TemplateResponse(request, name, ctx)
     from .security import csrf_token
     import re
-    token = csrf_token(request.cookies.get(COOKIE, ''))
+    token = csrf_token(request.cookies.get(COOKIE) or request.cookies.get('mm_mfa', ''))
     if token:
         html = re.sub(r'(<form\b[^>]*\bmethod=["\']post["\'][^>]*>)',
                       lambda m: m.group(1) + f'<input type="hidden" name="csrf_token" value="{token}">',
                       response.body.decode(), flags=re.IGNORECASE)
-        return HTMLResponse(html, status_code=response.status_code)
+        return HTMLResponse(html, status_code=response.status_code, headers={"Cache-Control": "no-store"})
     return response
 
 

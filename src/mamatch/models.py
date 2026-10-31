@@ -320,6 +320,12 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20))  # seller | buyer | deal_manager
     organization: Mapped[str] = mapped_column(String(200), default="")
     buyer_id: Mapped[int | None] = mapped_column(ForeignKey("buyers.id"), nullable=True)
+    is_demo: Mapped[bool] = mapped_column(default=False)
+    mfa_secret: Mapped[str] = mapped_column(Text, default='')
+    mfa_recovery_hashes: Mapped[list] = mapped_column(JSON, default=list)
+    mfa_recovery_counter: Mapped[int] = mapped_column(Integer, default=0)
+    mfa_last_step: Mapped[int] = mapped_column(Integer, default=-1)
+    mfa_version: Mapped[int] = mapped_column(Integer, default=0)
     active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -331,6 +337,8 @@ class UserSession(Base):
     __tablename__ = "user_sessions"
 
     token: Mapped[str] = mapped_column(String(64), primary_key=True)
+    mfa_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    mfa_version: Mapped[int] = mapped_column(Integer, default=0)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -567,3 +575,24 @@ class HandoffEvent(Base):
     provider_event_id: Mapped[str | None] = mapped_column(String(150), nullable=True, unique=True)
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class MfaChallenge(Base):
+    __tablename__ = 'mfa_challenges'
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    purpose: Mapped[str] = mapped_column(String(20))
+    pending_secret: Mapped[str] = mapped_column(Text, default='')
+    next_path: Mapped[str] = mapped_column(String(500), default='/')
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    consumed: Mapped[bool] = mapped_column(default=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AccountInvite(Base):
+    __tablename__ = 'account_invites'
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    email: Mapped[str] = mapped_column(String(200))
+    role: Mapped[str] = mapped_column(String(20), default='deal_manager')
+    consumed: Mapped[bool] = mapped_column(default=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

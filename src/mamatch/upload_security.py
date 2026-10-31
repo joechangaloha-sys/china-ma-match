@@ -85,6 +85,10 @@ def scan(doc):
     """ClamAV exit 0 only; unavailable/outdated/error results never release a file."""
     path = verified_path(doc)
     validate(path.suffix.lower(), path.read_bytes())
+    if config.CLAMD_SOCKET:
+        result = _scan_stream(path)
+        verified_path(doc)
+        return result
     if not config.CLAMSCAN_PATH:
         return 'error'
     try:
@@ -96,4 +100,57 @@ def scan(doc):
         verified_path(doc)
         return {0: 'clean', 1: 'infected'}.get(result.returncode, 'error')
     except (OSError, subprocess.TimeoutExpired, ValueError):
+        return 'error'
+
+
+def _clamd_reply(sock):
+    reply = bytearray()
+    while len(reply) < 4096:
+        part = sock.recv(4096 - len(reply))
+        if not part:
+            break
+        reply.extend(part)
+        if b'\0' in part or b'\n' in part:
+            break
+    return bytes(reply).rstrip(b'\0\r\n')
+
+
+def scanner_health():
+    """Check the loaded database's timestamp, not merely an updater file mtime."""
+    if not config.CLAMD_SOCKET:
+        return 'command' if config.CLAMSCAN_PATH else 'not_configured'
+    import socket
+    from datetime import datetime, timezone
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(3)
+            sock.connect(config.CLAMD_SOCKET)
+            sock.sendall(b'zVERSION\0')
+            value = _clamd_reply(sock).decode('ascii')
+        built = datetime.strptime(value.rsplit('/', 1)[1], '%a %b %d %H:%M:%S %Y').replace(tzinfo=timezone.utc)
+        age = (datetime.now(timezone.utc) - built).total_seconds()
+        return 'ready' if -3600 < age < 48 * 3600 else 'stale'
+    except (OSError, ValueError, IndexError, UnicodeError):
+        return 'unavailable'
+
+
+def _scan_stream(path):
+    import socket
+    import struct
+    if scanner_health() != 'ready':
+        return 'error'
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(60)
+            sock.connect(config.CLAMD_SOCKET)
+            sock.sendall(b'zINSTREAM\0')
+            with path.open('rb') as stream:
+                while part := stream.read(65536):
+                    sock.sendall(struct.pack('!I', len(part)) + part)
+            sock.sendall(struct.pack('!I', 0))
+            reply = _clamd_reply(sock)
+        if reply == b'stream: OK':
+            return 'clean'
+        return 'infected' if reply.startswith(b'stream: ') and reply.endswith(b' FOUND') else 'error'
+    except OSError:
         return 'error'
