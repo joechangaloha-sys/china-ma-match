@@ -9,9 +9,9 @@
 <section class="panel">
   <h2>{{ T('流程', 'What happens') }}</h2>
   <ol class="steps small">
-    <li><b>{{ T('保密访谈', 'A confidential call') }}</b>: {{ T('交易经理了解您的企业和诉求。', 'a deal manager learns about your business and what you want.') }}</li>
-    <li><b>{{ T('委托与核验', 'Mandate and checks') }}</b>: {{ T('确认您有权出售。', 'we confirm you are authorised to sell.') }}</li>
-    <li><b>{{ T('出售准备', 'Preparation') }}</b>: {{ T('上传资料，AI 提取数字并提示买方会问的问题。', 'upload documents; AI extracts figures and flags what buyers will ask.') }}</li>
+    <li><b>{{ T('保密访谈', 'A confidential call') }}</b>: {{ T('项目负责人了解企业经营情况及股权转让诉求。', 'a deal manager learns about your business and what you want.') }}</li>
+    <li><b>{{ T('委托授权核验', 'Mandate and checks') }}</b>: {{ T('核实委托人身份及交易授权。', 'we confirm you are authorised to sell.') }}</li>
+    <li><b>{{ T('交易准备', 'Preparation') }}</b>: {{ T('整理项目资料，核对财务数据并梳理投资方关注事项。', 'organise documents, check financial figures and identify buyer diligence questions.') }}</li>
     <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>: {{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, with no name, city or exact figures.') }}</li>
     <li><b>{{ T('引荐与披露', 'Introductions and disclosure') }}</b>: {{ T('每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。', 'you decide on each buyer; details open only after an NDA and your consent.') }}</li>
     <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>: {{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers at fixed prices.') }}</li>
@@ -32,8 +32,8 @@
   <label class="wide">{{ T('电话或邮箱', 'Phone or email') }} <input name="contact" required></label>
   <label>{{ T('行业', 'Sector') }} <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
   <label>{{ T('省市', 'Province') }} <select name="province">{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
-  <label>{{ T('年收入（百万元）', 'Revenue, RMB m') }} <input name="revenue" inputmode="decimal"></label>
-  <label>{{ T('年净利润（百万元）', 'Net profit, RMB m') }} <input name="net_profit" inputmode="decimal"></label>
+  <label>{{ T('年营业收入（人民币百万元）', 'Revenue, RMB m') }} <input name="revenue" inputmode="decimal"></label>
+  <label>{{ T('年净利润（人民币百万元）', 'Net profit, RMB m') }} <input name="net_profit" inputmode="decimal"></label>
   <label>{{ T('交易方式', 'Deal') }} <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
   <label>{{ T('出售原因', 'Reason') }} <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
   <label class="wide">{{ T('补充说明', 'Anything else') }} <textarea name="notes"></textarea></label>

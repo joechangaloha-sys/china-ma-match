@@ -368,3 +368,19 @@ structures. Shared styles, print rules and named exports verified. Chinese memo,
 NDA and LOI opened in separate visible browser tabs; each has grid layout, navy
 header, white paper and no English prose. Screenshots saved for Joe. Saved records
 remain 3 targets / 40 buyers / 13 matches / 0 documents / 2 handoffs / 6 events.
+
+## Main-site standing standards — 31 October 2026
+
+Joe reaffirmed language/design rules as standing instructions; saved them in Codex
+memory, AGENTS.md and the language guide. Extended parity checks to the main public
+pages, including registration/adviser registration, with existing language-isolation
+checks. Refined Chinese homepage and seller/buyer terminology; aligned old AI claims
+in both languages with model calls being disabled in this demo. Uses the existing
+shared Japan IR Index-inspired navy/white/cool-grey palette; removed decorative
+amber from promotional/internal banners and fixed internal badge contrast. No
+transaction economics, permissions, stored identities or external services changed.
+Branch: `kimi/main-site-standards`.
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/11. All 151 tests pass.
+Targets the main website as Joe requested; standing rules are persisted in memory
+and repository instructions. Public-page structures and language isolation verified.

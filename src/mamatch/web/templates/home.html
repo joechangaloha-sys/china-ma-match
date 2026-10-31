@@ -3,9 +3,9 @@
 {% block body %}
 <section class="hero">
   <span class="eyebrow">{{ T('把企业交棒给对的人', 'Hand your company on to the right owner') }}</span>
-  <h1>{{ T('保密、可靠地出售或收购中小企业', 'A confidential, trusted way to sell or buy a small business') }}</h1>
-  <p class="lead">{{ T('经过核验的卖方、分阶段披露、人工把关的 AI，帮助企业主准备出售，帮助合格买方找到、评估并完成收购。',
-                     'Verified sellers, staged disclosure and human-checked AI help owners prepare a confidential sale, and help qualified buyers find, evaluate and complete acquisitions.') }}</p>
+  <h1>{{ T('中小企业股权转让与并购服务', 'Confidential M&A services for small businesses') }}</h1>
+  <p class="lead">{{ T('通过委托授权核验、分阶段信息披露及专业人员审核，协助企业主开展股权转让准备，并支持合格投资方筛选及评估收购项目。',
+                     'Mandate verification, staged disclosure and professional review support owners preparing a sale and qualified investors screening and assessing acquisitions.') }}</p>
   <div class="actions">
     <a class="button" href="{{ P }}/sell">{{ T('我想出售企业', 'I want to sell') }}</a>
     {% if cfg.DEMO_MODE %}<a class="button" href="{{ P }}/document-demos">{{ T("信息备忘录、保密协议及收购意向书演示", "Info memo, NDA and LOI demos") }}</a>{% endif %}
@@ -19,23 +19,23 @@
     <p class="small">{{ T('每个项目都核实了委托人身份和授权，财务数字可追溯到原始文件。', 'Every mandate has verified authority, and every figure traces back to a source document.') }}</p></section>
   <section class="panel"><h2>{{ T('分阶段披露', 'Staged disclosure') }}</h2>
     <p class="small">{{ T('公开只显示匿名区间；签署保密协议并经卖方同意后才开放详细资料。', "Publicly, only ranges. Details open after an NDA and with the seller's consent.") }}</p></section>
-  <section class="panel"><h2>{{ T('人工把关的 AI', 'Human-checked AI') }}</h2>
-    <p class="small">{{ T('AI 读取资料、发现缺口、起草简介、推荐买方；每一步都由交易经理审核。', 'AI reads documents, finds gaps, drafts teasers and suggests buyers; a deal manager reviews every step.') }}</p></section>
+  <section class="panel"><h2>{{ T('人工审核与技术辅助', 'Human review and technical support') }}</h2>
+    <p class="small">{{ T('资料核查、项目简介编制及投资方匹配均须经项目负责人审核。当前演示未启用人工智能模型调用。', 'Document checks, teaser preparation and buyer matching require human review. AI model calls are disabled in the current demo.') }}</p></section>
 </div>
 
 <section class="why">
-  <h2>{{ T('我们为什么做这件事', 'Why we built this') }}</h2>
+  <h2>{{ T('服务理念', 'Our approach') }}</h2>
   <div class="cols">
     <div>
       <h3>{{ T('第一代企业家正在寻找退出之路', 'A generation of founders is looking for an exit') }}</h3>
       <p>{{ T('大量中小企业由第一代创业者白手起家建立。如今许多创始人临近退休，子女未必接班，企业的价值、员工和客户都需要一个妥善的去处。他们需要一个值得信赖的平台：既能保密，又能接触到尽可能多的合格买方。',
               'Many of today’s small businesses were built from nothing by their first-generation founders. Many of those founders are now nearing retirement, often without a family successor, and the value they built, their employees and their customers all need a good home. They need a marketplace they can trust: confidential, yet able to reach the widest field of qualified buyers.') }}</p>
-      <h3>{{ T('更多买方 + 有序流程 = 更好的结果', 'More buyers and a controlled process mean a better outcome') }}</h3>
+      <h3>{{ T('扩大合格投资方覆盖，规范交易流程', 'Qualified buyer coverage and a disciplined sale process') }}</h3>
       <ul class="small">
-        <li>{{ T('更多合格买方带来竞争，通常意味着更好的价格和条款。', 'More qualified buyers create competition, which usually means a better price and better terms.') }}</li>
-        <li>{{ T('所有买方获得同样准备充分的信息，比较更公平，谈判更有底气。', 'Every buyer receives the same well-prepared information, so offers are comparable and the seller negotiates from strength.') }}</li>
+        <li>{{ T('扩大合格投资方覆盖范围，形成市场化的报价比较及谈判基础。', 'Broader qualified buyer coverage supports competitive price discovery and comparison of terms.') }}</li>
+        <li>{{ T('向投资方提供口径一致、准备充分的项目资料，以提高报价可比性并支持交易谈判。', 'Every buyer receives the same well-prepared information, so offers are comparable and the seller negotiates from strength.') }}</li>
         <li>{{ T('分阶段披露保护员工、客户和供应商，直到交易确定。', 'Staged disclosure protects employees, customers and suppliers until a deal is secure.') }}</li>
-        <li>{{ T('提前整理的资料让尽调更快，减少交易后期“意外”和压价。', 'Documents prepared up front make diligence faster and reduce late surprises and price chipping.') }}</li>
+        <li>{{ T('前置梳理项目资料，有助于提高尽职调查效率，减少交易后期新增事项及价格调整风险。', 'Documents prepared up front make diligence faster and reduce late surprises and price chipping.') }}</li>
         <li>{{ T('只与经过核验、资金可靠的买方会面，节省创始人的时间。', 'Founders meet only verified buyers with credible funding, which saves their time.') }}</li>
         <li>{{ T('创始人可以按契合度选择买方：员工安置、品牌延续、交接安排，而不只是价格。', "Founders can choose a buyer for fit (employees, legacy, handover) and not on price alone.") }}</li>
       </ul>
@@ -44,15 +44,15 @@
       <h3>{{ T('美国的经验：大型并购与小企业之间的空白', 'From the US: the gap between big M&A and small businesses') }}</h3>
       <p>{{ T('在美国，投资银行一般不承接价值低于约2,500万至5,000万美元的交易；大量小企业通过企业转让经纪人、精品并购顾问和 BizBuySell 等线上平台出售，2025年仅 BizBuySell 报告的成交就约9,600宗。买方中有不少由私募基金支持的整合者，在兽医诊所、汽车维修、暖通空调等分散行业里持续收购单店企业。国内一家经营得很好的汽修店、干洗店或面包店，同样需要这样的渠道，而不是只能清算或卖给熟人。',
               "In the US, investment banks rarely take on deals below about USD 25–50 million. Many small companies are sold through business brokers, boutique M&A advisers and online marketplaces such as BizBuySell, which reported about 9,600 sales in 2025 alone. Among the buyers are private-equity-backed consolidators that keep acquiring single-site businesses in fragmented sectors such as veterinary clinics, auto repair and HVAC. A well-run car-repair shop, dry cleaner or bakery in China needs the same kind of route to market, rather than liquidation or a sale to someone the owner happens to know.") }}</p>
-      <p>{{ T('一家小企业的估值对投行和律师来说也许不高，却往往是业主一生最重要的财富。', 'A small company may not be worth much to a bank or a law firm, but it is often its owner’s most important wealth.') }}</p>
+      <p>{{ T('中小企业价值往往与企业主的财富规划及代际传承密切相关。', 'For owners, the value of their business is often central to personal wealth and succession planning.') }}</p>
       <h3>{{ T('把大型交易的严谨带给中小企业', 'Institutional rigour for small companies') }}</h3>
       <p>{{ T('我们的创始团队来自国际顶级投资银行、大型律师事务所和四大会计师事务所。在大型交易中，出售都遵循严格的流程：充分准备、匿名简介、经过筛选的买方名单、保密协议、资料室，以及有序的竞争。这正是大企业能够卖出好价格的原因。',
               'Our founders bring experience from bulge-bracket investment banks, major law firms and Big Four accounting firms. On large transactions, every sale follows a disciplined process: careful preparation, an anonymous teaser, a vetted list of buyers, NDAs, a data room and managed competition. That process is a large part of why large companies sell well.') }}</p>
-      <p>{{ T('过去，这样的服务成本太高，中小企业很难获得。如今借助 AI 完成资料整理、数据核对、简介起草与买方匹配，再由专业人员把关，我们能以合理的价格，为中小企业提供同样有序、受控的出售流程。',
-              'Until now that level of service has cost too much for small businesses. With AI doing the heavy lifting (organising documents, checking figures, drafting teasers, matching buyers) and experienced people reviewing every step, we can offer small companies the same controlled process at a reasonable price.') }}</p>
+      <p>{{ T('平台设计采用技术辅助与人工复核相结合的方式，支持资料整理、数据核对、项目简介编制及投资方匹配，以提高中小企业交易服务的可及性。当前演示未启用人工智能模型调用。',
+              'The platform is designed to combine technical support with human review for document preparation, figure checks, teaser drafting and buyer matching, making a disciplined sale process more accessible to small businesses. AI model calls are disabled in the current demo.') }}</p>
       <h3>{{ T('信用优先', 'Trust comes first') }}</h3>
-      <p>{{ T('在国内，买方最担心的是数据和文件是否可靠。我们让企业主的会计师和律师参与，核实出售权限，并用 AI 交叉核对财务与法律资料；每个项目都标明已经核验了什么，并持续提高完整核验的比例。',
-              'In China, a buyer’s first worry is whether the figures and documents can be trusted. We bring in the owner’s accountants and lawyers, verify the authority to sell, and use AI to cross-check financial and legal information. Every listing shows what has been verified, and we keep raising the share that is fully verified.') }}</p>
+      <p>{{ T('项目资料的真实性及完整性是投资方评估的重要基础。平台流程要求核实委托授权，支持企业主聘请的会计师及律师参与资料准备，并逐项列示已完成的核查范围及待核实事项。',
+              'Reliable and complete information is central to buyer assessment. The process calls for mandate verification, supports preparation with the owner’s accountants and lawyers, and identifies the scope of completed checks and outstanding diligence.') }}</p>
       <h3>{{ T('与会计师、律师和顾问合作', 'Working with accountants, lawyers and advisers') }}</h3>
       <p>{{ T('企业主最信任的往往是自己的会计师、律师和顾问。他们可以代表客户在平台上登记出售信息，继续主导客户关系，并借助平台的买方网络和受控流程为客户争取更好的结果。收费安排事先约定、公开透明。',
               "Owners’ most trusted advisers are usually their accountants, lawyers and consultants. They can list a business for sale on their client’s behalf, stay at the centre of the client relationship, and use our buyer network and controlled process to get their client a better result, with fee arrangements agreed in advance and disclosed.") }}</p>
@@ -79,10 +79,10 @@
   <h2>{{ T('流程', 'How it works') }}</h2>
   <ol class="steps small">
     <li>{{ T('卖方访谈与委托核验', 'Owner interview, mandate and identity check') }}</li>
-    <li>{{ T('上传资料，AI 提取财务数据并提示缺口', 'Documents uploaded; AI extracts figures and flags gaps') }}</li>
+    <li>{{ T('整理项目资料，核对财务数据并识别待补充事项', 'Organise project documents, check financial figures and identify missing information') }}</li>
     <li>{{ T('交易经理与卖方确认匿名简介', 'Deal manager and seller approve an anonymous teaser') }}</li>
     <li>{{ T('买方提交收购方向与资金证明并通过审核', 'Buyers submit a thesis and funding evidence, and are verified') }}</li>
-    <li>{{ T('筛选与 AI 辅助匹配，经审核后引荐', 'Filtering and AI-assisted matching; introductions after review') }}</li>
+    <li>{{ T('按收购条件筛选匹配，经人工审核后安排引荐', 'Screen and match against acquisition criteria; introductions after human review') }}</li>
     <li>{{ T('签署保密协议，经卖方同意后开放资料室', "NDA, then the data room with the seller's consent") }}</li>
     <li>{{ T('尽调、意向书、交割与交接，由合作律师、会计师支持', 'Diligence, LOI, closing and handover with partner professionals') }}</li>
   </ol>
