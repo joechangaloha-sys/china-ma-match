@@ -307,3 +307,5 @@ actions align the teaser and document demos. `docs/VISUAL_STYLE.md` records the 
 147 tests pass; browser checks confirm matching navy headers/white paper, white text
 on primary actions, working teaser checks and no horizontal overflow at 375px.
 Branch `kimi/institutional-palette` includes prior review work; no merge to main.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/7.
