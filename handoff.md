@@ -8,6 +8,22 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Controlled upgrades and recovery — 31 October 2026
+
+Joe authorised controlled database upgrades and backup/restore testing, with MFA disabled and external
+connections deferred. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/18 (unmerged).
+Branch kimi/database-recovery starts from merged main cb393d5. Web startup/readiness now check a reviewed
+Alembic revision and schema instead of applying model-driven DDL. Explicit adoption validates the frozen
+baseline; unknown/partial schemas are refused. Reviewed revision 0002 adds an audit index and validates
+required-column nullability. PostgreSQL upgrades use one transaction, advisory lock and bounded timeouts.
+Deployment retains the old image and requires a consistent snapshot backup plus isolated restore rehearsal
+before upgrading live. Table counts/digests, upload bytes, corruption refusal, constraints, sequences,
+synthetic file recovery and injected migration rollback are checked. Scratch names/cleanup are guarded;
+there is no live-restore command. Backups stay private on Tencent; off-host DR/PITR and recurring schedules
+are not configured. Private env/MFA encryption key must be retained separately. See docs/DATABASE_RECOVERY.md.
+218 local tests pass. Deploy branch for review and record actual Tencent rehearsal evidence below.
+Do not merge without a new instruction. Keep MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false.
+
 ## Internal language cleanup — 31 October 2026
 
 Joe reported mixed Chinese/English on 试点数据 and other internal pages; each edition must be monolingual.
