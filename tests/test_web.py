@@ -67,7 +67,7 @@ def test_public_pages_render(app):
 def test_public_site_shows_anonymised_sellers_only(app, db_url):
     c = client(app)
     page = c.get("/opportunities").text
-    assert "Project Kiln" in page and "Project Delta" in page and "Project Jade" not in page
+    assert "窑炉项目" in page and "德尔塔项目" in page and "Project Jade" not in page
     assert "期望价格" in page and "出让股权" in page
     assert not [n for n in _buyer_names(db_url) if n in page]
     kiln = _get(db_url, Target, code_name="Project Kiln")
@@ -537,7 +537,7 @@ def test_listing_share_panel(app, db_url):
     kiln = _get(db_url, Target, code_name="Project Kiln")
     page = client(app).get(f"/zh/opportunities/{kiln.id}").text
     assert "分享此项目" in page and "<svg" in page and "复制链接" in page
-    assert re.search(r"<title>Project Kiln · mamatch</title>", page)  # nothing leaked into the title
+    assert re.search(r"<title>窑炉项目 · 中小企业并购平台</title>", page)  # nothing leaked into the title
     assert f"/zh/opportunities/{kiln.id}/" in page and "把企业交棒给对的人" in page
     for secret in (kiln.legal_name, kiln.short_name, kiln.owner_name, "无锡"):
         assert secret not in page
