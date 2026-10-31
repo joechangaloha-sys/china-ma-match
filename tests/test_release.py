@@ -104,7 +104,13 @@ def test_real_mandates_cannot_click_sign_or_download_uploads(seeded):
     m = next(m for m in t.matches if m.stage in offers.AFTER_NDA)
     doc = Document(target_id=t.id, kind='other', filename='confidential.txt', stored_path='/not-served', in_data_room=True)
     seeded.add(doc); seeded.flush()
-    m.data_room_granted_at = datetime.now(timezone.utc)
+    from mamatch import handoff
+    manager = seeded.scalar(select(User).where(User.role == 'deal_manager'))
+    owner = seeded.get(User, t.seller_user_id)
+    h = handoff.get(m)
+    handoff.request_access(h, manager)
+    handoff.seller_approve(h, owner)
+    handoff.provision(h, manager)
     assert offers.can_view_document(m, doc)
     t.is_example = False
     assert not offers.can_view_document(m, doc)

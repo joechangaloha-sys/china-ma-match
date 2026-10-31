@@ -39,6 +39,7 @@
     <a href="{{ I }}/advisers" class="{{ 'on' if request.url.path.startswith(I + '/advisers') }}">{{ T('顾问审核', 'Adviser checks') }}</a>
     <a href="{{ I }}/pipeline" class="{{ 'on' if request.url.path.startswith(I + '/pipeline') }}">{{ T('交易进度', 'Pipeline') }}</a>
     <a href="{{ I }}/dashboard" class="{{ 'on' if request.url.path.startswith(I + '/dashboard') }}">{{ T('试点数据', 'Pilot metrics') }}</a>
+    <a href="{{ I }}/connections">{{ T('外部连接待办', 'Connection to-dos') }}</a>
     <a href="{{ I }}/audit" class="{{ 'on' if request.url.path.startswith(I + '/audit') }}">{{ T('审计', 'Audit') }}</a>
   {% else %}
     {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
