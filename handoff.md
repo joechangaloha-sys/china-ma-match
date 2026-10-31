@@ -8,6 +8,27 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Local scanner and personal MFA — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/15 (unmerged).
+Cumulative branch includes #13/#14; review/merge #15 rather than merging all independently.
+Joe authorised installing the local scanner and setting up MFA. Existing SSH access suffices.
+Installed host ClamAV/FreshClam, downloaded official signatures and configured a 0660 group-restricted
+Unix socket, no TCP scanner port, automatic updates/self-check reload, single scan thread and memory
+limits suitable for the 2 GiB host. Web container streams bytes locally and checks loaded-definition age;
+stale/offline/error results remain quarantined. A pre-MFA database backup is saved on Tencent.
+Generated a persistent Fernet key in the private server env without displaying or committing it.
+MFA-required policy applies to personal accounts at password-first login/registration/activation.
+Shared seeded fictional demo accounts are explicitly exempt only in demo mode and cannot enroll phones.
+Encrypted seeds, replay protection, one-use recovery codes, challenge/account attempt limits, session
+revocation and sensitive-page headers are implemented. Activation tokens are redacted in access logs.
+Private account settings: /zh/account/mfa and /en/account/mfa. See docs/MFA.md and docs/UPLOAD_SECURITY.md.
+192 offline tests pass. User's personal email was requested; the user must choose their password and
+scan/confirm their own authenticator. Do not enroll an agent-owned device, print seeds/recovery codes,
+send an invitation email or create an administrator without the user's chosen email.
+Deploy review branch kimi/scanner-mfa; verify real clean/EICAR scanner behavior, rollback-only PostgreSQL
+MFA checks, bilingual pages and laptop/mobile layouts. External signing/VDR connections remain deferred.
+
 ## Upload quarantine and session controls — 31 October 2026
 
 PR: https://github.com/joechangaloha-sys/china-ma-match/pull/14 (unmerged).
