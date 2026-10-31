@@ -248,3 +248,17 @@ the routes are disabled outside demo mode. Work branch: `kimi/standalone-teaser`
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/4.
 Validation: 145 tests passed; original assets included in wheel; browser render, checks,
 data panel and 375px layout verified. Live route: https://43.153.223.242.sslip.io/teaser-demo/.
+
+## Information memo, NDA and LOI demos — 31 October 2026
+
+Bilingual `/en/document-demos` and `/zh/document-demos` provide three fictional
+Project Willow documents: `info-memo`, `nda`, and `loi`. Linked from the main menu,
+homepage and original teaser. Each has three read-only stage previews, a labelled
+text export and print/PDF layout. They never query or mutate mandates, sign/send
+agreements, submit offers or grant VDR access. No external connections were added.
+The memo uses the teaser's financial bands and discloses diligence gaps; the NDA
+contains illustrative terms and unresolved legal items; the LOI distinguishes
+enterprise value, equity value and the acquired stake. All new transaction terms
+are fictional assumptions. Counsel review remains outstanding for real use.
+All pages share the passcode gate and are disabled outside demo mode. Branch:
+`kimi/document-demos`; cumulative review includes PRs #1–#4, with no merge to main.
