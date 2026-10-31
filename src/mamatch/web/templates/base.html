@@ -33,6 +33,7 @@
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
   <nav>
+  {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("文件演示：备忘录 / NDA / LOI", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('独立简介演示（英文）', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}
     <a href="{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
