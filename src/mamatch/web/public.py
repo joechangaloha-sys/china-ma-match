@@ -187,12 +187,29 @@ def login(request: Request, s: Session = Depends(get_session), email: str = Form
           next: str = Form("")):
     user = auth.authenticate(s, email, password)
     if user is None:
-        auth.log(s, None, "sign_in_failed", email=email.strip().lower()[:200])
         return back(f"/login?next={next}", "邮箱或密码不正确 Wrong email or password.")
     resp = RedirectResponse(_safe_next(next, user), status_code=303)
     resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
+                    secure=request.url.scheme == "https", max_age=auth.SESSION_HOURS * 3600)
     return resp
+
+
+@router.get('/account/sessions', response_class=HTMLResponse)
+def session_security(request: Request, user: User | None = Depends(current_user)):
+    if user is None:
+        return RedirectResponse('/login', status_code=303)
+    return render(request, 'session_security.html', user, portal='internal' if user.role == 'deal_manager' else user.role,
+                  omit_profile_name=True)
+
+
+@router.post('/account/sessions/revoke')
+def revoke_sessions(request: Request, user: User | None = Depends(current_user), s: Session = Depends(get_session)):
+    if user is None:
+        return RedirectResponse('/login', status_code=303)
+    auth.end_all_sessions(s, user)
+    response = RedirectResponse('/login', status_code=303)
+    response.delete_cookie(COOKIE)
+    return response
 
 
 @router.post("/logout")
@@ -222,7 +239,7 @@ def adviser_register(request: Request, s: Session = Depends(get_session), email:
         return back("/register/adviser", str(exc))
     resp = RedirectResponse("/adviser", status_code=303)
     resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
+                    secure=request.url.scheme == "https", max_age=auth.SESSION_HOURS * 3600)
     return resp
 
 
@@ -249,7 +266,7 @@ def register(request: Request, s: Session = Depends(get_session), email: str = F
         return back("/register", str(exc))
     resp = RedirectResponse("/buyer#thesis", status_code=303)
     resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
+                    secure=request.url.scheme == "https", max_age=auth.SESSION_HOURS * 3600)
     return resp
 
 
@@ -287,7 +304,7 @@ def invite_accept(token: str, request: Request, s: Session = Depends(get_session
     auth.log(s, user, "seller_account_created", target_id=t.id)
     resp = RedirectResponse(f"/seller/{t.id}", status_code=303)
     resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
+                    secure=request.url.scheme == "https", max_age=auth.SESSION_HOURS * 3600)
     return resp
 
 

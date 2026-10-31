@@ -2,6 +2,7 @@
 {% from "_macros.html" import listing_card, fees_panel, data_form, findings_list, memo_view with context %}
 {% block title %}{{ t.code_name }}{% endblock %}
 {% block body %}
+<p><a href="{{ P }}{{ I }}/readiness#mandate-{{ t.id }}">{{ T('查看项目准备情况及下一步工作','View readiness and next action') }} →</a></p>
 <div>
   <p class="small"><a href="{{ I }}">← 卖方项目 Mandates</a> · <a href="{{ I }}/audit?target={{ t.id }}">审计记录 Audit log</a></p>
   <h1>{{ t.code_name }} {% if t.is_example %}<span class="pill example">示例 example</span>{% endif %}
@@ -95,7 +96,8 @@
 </section>
 
 <section class="panel" id="documents">
-  <h2>资料与提取 Documents and extraction</h2>
+  <h2>{{ T("资料与提取", "Documents and extraction") }}</h2>
+  <p><a href="{{ P }}{{ I }}/upload-security">{{ T("文件须先通过安全检查，再进行审核及提取。", "Files must pass security checks before review and extraction.") }}</a></p>
   {% if missing %}<p class="small">缺少必需资料 Missing required: {% for k in missing %}<span class="pill medium">{{ CHECKLIST[k] }}</span> {% endfor %}</p>{% endif %}
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/documents" enctype="multipart/form-data">
     <select name="kind" aria-label="Document type">{% for k, label in CHECKLIST.items() %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select>
@@ -105,7 +107,7 @@
   <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>文件 File</th><th>类型 Type</th><th>上传 Uploaded</th><th>文字 Text</th><th></th></tr>
     {% for d in t.documents %}
-    <tr><td><a href="{{ I }}/documents/{{ d.id }}">{{ d.filename }}</a></td><td>{{ CHECKLIST[d.kind] }}</td>
+    <tr><td>{% if file_usable(d) %}<a href="{{ P }}{{ I }}/documents/{{ d.id }}">{{ d.filename }}</a>{% else %}{{ d.filename }}{% endif %}<br>{{ L(UPLOAD_STATUS[d.security_status]) }}</td><td>{{ CHECKLIST[d.kind] }}</td>
       <td>{{ d.created_at.strftime('%Y-%m-%d') }}</td><td>{{ '可读 readable' if d.text else '无文字 no text' }}</td>
       <td class="actions">
         {% if d.text %}<form method="post" action="{{ I }}/documents/{{ d.id }}/extract"><button class="ghost">AI 提取 Extract</button></form>{% endif %}

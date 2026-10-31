@@ -8,6 +8,41 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Upload quarantine and session controls — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/14 (unmerged).
+This cumulative branch includes the readiness dashboard from PR #13; review/merge #14 rather than
+merging both independently. Joe authorised secure uploads and pilot access hardening, not a main merge.
+All new/legacy files are quarantined; bounded format checks precede storage, and a local scan must pass
+before downloads, extraction, claim/financial-field review or data-room inclusion. Integrity is rechecked
+at use. Text parsers run in a bounded child process. Body limits apply before form/CSRF parsing.
+The Tencent review environment has no scanner configured: uploads stay blocked, with a clear notice.
+Local ClamAV image/signatures/update monitoring and EICAR verification remain outstanding; no external
+scanner, signature provider or VDR connection/account was created. See docs/UPLOAD_SECURITY.md.
+Sessions now expire at 30 idle minutes/12 hours; legacy sessions require fresh login. Users can revoke
+all their own sessions at /account/sessions. MFA remains outstanding for real-data use.
+New internal queue: /zh/internal/upload-security and /en/internal/upload-security, linked in navigation.
+Both pages share the institutional layout, monolingual editions and laptop/phone checks.
+Validation: 179 offline tests passed, including legacy upgrade, scanner result/error/timeout simulation,
+format/package rejection, hash replacement, roles, evidence gates, body limits and session controls.
+Before deployment, database backup saved on Tencent; baseline business counts: 3 targets, 40 buyers,
+13 matches, 0 documents, 2 handoffs, 6 handoff events. Deploy branch kimi/secure-uploads for review.
+
+## Deal-readiness review build — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/13 (unmerged).
+Added private `/zh/internal/readiness` and `/en/internal/readiness`, linked from internal navigation
+and mandate pages. Read-only snapshots use latest language-specific versions, existing evidence/source
+approval gates, verified buyers and current unexpired demo access. Links lead to actual review/handoff
+screens; no approval, disclosure, signature, invitation or access grant is created. Non-example mandates
+remain blocked pending external services. External connections remain deferred.
+Shared institutional layout and locale-preserving navigation; static export included.
+Validation: 156 offline tests pass, including role isolation, language purity, stale approvals,
+expired access and no-write checks. Laptop and phone layouts checked. Deploy review branch
+`kimi/deal-readiness` to Tencent; do not merge without Joe's review instruction.
+Recommended next work: secure upload validation/quarantine, then pilot access hardening;
+provider onboarding only when Joe resumes it.
+
 ## Main merged and Tencent deployment — 31 October 2026
 
 Joe explicitly instructed: "merge the new pages with main so the website will show all the changes".

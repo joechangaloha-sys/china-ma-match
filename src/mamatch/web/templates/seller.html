@@ -43,6 +43,7 @@
 
 <section class="panel" id="documents">
   <h2>{{ T('资料清单', 'Document checklist') }}</h2>
+  <p>{{ T("所有上传文件先隔离，安全扫描通过后方可审核及提取。扫描不代表内容真实或可向投资方提供。", "All uploads are quarantined until a security scan passes. Scanning does not verify accuracy or authorise buyer disclosure.") }}</p>
   <p class="small muted">{{ T('文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为“资料室”的文件。',
                              'Only you and your deal manager can see these. A buyer sees data-room documents only after an NDA and your consent.') }}</p>
   <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
@@ -50,7 +51,7 @@
     {% for k, label in CHECKLIST.items() %}
     {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}
     <tr><td>{{ L(label) }}{% if k in missing %} <span class="pill medium">{{ T('必需', 'required') }}</span>{% endif %}</td>
-      <td>{% for d in docs %}{{ d.filename }}{{ ' · ' if not loop.last }}{% else %}—{% endfor %}</td></tr>
+      <td>{% for d in docs %}{{ d.filename }} · {{ L(UPLOAD_STATUS[d.security_status]) }}{{ ' · ' if not loop.last }}{% else %}—{% endfor %}</td></tr>
     {% endfor %}
   </table></div>
   <form class="inline" method="post" action="{{ P }}/seller/{{ t.id }}/documents" enctype="multipart/form-data">
