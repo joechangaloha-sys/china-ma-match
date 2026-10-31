@@ -2,11 +2,11 @@
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 from .. import config
-from .common import get_lang, render
-from .teaser_zh import TEASER
+from .common import get_lang
+from .teaser_locale import chinese_shell
 
 router = APIRouter()
 ROOT = Path(__file__).parent / 'teaser_demo'
@@ -25,14 +25,18 @@ def standalone_teaser(request: Request, state: str = 'draft'):
     if not config.DEMO_MODE:
         raise HTTPException(404)
     if get_lang(request) == 'zh':
-        if state not in TEASER['notes']:
+        if state not in {'draft', 'review', 'preview'}:
             raise HTTPException(400, '未知演示阶段')
-        from .document_demos import DOCUMENTS
-        return render(request, 'document_demos.html', None, documents=DOCUMENTS,
-                      kind='teaser', doc=TEASER, state=state, portal='public')
+        return HTMLResponse(chinese_shell((ROOT / 'index.html').read_text()), headers={
+            'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow, noarchive'})
     return asset('index.html')
 
 
 @router.get('/teaser-demo/{asset_path:path}', response_class=FileResponse)
-def standalone_teaser_asset(asset_path: str):
+def standalone_teaser_asset(request: Request, asset_path: str):
+    if asset_path == 'data/teaser.json' and get_lang(request) == 'zh':
+        if not config.DEMO_MODE:
+            raise HTTPException(404)
+        return FileResponse(ROOT / 'data/teaser_zh.json', headers={
+            'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow, noarchive'})
     return asset(asset_path)
