@@ -199,6 +199,12 @@ class Teaser(Base):
     generated_by: Mapped[str] = mapped_column(String(40), default="offline")
     status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | approved (by the analyst)
     seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    analyst_approved_by: Mapped[str] = mapped_column(String(200), default="")
+    analyst_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    analyst_content_hash: Mapped[str] = mapped_column(String(64), default="")
+    seller_approved_by: Mapped[str] = mapped_column(String(200), default="")
+    seller_content_hash: Mapped[str] = mapped_column(String(64), default="")
+    source_hash: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="teasers")
@@ -290,6 +296,13 @@ class InfoMemo(Base):
     name_findings: Mapped[list[dict]] = mapped_column(JSON, default=list)  # names that must not appear
     generated_by: Mapped[str] = mapped_column(String(40), default="offline")
     status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | approved
+    seller_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    analyst_approved_by: Mapped[str] = mapped_column(String(200), default="")
+    analyst_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    analyst_content_hash: Mapped[str] = mapped_column(String(64), default="")
+    seller_approved_by: Mapped[str] = mapped_column(String(200), default="")
+    seller_content_hash: Mapped[str] = mapped_column(String(64), default="")
+    source_hash: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     target: Mapped[Target] = relationship(back_populates="memos")
@@ -489,3 +502,20 @@ class IndicativeOffer(Base):
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     match: Mapped[Match] = relationship(back_populates="offers")
+
+
+class ReleaseClaim(Base):
+    """An immutable assertion-to-evidence review for one document content hash."""
+    __tablename__ = "release_claims"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("targets.id"))
+    artifact_kind: Mapped[str] = mapped_column(String(10))
+    artifact_id: Mapped[int] = mapped_column(Integer)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    claim_path: Mapped[str] = mapped_column(String(200))
+    statement: Mapped[str] = mapped_column(Text)
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"), nullable=True)
+    evidence_sha256: Mapped[str] = mapped_column(String(64), default="")
+    evidence_ref: Mapped[str] = mapped_column(Text)
+    reviewed_by: Mapped[str] = mapped_column(String(200))
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

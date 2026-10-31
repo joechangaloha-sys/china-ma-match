@@ -1,13 +1,13 @@
 """Draft anonymised teasers (匿名项目简介) from an adviser's intake notes.
 
-Only non-identifying inputs are sent to Claude: the adviser's description, sector, province
-and banded figures. Names, city, registry code and brands stay in the workspace and are used
+AI calls are currently disabled pending provider/data-transfer review. Drafts use structured
+fields and deterministic templates. Names, city, registry code and brands stay in the workspace and are used
 afterwards by the re-identification check, which runs on every draft whoever wrote it.
 """
 
 from sqlalchemy.orm import Session
 
-from . import llm, reid
+from . import reid, release
 from .models import Target, Teaser
 from .taxonomy import DEAL_TYPES, SALE_REASONS, SECTORS, macro_region
 
@@ -47,6 +47,8 @@ def band(value: float | None, edges: list[float], unit: str) -> str:
     """Bucket a figure into a range label, e.g. band(127, [50,100,200], '百万元') -> '100–200百万元'."""
     if value is None:
         return "未披露"
+    if value < 0:
+        return "亏损"
     lower = 0.0
     for edge in edges:
         if value < edge:
@@ -86,6 +88,8 @@ def localised(f: dict, language: str) -> dict:
     if lang == "en":
         for k in ("revenue_band", "net_profit_band", "valuation_band", "employees_band", "years_operating", "region", "province"):
             out[k] = i18n.val(f[k], "en")
+    if f.get("net_profit_band") == "亏损" and language == "en":
+        out["net_profit_band"] = "Loss-making"
     return out
 
 
@@ -110,39 +114,35 @@ def draft_offline(target: Target, f: dict, language: str) -> dict:
 
 
 def draft(session: Session, target: Target, language: str = "zh", use_llm: bool = True) -> Teaser:
+    if language not in LANGUAGES:
+        raise ValueError("Unknown language")
     f = facts(target)
-    prompt = (
-        f"Write the teaser in {LANGUAGES[language]}.\n\nFacts (already anonymised):\n"
-        + "\n".join(f"- {k}: {v}" for k, v in f.items())
-        + f"\n\nAdviser's intake notes (may contain identifying details; leave them out):\n{target.description}"
-    )
-    content = llm.structured(SYSTEM, prompt, TEASER_SCHEMA) if use_llm else None
-    generated_by = llm.label() if content is not None else "offline"
-    if content is None:
-        content = draft_offline(target, f, language)
+    # Provider/data-transfer review is pending: do not transmit intake notes or call AI.
+    content = draft_offline(target, f, language)
+    generated_by = "offline"
 
     body = {**content, "facts": {k: f[k] for k in ("sector_zh", "province", "revenue_band", "net_profit_band",
                                                      "valuation_band", "employees_band", "deal_type")}}
+    # The public card carries additional assertions (products, stake, premises, etc.).
+    # Review them alongside the teaser, before the same source snapshot can be listed.
+    from . import listing
+    body['listing_claims'] = {k: v for k, v in listing.card(target).items()
+                              if k not in {'ready', 'checks', 'checks_as_of'}}
     score, findings = reid.check(target, body)
     version = 1 + max((t.version for t in target.teasers if t.language == language), default=0)
     teaser = Teaser(target=target, version=version, language=language, body=body, reid_score=score,
-                    reid_findings=findings, generated_by=generated_by)
+                    reid_findings=findings, generated_by=generated_by, source_hash=release.source_digest(target))
     session.add(teaser)
     session.flush()
     return teaser
 
 
-def approve(teaser: Teaser) -> None:
-    """Advisers approve a teaser only when the re-identification risk is low."""
+def approve(teaser: Teaser, user=None) -> None:
+    # Preserve the conservative stored-risk check as well as recomputing it at release.
     if reid.risk_label(teaser.reid_score) != "low":
         raise ValueError("Resolve the re-identification findings before approving this teaser.")
-    teaser.status = "approved"
+    release.approve(teaser, user)
 
 
-def seller_approve(teaser: Teaser) -> None:
-    """The seller confirms the analyst-approved teaser; only then can it be published or sent."""
-    if teaser.status != "approved":
-        raise ValueError("The adviser has not approved this teaser yet.")
-    from datetime import datetime, timezone
-
-    teaser.seller_approved_at = datetime.now(timezone.utc)
+def seller_approve(teaser: Teaser, user=None) -> None:
+    release.seller_approve(teaser, user)

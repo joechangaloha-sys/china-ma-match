@@ -161,6 +161,7 @@
     <div class="small muted">v{{ m.version }} · {{ m.language }} · {{ m.generated_by }} · {{ m.created_at.strftime('%Y-%m-%d %H:%M') }}
       {% if m.status == 'approved' %}<span class="pill">已批准 approved</span>{% endif %}</div>
     {% if m.name_findings %}<ul class="findings">{% for f in m.name_findings %}<li>{{ f.message }} <code>{{ f.matched }}</code></li>{% endfor %}</ul>{% endif %}
+    <p class="small"><a href="{{ I }}/review/memo/{{ m.id }}">逐项审核证据与版本 Review evidence and version</a> · {{ '可分发 Ready to share' if release.ready(m) else '分发已锁定 Release locked' }}</p>
     <details {{ 'open' if loop.first }}><summary>查看 View</summary>{{ memo_view(m) }}</details>
     {% if m.status != 'approved' and not m.name_findings %}
     <form class="inline" method="post" action="{{ I }}/memos/{{ m.id }}/approve"><button class="ghost">审核通过 Approve</button></form>
@@ -184,6 +185,7 @@
       · <span class="pill {{ risk }}">识别风险 re-ID risk: {{ risk }} ({{ '%.2f'|format(tz.reid_score) }})</span>
       {% if tz.status == 'approved' %}<span class="pill">已批准 approved</span>{% endif %}
       {% if tz.seller_approved_at %}<span class="pill">卖方已确认 seller approved</span>{% elif tz.status == 'approved' %}<span class="pill medium">待卖方确认 waiting for seller</span>{% endif %}</div>
+    <p class="small"><a href="{{ I }}/review/teaser/{{ tz.id }}">逐项审核证据与版本 Review evidence and version</a> · {{ '可分发 Ready to share' if release.ready(tz) else '分发已锁定 Release locked' }}</p>
     <h3>{{ tz.body.headline }}</h3>
     <p>{{ tz.body.summary }}</p>
     <ul>{% for h in tz.body.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
