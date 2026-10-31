@@ -262,3 +262,7 @@ enterprise value, equity value and the acquired stake. All new transaction terms
 are fictional assumptions. Counsel review remains outstanding for real use.
 All pages share the passcode gate and are disabled outside demo mode. Branch:
 `kimi/document-demos`; cumulative review includes PRs #1–#4, with no merge to main.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/5.
+Validation: 146 tests passed; browser stage switching, downloaded watermark/content,
+Chinese LOI and 375px no-overflow layout checked.
