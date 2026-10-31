@@ -30,12 +30,13 @@
       <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/decline"><button class="ghost">{{ T('不考虑', 'Decline') }}</button></form>
     </div>
     {% elif nda_available(m) %}
+    <p class="small muted">{{ T('仅为虚构演示，不代表已核验的电子签名。真实交易须通过经审核的电子签名服务。', 'Fictional demonstration only; this is not a verified electronic signature. Real deals require an approved e-signature service.') }}</p>
     <details open><summary>{{ T('保密承诺', 'Confidentiality undertaking') }}</summary><p class="small nda">{{ L(nda_text) }}</p></details>
-    <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/nda"><button>{{ T('接受并签署', 'Accept and sign') }}</button></form>
+    <form method="post" action="{{ P }}/buyer/deals/{{ m.id }}/nda"><button>{{ T('演示：接受保密承诺', 'Demo: accept undertaking') }}</button></form>
     {% elif m.stage == 'interested' %}<p class="small muted">{{ T('交易经理审核中。', 'The deal manager is reviewing this.') }}</p>
     {% endif %}
 
-    {% if m.stage in after_nda %}
+    {% if m.stage in after_nda and m.target.is_example %}
       {% set im = shared_memo(m.target, lang) %}
       {% if im %}<details><summary>{{ T('信息备忘录', 'Info memo') }}</summary>{{ memo_view(im) }}</details>{% endif %}
       {% if m.data_room_granted_at %}

@@ -22,4 +22,10 @@
   </ul>
 </section>
 </div>
+<section class="panel small">
+  <h2>{{ T('当前演示的边界', 'Current demonstration limits') }}</h2>
+  <p>{{ T('简介及信息备忘录采用模板生成，AI 调用已关闭。证据审核与双重批准绑定具体版本；内容或来源变化后须重新审核。签名服务和专业资料室尚未连接，真实交易的买方无法下载平台上传文件。', 'Teasers and info memos use templates; AI calls are disabled. Evidence reviews and both approvals are tied to a specific version; content or source changes require review again. Signature and professional VDR services are not connected, and buyers cannot download platform uploads on real mandates.') }}</p>
+  <p>{{ T('已加入登录失败限制与登录后表单防伪校验。真实资料试点前仍需多因素认证、上传文件恶意软件扫描、正式数据库迁移以及法律和数据处理审查。', 'Failed-sign-in limits and CSRF checks for signed-in forms are in place. MFA, malware scanning of uploads, managed database migrations, and legal/data-processing review remain prerequisites for a real-data pilot.') }}</p>
+  {% if cfg.DEMO_MODE %}<a href="{{ P }}/workflow">{{ T('查看虚构流程演示', 'Explore the fictional workflow') }} →</a>{% endif %}
+</section>
 {% endblock %}
