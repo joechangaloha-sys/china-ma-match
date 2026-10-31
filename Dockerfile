@@ -9,14 +9,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
-RUN pip install --no-cache-dir . \
+RUN pip install --no-cache-dir uv==0.12.5 \
+    && uv sync --frozen --no-dev --no-editable \
     && groupadd --system --gid 10001 mamatch \
     && useradd --system --uid 10001 --gid mamatch --home-dir /app mamatch \
     && mkdir -p /app/data/uploads \
     && chown -R mamatch:mamatch /app
 
+ENV PATH="/app/.venv/bin:$PATH"
 USER mamatch
 EXPOSE 8080
 
