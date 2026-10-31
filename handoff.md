@@ -25,7 +25,10 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   the existing workflow demo. Internal to-do/handoff screens are included in the static export too.
 - External callbacks, provider-side enforcement, provider accounts and procurement remain deferred.
   Do not confuse a mock completion or local access flag with a real provider acknowledgement.
-- Branch `kimi/nda-vdr-handoff` includes prior review work because main is still unchanged. PR: pending.
+- Branch `kimi/nda-vdr-handoff` includes prior review work because main is still unchanged.
+  PR: https://github.com/joechangaloha-sys/china-ma-match/pull/3. All 143 offline tests pass.
+  Prior-version upgrade preserved 3 targets, 40 buyers, 13 matches and 0 documents; mock records/events
+  were seeded once. Browser checks passed pending/revoked states and 375px Chinese/checklist layouts.
   Validate offline suite, legacy database upgrade, live zh/en scenarios, role checks and phone layouts;
   back up existing Tencent PostgreSQL before deploying the pushed review branch. Never merge for Joe.
 
