@@ -31,6 +31,10 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   were seeded once. Browser checks passed pending/revoked states and 375px Chinese/checklist layouts.
   Validate offline suite, legacy database upgrade, live zh/en scenarios, role checks and phone layouts;
   back up existing Tencent PostgreSQL before deploying the pushed review branch. Never merge for Joe.
+- Live Lighthouse checks passed all 18 zh/en handoff scenarios, internal checklist/handoff views, role
+  restrictions and CSRF denial. Existing records remain 3 targets/40 buyers/13 matches/0 documents;
+  walkthroughs did not mutate saved handoffs. Mock records/events: 2/6. The pushed review branch is live;
+  a restricted PostgreSQL backup was saved under `/opt/mamatch/backups/` before the upgrade.
 
 ## Evidence-bound document release (31 Oct 2026, branch kimi/release-controls)
 
