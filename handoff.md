@@ -349,3 +349,9 @@ workflow permissions or provider connections changed. Branch: `kimi/document-lay
 
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/9.
 All 150 tests passed, including all nine English/Chinese structural parity pairs.
+
+Tencent deployed `3da3237`; all nine live language/stage pairs have matching
+structures. Shared styles, print rules and named exports verified. Chinese memo,
+NDA and LOI opened in separate visible browser tabs; each has grid layout, navy
+header, white paper and no English prose. Screenshots saved for Joe. Saved records
+remain 3 targets / 40 buyers / 13 matches / 0 documents / 2 handoffs / 6 events.
