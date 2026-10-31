@@ -6,16 +6,17 @@ Every route here requires a signed-in deal manager. The pages are marked interna
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, PlainTextResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import (analytics, auth, authority, buyers, datacheck, dealstatus, documents, fees, infomemo, listing, matching, offers,
                 pipeline, plans, teaser)
+from .. import config, upload_security
 from ..models import (Adviser, AuditEvent, Buyer, Document, ExpertReferral, ExtractedField, InfoMemo,
                       MandateAuthorization, Match, Target, Teaser, User)
 from ..taxonomy import FOUNDER_TRANSITION, INVENTORY, PAYMENT_TERMS, PERMITS, PREMISES, TIMING
-from .common import I, back, firm, get_session, not_found, num, render, require, save_data
+from .common import I, back, firm, get_lang, get_session, not_found, num, render, require, save_data
 
 router = APIRouter(prefix=I)
 dm = require("deal_manager")
@@ -35,6 +36,15 @@ def home(request: Request, user: User = Depends(dm), s: Session = Depends(get_se
     to_verify = s.scalars(select(Buyer).where(Buyer.status == "registered")).all()
     return render(request, "sellers.html", user, portal="internal", targets=targets, inquiries=inquiries,
                   to_verify=to_verify, firm=firm(s), nda_available=offers.nda_available)
+
+
+@router.get("/readiness", response_class=HTMLResponse)
+def readiness_page(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
+    from .. import readiness
+    from .common import get_lang
+    targets = s.scalars(select(Target).order_by(Target.created_at.desc())).all()
+    rows = [readiness.snapshot(t, get_lang(request)) for t in targets]
+    return render(request, "readiness.html", user, portal="internal", rows=rows, omit_profile_name=True)
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
@@ -303,8 +313,10 @@ async def doc_upload(target_id: int, kind: str = Form("other"), file: UploadFile
 
 
 @router.get("/documents/{doc_id}")
-def doc_view(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
+def doc_view(doc_id: int, request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
     doc = s.get(Document, doc_id) or not_found()
+    if not upload_security.usable(doc):
+        return PlainTextResponse("文件已隔离或不可用。" if get_lang(request) == "zh" else "File is quarantined or unavailable.", status_code=423)
     auth.log(s, user, "document_view", target_id=doc.target_id, document_id=doc.id)
     return FileResponse(Path(doc.stored_path), media_type=doc.content_type or "application/octet-stream",
                         filename=doc.filename, headers={"Cache-Control": "no-store"})
@@ -313,6 +325,8 @@ def doc_view(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_ses
 @router.post("/documents/{doc_id}/extract")
 def doc_extract(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
     doc = s.get(Document, doc_id) or not_found()
+    if not upload_security.usable(doc):
+        return back(f"{I}/upload-security", "文件尚未通过安全检查 File has not passed security checks.")
     fields = documents.extract(s, doc, user)
     if doc.target.status in ("draft", "documents_requested"):
         doc.target.status = "extraction_review"
@@ -322,6 +336,8 @@ def doc_extract(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_
 @router.post("/documents/{doc_id}/data-room")
 def doc_data_room(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
     doc = s.get(Document, doc_id) or not_found()
+    if not upload_security.usable(doc):
+        return back(f"{I}/upload-security", "文件尚未通过安全检查 File has not passed security checks.")
     doc.in_data_room = not doc.in_data_room
     auth.log(s, user, "data_room_flag", target_id=doc.target_id, document_id=doc.id, in_data_room=doc.in_data_room)
     return back(f"{I}/targets/{doc.target_id}#documents")
@@ -335,7 +351,10 @@ def field_review(field_id: int, decision: str = Form(...), value: str = Form("")
         corrected = num(value)
     except ValueError:
         return back(f"{I}/targets/{f.target_id}#documents", "Value must be a number")
-    documents.review(s, f, user, decision == "confirm", corrected)
+    try:
+        documents.review(s, f, user, decision == "confirm", corrected)
+    except ValueError as exc:
+        return back(f"{I}/targets/{f.target_id}#documents", str(exc))
     return back(f"{I}/targets/{f.target_id}#documents")
 
 
@@ -447,3 +466,17 @@ def review_assertion(kind: str, artifact_id: int, claim_path: str = Form(''), ev
     except ValueError as exc:
         return back(f'{I}/review/{kind}/{artifact_id}', str(exc))
     return back(f'{I}/review/{kind}/{artifact_id}', '证据审核已记录 Evidence review recorded')
+
+
+@router.get('/upload-security', response_class=HTMLResponse)
+def upload_queue(request: Request, user: User = Depends(dm), s: Session = Depends(get_session)):
+    return render(request, 'upload_security.html', user, portal='internal', omit_profile_name=True,
+                  scanner_configured=bool(config.CLAMSCAN_PATH or config.CLAMD_SOCKET), scanner_health=upload_security.scanner_health(),
+                  docs=s.scalars(select(Document).order_by(Document.created_at.desc())).all())
+
+
+@router.post('/documents/{doc_id}/scan')
+def document_scan(doc_id: int, user: User = Depends(dm), s: Session = Depends(get_session)):
+    doc = s.get(Document, doc_id) or not_found()
+    documents.scan(s, doc, user)
+    return back(f'{I}/upload-security')

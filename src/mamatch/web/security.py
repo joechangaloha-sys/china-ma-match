@@ -20,7 +20,7 @@ class RequestProtection(BaseHTTPMiddleware):
                 return PlainTextResponse('Cross-origin submission denied', status_code=403)
             if request.headers.get('sec-fetch-site') == 'cross-site':
                 return PlainTextResponse('Cross-site submission denied', status_code=403)
-            token = request.cookies.get('mm_session')
+            token = request.cookies.get('mm_session') or request.cookies.get('mm_mfa')
             if token:
                 provided = request.headers.get('x-csrf-token', '')
                 if not provided:
@@ -41,3 +41,42 @@ class RequestProtection(BaseHTTPMiddleware):
         if request.cookies.get('mm_session'):
             response.headers.setdefault('Cache-Control', 'no-store')
         return response
+
+
+class BodyLimit:
+    """Bound the body before form/CSRF parsers, including chunked uploads."""
+    MAX_BODY = 21 * 1024 * 1024
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope['type'] != 'http' or scope['method'] not in {'POST', 'PUT', 'PATCH'}:
+            return await self.app(scope, receive, send)
+        headers = dict(scope.get('headers', []))
+        try:
+            oversized = int(headers.get(b'content-length', b'0')) > self.MAX_BODY
+        except ValueError:
+            oversized = True
+        body = bytearray()
+        while not oversized:
+            message = await receive()
+            if message['type'] == 'http.disconnect':
+                return
+            body.extend(message.get('body', b''))
+            oversized = len(body) > self.MAX_BODY
+            if not message.get('more_body'):
+                break
+        if oversized:
+            zh = scope.get('state', {}).get('lang') == 'zh'
+            response = PlainTextResponse('上传请求超过大小限制。' if zh else 'Upload request exceeds size limit.', status_code=413)
+            return await response(scope, receive, send)
+        delivered = False
+
+        async def replay():
+            nonlocal delivered
+            if not delivered:
+                delivered = True
+                return {'type': 'http.request', 'body': bytes(body), 'more_body': False}
+            return await receive()
+        await self.app(scope, replay, send)

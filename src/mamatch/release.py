@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import object_session
 
-from . import reid
+from . import reid, upload_security
 from .models import Document, ReleaseClaim
 
 SOURCE_FIELDS = ('code_name', 'legal_name', 'short_name', 'owner_name', 'brands', 'city', 'uscc',
@@ -85,7 +85,7 @@ def review_claim(artifact, path, evidence_ref, user, document_id=None):
     if len(evidence_ref.strip()) > 2000:
         raise ValueError('Evidence reference is too long.')
     doc = object_session(artifact).get(Document, document_id) if document_id else None
-    if doc is None or doc.target_id != artifact.target_id or not doc.sha256:
+    if doc is None or doc.target_id != artifact.target_id or not doc.sha256 or not upload_security.usable(doc):
         raise ValueError('Select an existing source document belonging to this mandate.')
     record = ReleaseClaim(document_id=doc.id, evidence_sha256=doc.sha256, target_id=artifact.target_id, artifact_kind=kind(artifact), artifact_id=artifact.id,
                           content_hash=content_digest(artifact), claim_path=path, statement=available[path],
@@ -103,7 +103,7 @@ def evidence_complete(artifact):
         if not record.evidence_ref or not record.reviewed_by or not valid_time(record.reviewed_at):
             continue
         doc = session.get(Document, record.document_id) if record.document_id else None
-        if doc is not None and doc.target_id == artifact.target_id and doc.sha256 == record.evidence_sha256:
+        if doc is not None and doc.target_id == artifact.target_id and doc.sha256 == record.evidence_sha256 and upload_security.usable(doc):
             checked.add((record.claim_path, record.statement))
         elif artifact.target.is_example and record.reviewed_by == 'fictional-demo-reviewer':
             checked.add((record.claim_path, record.statement))

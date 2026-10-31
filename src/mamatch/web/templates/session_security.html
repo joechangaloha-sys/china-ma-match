@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block title %}{{ T('登录安全','Session security') }}{% endblock %}
+{% block body %}<header><h1>{{ T('登录安全','Session security') }}</h1><p class="sub">{{ T('管理当前账户的登录状态。','Manage sign-in sessions for your account.') }}</p></header>
+<section class="panel narrow"><h2>{{ T('会话有效期','Session lifetime') }}</h2><p>{{ T('连续三十分钟未操作，或自登录起满十二小时，均须重新登录。','Sign in again after thirty minutes of inactivity or twelve hours from sign-in.') }}</p><p>{{ T('如怀疑账户在其他设备保持登录，可立即终止全部会话。本设备亦将退出。','If another device may still be signed in, end every session now. This device will also be signed out.') }}</p><form method="post" action="{{ P }}/account/sessions/revoke"><button>{{ T('退出全部设备','Sign out all sessions') }}</button></form>{% if cfg.MFA_ENABLED %}<p class="small muted"><a href="{{ P }}/account/mfa">{{ T('管理多因素认证','Manage multi-factor authentication') }}</a></p>{% endif %}</section>{% endblock %}

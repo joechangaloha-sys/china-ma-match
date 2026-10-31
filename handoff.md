@@ -8,6 +8,97 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Internal language cleanup — 31 October 2026
+
+Joe reported mixed Chinese/English on 试点数据 and other internal pages; each edition must be monolingual.
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/17 (unmerged, cumulative over #16).
+Converted legacy hard-coded bilingual templates for metrics, adviser/buyer checks, mandates, pipeline,
+new-mandate form, audit, target workspace and shared fee panels to explicit selected-edition labels.
+Localised status dictionaries, controls, accessible labels, placeholders and audit captions. Added display
+aliases for known fictional seed labels only; original records and audit JSON remain unchanged. Registry,
+licence, invoice and contact identifiers remain data. Original source disclosures remain editable data.
+Teaser/memo lists show only the selected edition. Locale links and original dropdown submission values
+are preserved. 210 tests passed, including legacy live pipeline notes, language checks on seven internal routes, document filtering,
+immutable saved records and English province-label/Chinese canonical-value regression coverage.
+Deployed 28356cf on Tencent. Verified seven internal routes in both editions at 390/1366px; no horizontal overflow.
+Chinese dashboard is fully Chinese and English dashboard fully English. Legacy pipeline note also verified clean.
+MFA remains disabled; the local scanner remains active. Do not merge older cumulative PRs independently.
+
+## MFA prepared but not live — 31 October 2026
+
+Joe: "got it. set it up but no need to make it live. so i don't ned to send an email".
+No email, invitation, personal account or phone enrollment is needed now. Keep MFA code prepared,
+but set MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false on Tencent. The feature switch hides
+links and disables all enrollment/challenge/activation routes. Existing enrolled users must never be
+downgraded to password-only access; confirmed live enrollment count is zero. Local scanner stays active.
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/16 (unmerged).
+Verified on Tencent: both flags false, MFA routes return 404, links absent, no enrolled accounts, scanner ready.
+199 offline tests pass. Branch kimi/mfa-staged is cumulative over #15; do not merge older PRs independently.
+Enable MFA only after a new explicit activation instruction. No merge authorised for this task.
+
+## Local scanner and personal MFA — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/15 (unmerged).
+Cumulative branch includes #13/#14; review/merge #15 rather than merging all independently.
+Joe authorised installing the local scanner and setting up MFA. Existing SSH access suffices.
+Installed host ClamAV/FreshClam, downloaded official signatures and configured a 0660 group-restricted
+Unix socket, no TCP scanner port, automatic updates/self-check reload, single scan thread and memory
+limits suitable for the 2 GiB host. Web container streams bytes locally and checks loaded-definition age;
+stale/offline/error results remain quarantined. A pre-MFA database backup is saved on Tencent.
+Generated a persistent Fernet key in the private server env without displaying or committing it.
+MFA-required policy applies to personal accounts at password-first login/registration/activation.
+Shared seeded fictional demo accounts are explicitly exempt only in demo mode and cannot enroll phones.
+Encrypted seeds, replay protection, one-use recovery codes, challenge/account attempt limits, session
+revocation and sensitive-page headers are implemented. Activation tokens are redacted in access logs.
+Private account settings: /zh/account/mfa and /en/account/mfa. See docs/MFA.md and docs/UPLOAD_SECURITY.md.
+198 offline tests pass. The first deployment exposed a legacy PostgreSQL Boolean-default migration bug;
+the previous review build was restored, and the helper now uses portable TRUE/FALSE literals with regression coverage. User's personal email was requested; the user must choose their password and
+scan/confirm their own authenticator. Do not enroll an agent-owned device, print seeds/recovery codes,
+send an invitation email or create an administrator without the user's chosen email.
+Deployed review branch kimi/scanner-mfa as 2364a9c. Actual clean-file/EICAR detection and rollback-only
+PostgreSQL MFA enrollment/replay/recovery checks passed. Preserved 3 targets, 40 buyers, 13 matches,
+0 documents, 2 handoffs, 6 handoff events and 5 existing users. Both language editions passed 320/390/1366
+layout and monolingual checks. Loaded daemon database timestamps are rendered in UTC explicitly;
+Ubuntu's read-only VERSION command is enabled for freshness checks, while shutdown/reload remain disabled.
+Joe replied "WHAT IS MFA" to the personal-email question; explain password plus phone authenticator
+codes. No personal email was supplied, no invitation/account was created, and no personal device was enrolled.
+Your next user-dependent step is explaining enrollment and obtaining Joe's chosen personal email. External signing/VDR connections remain deferred.
+
+## Upload quarantine and session controls — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/14 (unmerged).
+This cumulative branch includes the readiness dashboard from PR #13; review/merge #14 rather than
+merging both independently. Joe authorised secure uploads and pilot access hardening, not a main merge.
+All new/legacy files are quarantined; bounded format checks precede storage, and a local scan must pass
+before downloads, extraction, claim/financial-field review or data-room inclusion. Integrity is rechecked
+at use. Text parsers run in a bounded child process. Body limits apply before form/CSRF parsing.
+The Tencent review environment has no scanner configured: uploads stay blocked, with a clear notice.
+Local ClamAV image/signatures/update monitoring and EICAR verification remain outstanding; no external
+scanner, signature provider or VDR connection/account was created. See docs/UPLOAD_SECURITY.md.
+Sessions now expire at 30 idle minutes/12 hours; legacy sessions require fresh login. Users can revoke
+all their own sessions at /account/sessions. MFA remains outstanding for real-data use.
+New internal queue: /zh/internal/upload-security and /en/internal/upload-security, linked in navigation.
+Both pages share the institutional layout, monolingual editions and laptop/phone checks.
+Validation: 179 offline tests passed, including legacy upgrade, scanner result/error/timeout simulation,
+format/package rejection, hash replacement, roles, evidence gates, body limits and session controls.
+Before deployment, database backup saved on Tencent; baseline business counts: 3 targets, 40 buyers,
+13 matches, 0 documents, 2 handoffs, 6 handoff events. Deploy branch kimi/secure-uploads for review.
+
+## Deal-readiness review build — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/13 (unmerged).
+Added private `/zh/internal/readiness` and `/en/internal/readiness`, linked from internal navigation
+and mandate pages. Read-only snapshots use latest language-specific versions, existing evidence/source
+approval gates, verified buyers and current unexpired demo access. Links lead to actual review/handoff
+screens; no approval, disclosure, signature, invitation or access grant is created. Non-example mandates
+remain blocked pending external services. External connections remain deferred.
+Shared institutional layout and locale-preserving navigation; static export included.
+Validation: 156 offline tests pass, including role isolation, language purity, stale approvals,
+expired access and no-write checks. Laptop and phone layouts checked. Deploy review branch
+`kimi/deal-readiness` to Tencent; do not merge without Joe's review instruction.
+Recommended next work: secure upload validation/quarantine, then pilot access hardening;
+provider onboarding only when Joe resumes it.
+
 ## Main merged and Tencent deployment — 31 October 2026
 
 Joe explicitly instructed: "merge the new pages with main so the website will show all the changes".

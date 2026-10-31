@@ -19,6 +19,8 @@ def app(db_url, monkeypatch, tmp_path):
     monkeypatch.setattr(config, "UPLOAD_DIR", str(tmp_path / "uploads"))
     with db.session_scope(db_url) as s:
         seed(s)
+    from mamatch import upload_security
+    monkeypatch.setattr(upload_security, "scan", lambda doc: "clean")  # explicit scan actions only
     from mamatch.web.app import app
 
     return app
@@ -27,8 +29,8 @@ def app(db_url, monkeypatch, tmp_path):
 class BrowserClient(TestClient):
     def request(self, method, url, **kwargs):
         from mamatch.web.security import csrf_token
-        if method.upper() in {'POST', 'PUT', 'PATCH', 'DELETE'} and self.cookies.get('mm_session'):
-            kwargs['headers'] = {**(kwargs.get('headers') or {}), 'X-CSRF-Token': csrf_token(self.cookies.get('mm_session'))}
+        if method.upper() in {'POST', 'PUT', 'PATCH', 'DELETE'} and (self.cookies.get('mm_session') or self.cookies.get('mm_mfa')):
+            kwargs['headers'] = {**(kwargs.get('headers') or {}), 'X-CSRF-Token': csrf_token(self.cookies.get('mm_session') or self.cookies.get('mm_mfa'))}
         return super().request(method, url, **kwargs)
 
 
@@ -133,7 +135,8 @@ def test_internal_pages_are_marked_internal(app, db_url):
                 f"{I}/targets/{jade.id}"):
         r = c.get(url)
         assert r.status_code == 200, url
-        assert "Internal page for deal managers only" in r.text, url
+        assert "内部页面：仅限项目负责人使用" in r.text, url
+        assert "Internal page for deal managers only" in c.get("/en"+url).text, url
 
 
 # ---------------------------------------------------------------- seller portal
@@ -165,6 +168,8 @@ def test_seller_uploads_and_deal_manager_extracts(app, db_url):
     assert "已上传" in r.text
     doc = _get(db_url, Document, filename="fs.csv")
     dm = client(app, DM)
+    assert doc.security_status == "quarantined" and not doc.text
+    dm.post(f"{I}/documents/{doc.id}/scan")
     r = dm.post(f"{I}/documents/{doc.id}/extract")
     assert "个数字待审核" in r.text and "营业收入,10400" in r.text
     with db.session_scope(db_url) as s:
@@ -235,6 +240,7 @@ def test_data_room_needs_nda_seller_grant_and_flag(app, db_url):
     dm.post(f"{I}/targets/{jade.id}/documents", data={"kind": "license"},
             files={"file": ("licence.txt", "营业执照".encode(), "text/plain")})
     doc = _get(db_url, Document, filename="licence.txt")
+    dm.post(f"{I}/documents/{doc.id}/scan")
     buyer, other = client(app, BUYER), client(app, PENDING)
     assert buyer.get(f"/buyer/documents/{doc.id}").status_code == 404  # not in the data room yet
     dm.post(f"{I}/documents/{doc.id}/data-room")
@@ -279,6 +285,7 @@ def test_deal_manager_mandate_flow(app, db_url):
     dm.post(f"{url}/documents", data={"kind": "other"}, files={"file": ("review-source.txt", b"Fictional test source", "text/plain")})
     with db.session_scope(db_url) as review_session:
         source_id = review_session.scalar(select(Document.id).where(Document.target_id == tid))
+    dm.post(f"{I}/documents/{source_id}/scan")
     for path in claim_paths:
         dm.post(f"{I}/review/teaser/{tz}", data={"claim_path": path, "evidence_ref": "Test fixture supporting material, page 1", "document_id": source_id})
     dm.post(f"{I}/teasers/{tz}/approve")
@@ -294,6 +301,10 @@ def test_deal_manager_mandate_flow(app, db_url):
     assert "Upload the business licence" in dm.post(f"{url}/authority").text
     for kind in ("license", "ownership"):
         seller.post(f"/seller/{tid}/documents", data={"kind": kind}, files={"file": (f"{kind}.txt", b"x", "text/plain")})
+    with db.session_scope(db_url) as check:
+        ids = [d.id for d in check.get(Target, tid).documents]
+    for did in ids:
+        dm.post(f"{I}/documents/{did}/scan")
     dm.post(f"{url}/authority", data={"note": "licence checked"})
     seller.post(f"/seller/{tid}/visibility", data={"visibility": "listed"})
     t = _get(db_url, Target, id=tid)
@@ -467,6 +478,10 @@ def test_adviser_journey_with_client_authorisation(app, db_url):
     for kind in ("license", "ownership"):
         r = adv.post(f"/adviser/{t.id}/documents", data={"kind": kind}, files={"file": (f"{kind}.txt", b"x", "text/plain")})
         assert "已上传" in r.text
+    with db.session_scope(db_url) as check:
+        ids = [d.id for d in check.get(Target, t.id).documents]
+    for did in ids:
+        dm.post(f"{I}/documents/{did}/scan")
     dm.post(f"{I}/targets/{t.id}/authority", data={"note": "执照与股东名册一致"})
     _, _, verified_at, auths = auth_state(t.id)
     assert verified_at and auths[0][1] == "verified"
@@ -725,3 +740,138 @@ def test_handoff_roles_and_owner_approval_cannot_be_bypassed(app, db_url):
         assert not handoff.access_active(handoff.get(s.get(Match,mid)))
     client(app,SELLER).post(f'/seller/{jade.id}/matches/{mid}/revoke')
     assert _get(db_url,DealHandoff,match_id=mid).vdr_state == 'revoked'
+
+
+def test_readiness_is_private_monolingual_and_read_only(app,db_url):
+    from html.parser import HTMLParser
+    from mamatch.models import HandoffEvent,DealHandoff
+    def counts():
+        with db.session_scope(db_url) as s:
+            return [len(s.scalars(select(model)).all()) for model in (Target,Match,DealHandoff,HandoffEvent,AuditEvent)]
+    assert client(app).get('/en/internal/readiness',follow_redirects=False).status_code==303
+    for email in (SELLER,BUYER,ADVISER):
+        assert client(app,email).get('/en/internal/readiness').status_code==403
+    c=client(app,DM);before=counts()
+    class Text(HTMLParser):
+        def __init__(self):super().__init__();self.skip=0;self.parts=[];self.actions=[]
+        def handle_starttag(self,t,a):
+            if t=='form':self.actions.append(dict(a).get('action'))
+            if t in ('script','style'):self.skip+=1
+        def handle_endtag(self,t):
+            if t in ('script','style'):self.skip-=1
+        def handle_data(self,d):
+            if not self.skip:self.parts.append(d)
+    for lang in ('en','zh'):
+        page=c.get(f'/{lang}/internal/readiness');assert page.status_code==200
+        p=Text();p.feed(page.text);text=' '.join(p.parts)
+        assert not re.search(r'[\u4e00-\u9fff]' if lang=='en' else r'[A-Za-z]',text)
+        assert f'/{lang}/internal/targets/' in page.text
+        assert p.actions==[f'/{lang}/logout']
+    assert c.post('/en/internal/readiness').status_code==405
+    assert counts()==before
+
+
+def test_quarantine_blocks_all_file_paths_and_scan_is_manager_only(app, db_url):
+    from mamatch import upload_security
+    jade = _get(db_url, Target, code_name='Project Jade')
+    dm, seller = client(app, DM), client(app, SELLER)
+    seller.post(f'/seller/{jade.id}/documents', data={'kind': 'financials'},
+                files={'file': ('test.txt', b'Fictional evidence', 'text/plain')})
+    doc = _get(db_url, Document, filename='test.txt')
+    assert dm.get(f'{I}/documents/{doc.id}').status_code == 423
+    dm.post(f'{I}/documents/{doc.id}/extract')
+    dm.post(f'{I}/documents/{doc.id}/data-room')
+    assert not _get(db_url, Document, id=doc.id).in_data_room
+    assert seller.post(f'{I}/documents/{doc.id}/scan').status_code == 403
+    assert client(app, BUYER).get(f'{I}/upload-security').status_code == 403
+    assert client(app).get(f'{I}/upload-security', follow_redirects=False).status_code == 303
+    dm.post(f'{I}/documents/{doc.id}/scan')
+    assert dm.get(f'{I}/documents/{doc.id}').status_code == 200
+    assert _get(db_url, Document, id=doc.id).security_status == 'clean'
+    for lang, heading, absent in [('zh', '文件安全检查', 'Handling rules'), ('en', 'Upload security', '处理规则')]:
+        page = dm.get(f'/{lang}{I}/upload-security')
+        assert heading in page.text and absent not in page.text
+    # File replacement invalidates the scan even if the database flag still says clean.
+    from pathlib import Path
+    Path(doc.stored_path).write_bytes(b'Changed')
+    assert dm.get(f'{I}/documents/{doc.id}').status_code == 423
+
+
+def test_revoke_sessions_requires_csrf_and_only_revokes_own_sessions(app):
+    first, second, other = client(app, DM), client(app, DM), client(app, BUYER)
+    assert first.get('/en/account/sessions').status_code == 200
+    raw = TestClient(app)
+    raw.cookies.update(first.cookies)
+    assert raw.post('/account/sessions/revoke').status_code == 403
+    assert second.get('/internal/readiness').status_code == 200
+    first.post('/account/sessions/revoke')
+    assert second.get('/internal/readiness', follow_redirects=False).status_code == 303
+    assert other.get('/buyer').status_code == 200
+
+
+def test_request_size_limit_checks_declared_and_chunked_body(app, monkeypatch):
+    from mamatch.web.security import BodyLimit
+    monkeypatch.setattr(BodyLimit, 'MAX_BODY', 100)
+    c = TestClient(app)
+    assert c.post('/en/login', content=b'x' * 101).status_code == 413
+    def chunks():
+        yield b'a' * 60
+        yield b'b' * 60
+    assert c.post('/zh/login', content=chunks()).status_code == 413
+
+
+@pytest.mark.parametrize('route', ['/internal/dashboard','/internal/advisers','/internal/buyers','/internal',
+                                 '/internal/pipeline','/internal/targets/new','/internal/audit'])
+def test_internal_editions_localise_interface_copy(app, route):
+    from html.parser import HTMLParser
+    class Visible(HTMLParser):
+        def __init__(self):super().__init__();self.skip=0;self.parts=[]
+        def handle_starttag(self,tag,attrs):
+            if tag in ('script','style'):self.skip+=1
+        def handle_endtag(self,tag):
+            if tag in ('script','style'):self.skip-=1
+        def handle_data(self,data):
+            if not self.skip:self.parts.append(data)
+    c=client(app,DM)
+    for lang in ('en','zh'):
+        r=c.get('/'+lang+route);assert r.status_code==200
+        p=Visible();p.feed(r.text);text=' '.join(p.parts)
+        if lang=='en':assert not re.search('[一-鿿]',text),text
+        else:
+            # Registry, licence and contact identifiers are immutable data, not English UI copy.
+            text=re.sub(r'[\w.+-]+@[\w.-]+','',text)
+            text=re.sub(r'\b(?:EX-CPA-[\d]+|[0-9]{8}MA[0-9]+)\b','',text)
+            assert not re.search('[A-Za-z]',text),text
+        assert '/zh/en/' not in r.text and '/en/zh/' not in r.text
+
+
+def test_internal_documents_only_show_selected_edition(app):
+    c=client(app,DM)
+    for lang, own,other in [('en','English version','中文版本'),('zh','中文版本','English version')]:
+        page=c.get('/'+lang+'/internal/targets/1')
+        assert own in page.text and other not in page.text
+        assert '/en/en/' not in page.text and '/zh/zh/' not in page.text
+
+
+def test_language_display_does_not_rewrite_mandate_records(app,db_url):
+    def snapshot():
+        with db.session_scope(db_url) as s:
+            t=s.get(Target,1)
+            return (t.code_name,t.legal_name,t.description,[(x.id,x.body,x.version) for x in t.teasers])
+    before=snapshot()
+    c=client(app,DM)
+    assert c.get('/en/internal/targets/1').status_code==200
+    assert c.get('/zh/internal/targets/1').status_code==200
+    assert snapshot()==before
+
+
+def test_english_region_label_preserves_submitted_value(app):
+    page=client(app,DM).get('/en/internal/targets/new').text
+    assert '<option value="浙江">Zhejiang</option>' in page
+
+
+def test_legacy_demo_pipeline_note_localises_without_rewriting():
+    from mamatch.internal_display import record
+    original='NDA v1-2026-10 accepted online'
+    assert record(original,'zh')=='演示：已在线确认保密协议，版本1-2026-10'
+    assert record(original,'en')==original

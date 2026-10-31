@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, authority, listing, offers, teaser
+from .. import mfa, auth, authority, listing, offers, teaser
 from ..buyers import new_token
 from ..models import Buyer, Target, User
 from ..taxonomy import BUYER_KINDS, DEAL_TYPES, REGIONS, SALE_REASONS, SECTORS
@@ -179,7 +179,23 @@ def login_page(request: Request, next: str = "", user: User | None = Depends(cur
 
 
 def _safe_next(nxt: str, user: User) -> str:
-    return nxt if nxt.startswith("/") and not nxt.startswith("//") else _home_for(user)
+    return nxt if mfa.safe_path(nxt) else _home_for(user)
+
+
+def _signin_response(request, session, user, destination):
+    if mfa.required(user):
+        try:
+            token = mfa.begin(session, user, destination)
+        except ValueError:
+            return back('/login', '暂时无法完成验证，请稍后重试。 Verification is temporarily unavailable. Try again later.')
+        response = RedirectResponse('/mfa/challenge', status_code=303)
+        response.delete_cookie(COOKIE)
+        response.set_cookie('mm_mfa', token, httponly=True, samesite='strict', secure=request.url.scheme == 'https', max_age=300)
+        return response
+    response = RedirectResponse(destination, status_code=303)
+    response.set_cookie(COOKIE, auth.start_session(session, user), httponly=True, samesite='lax',
+                        secure=request.url.scheme == 'https', max_age=auth.SESSION_HOURS * 3600)
+    return response
 
 
 @router.post("/login")
@@ -187,12 +203,26 @@ def login(request: Request, s: Session = Depends(get_session), email: str = Form
           next: str = Form("")):
     user = auth.authenticate(s, email, password)
     if user is None:
-        auth.log(s, None, "sign_in_failed", email=email.strip().lower()[:200])
         return back(f"/login?next={next}", "邮箱或密码不正确 Wrong email or password.")
-    resp = RedirectResponse(_safe_next(next, user), status_code=303)
-    resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
-    return resp
+    return _signin_response(request, s, user, _safe_next(next, user))
+
+
+@router.get('/account/sessions', response_class=HTMLResponse)
+def session_security(request: Request, user: User | None = Depends(current_user)):
+    if user is None:
+        return RedirectResponse('/login', status_code=303)
+    return render(request, 'session_security.html', user, portal='internal' if user.role == 'deal_manager' else user.role,
+                  omit_profile_name=True)
+
+
+@router.post('/account/sessions/revoke')
+def revoke_sessions(request: Request, user: User | None = Depends(current_user), s: Session = Depends(get_session)):
+    if user is None:
+        return RedirectResponse('/login', status_code=303)
+    auth.end_all_sessions(s, user)
+    response = RedirectResponse('/login', status_code=303)
+    response.delete_cookie(COOKIE)
+    return response
 
 
 @router.post("/logout")
@@ -220,10 +250,7 @@ def adviser_register(request: Request, s: Session = Depends(get_session), email:
     except ValueError as exc:
         s.rollback()
         return back("/register/adviser", str(exc))
-    resp = RedirectResponse("/adviser", status_code=303)
-    resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
-    return resp
+    return _signin_response(request, s, user, "/adviser")
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -247,10 +274,7 @@ def register(request: Request, s: Session = Depends(get_session), email: str = F
     except ValueError as exc:
         s.delete(buyer)
         return back("/register", str(exc))
-    resp = RedirectResponse("/buyer#thesis", status_code=303)
-    resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
-    return resp
+    return _signin_response(request, s, user, "/buyer#thesis")
 
 
 @router.get("/invite/{token}", response_class=HTMLResponse)
@@ -285,10 +309,7 @@ def invite_accept(token: str, request: Request, s: Session = Depends(get_session
         return back(f"/invite/{token}", str(exc))
     t.seller_user_id, t.seller_token = user.id, ""
     auth.log(s, user, "seller_account_created", target_id=t.id)
-    resp = RedirectResponse(f"/seller/{t.id}", status_code=303)
-    resp.set_cookie(COOKIE, auth.start_session(s, user), httponly=True, samesite="lax",
-                    secure=request.url.scheme == "https", max_age=auth.SESSION_DAYS * 86400)
-    return resp
+    return _signin_response(request, s, user, f"/seller/{t.id}")
 
 
 # Last: a catch-all for the static information pages.

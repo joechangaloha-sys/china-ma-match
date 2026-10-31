@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}审计{% endblock %}
+{% block title %}{{ T("审计","Audit log") }}{% endblock %}
 {% block body %}
-<div><h1>审计记录 Audit log</h1><p class="sub">{% if target %}项目 #{{ target }} · <a href="{{ I }}/audit">全部 All</a>{% else %}最近300条 Latest 300{% endif %}</p></div>
+<div><h1>{{ T("审计记录","Audit log") }}</h1><p class="sub">{% if target %}项目 #{{ target }} · <a href="{{ P }}{{ I }}/audit">{{ T("全部","All") }}</a>{% else %}{{ T("最近300条","Latest 300") }}{% endif %}</p></div>
 <section class="panel tbl">
   <table class="small">
-    <tr><th>时间 When (UTC)</th><th>用户 Who</th><th>操作 Action</th><th>项目 Mandate</th><th>详情 Detail</th></tr>
+    <tr><th>{{ T("时间（协调世界时）","When (UTC)") }}</th><th>{{ T("用户","Who") }}</th><th>{{ T("操作","Action") }}</th><th>{{ T("项目","Mandate") }}</th><th>{{ T("详情","Detail") }}</th></tr>
     {% for e in events %}
     <tr><td class="num">{{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-      <td>{{ e.user.email if e.user else '—' }}</td><td><code>{{ e.action }}</code></td>
-      <td>{% if e.target_id %}<a href="{{ I }}/audit?target={{ e.target_id }}">#{{ e.target_id }}</a>{% endif %}{% if e.document_id %} · doc {{ e.document_id }}{% endif %}{% if e.match_id %} · match {{ e.match_id }}{% endif %}</td>
-      <td class="muted">{{ e.detail|tojson if e.detail }}</td></tr>
+      <td>{{ T('用户编号','User reference') ~ ' ' ~ e.user_id if e.user_id else '—' }}</td><td><code>{{ audit_action(e.action) }}</code></td>
+      <td>{% if e.target_id %}<a href="{{ P }}{{ I }}/audit?target={{ e.target_id }}">#{{ e.target_id }}</a>{% endif %}{% if e.document_id %} · {{ T("文件编号","File reference") }} {{ e.document_id }}{% endif %}{% if e.match_id %} · {{ T("匹配编号","Match reference") }} {{ e.match_id }}{% endif %}</td>
+      <td class="muted">{% for label,value in audit_details(e.detail) %}<div>{{ label }}: {{ value }}</div>{% endfor %}</td></tr>
     {% else %}<tr><td colspan="5" class="empty">—</td></tr>{% endfor %}
   </table>
 </section>

@@ -273,3 +273,13 @@ def test_main_public_editions_share_layout_and_institutional_styles(demo_app):
     assert '当前演示未启用人工智能模型调用' in zh
     palette=c.get('/static/palette.css').text
     assert '--house-navy: #0b2545' in palette and '--house-paper: #ffffff' in palette
+
+
+def test_scanner_setup_enables_only_needed_version_command():
+    from pathlib import Path
+    script = (Path(__file__).parents[1] / 'deploy/lighthouse/setup-scanner-mfa.sh').read_text()
+    assert "'EnableVersionCommand':'true'" in script
+    assert "'EnableShutdownCommand':'false'" in script
+    assert "'EnableReloadCommand':'false'" in script
+    assert "'LocalSocketMode':'660'" in script
+    assert "Environment=TZ=UTC" in script

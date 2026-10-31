@@ -2,8 +2,7 @@
 
 Labels across the app are written bilingually, Chinese first ("出售项目 Opportunities",
 "100%股权转让 / Full sale"). `tr` picks one side for the reader's language; `val` turns
-banded figures ("30–50百万元", "20年以上") into the reader's language. Internal pages stay
-bilingual on purpose: deal managers work in both.
+banded figures ("30–50百万元", "20年以上") into the reader's language. Internal and public pages both use the selected edition; bilingual labels must be localised explicitly.
 """
 
 import re

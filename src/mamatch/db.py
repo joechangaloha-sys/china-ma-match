@@ -52,7 +52,7 @@ def _add_missing_columns(engine) -> None:
                     else:
                         literal = "NULL"
                 elif isinstance(default, bool):
-                    literal = "1" if default else "0"
+                    literal = "TRUE" if default else "FALSE"
                 elif isinstance(default, (int, float)):
                     literal = str(default)
                 elif isinstance(default, str):

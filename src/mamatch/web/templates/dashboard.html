@@ -1,41 +1,41 @@
 {% extends "base.html" %}
-{% block title %}试点数据{% endblock %}
+{% block title %}{{ T("试点数据","Pilot metrics") }}{% endblock %}
 {% block body %}
-<div><h1>试点数据 Pilot metrics</h1><p class="sub">90天试点的漏斗与服务指标 · Funnel and service measures for the 90-day pilot</p></div>
+<div><h1>{{ T("试点数据","Pilot metrics") }}</h1><p class="sub">{{ T("90天试点的漏斗与服务指标","Funnel and service measures for the 90-day pilot") }}</p></div>
 <section class="panel stats">
-  <div class="stat"><b>{{ m.mandates }}</b><span>卖方委托 Mandates</span></div>
-  <div class="stat"><b>{{ m.docs_complete }}</b><span>资料齐全 Documents complete</span></div>
-  <div class="stat"><b>{{ m.lead_time_days if m.lead_time_days is not none else '—' }}</b><span>资料齐全→简介确认（天）Docs → approved teaser, days</span></div>
-  <div class="stat"><b>{{ m.correction_rate if m.correction_rate is not none else '—' }}</b><span>提取更正率 Extraction correction rate</span></div>
+  <div class="stat"><b>{{ m.mandates }}</b><span>{{ T("卖方委托","Mandates") }}</span></div>
+  <div class="stat"><b>{{ m.docs_complete }}</b><span>{{ T("资料齐全","Documents complete") }}</span></div>
+  <div class="stat"><b>{{ m.lead_time_days if m.lead_time_days is not none else '—' }}</b><span>{{ T("资料齐全→简介确认（天）","Docs → approved teaser, days") }}</span></div>
+  <div class="stat"><b>{{ m.correction_rate if m.correction_rate is not none else '—' }}</b><span>{{ T("提取更正率","Extraction correction rate") }}</span></div>
 </section>
 <section class="panel stats">
-  <div class="stat"><b>{{ m.buyers_registered }}</b><span>注册买方 Registered buyers</span></div>
-  <div class="stat"><b>{{ m.buyers_verified }}</b><span>已认证 Verified</span></div>
-  <div class="stat"><b>{{ m.theses }}</b><span>收购方向 Detailed theses</span></div>
-  <div class="stat"><b>{{ m.recs_accepted }} / {{ m.recs_accepted + m.recs_rejected }}</b><span>推荐采纳 Recommendations accepted</span></div>
+  <div class="stat"><b>{{ m.buyers_registered }}</b><span>{{ T("注册买方","Registered buyers") }}</span></div>
+  <div class="stat"><b>{{ m.buyers_verified }}</b><span>{{ T("已核验投资方","Verified buyers") }}</span></div>
+  <div class="stat"><b>{{ m.theses }}</b><span>{{ T("收购方向","Detailed theses") }}</span></div>
+  <div class="stat"><b>{{ m.recs_accepted }} / {{ m.recs_accepted + m.recs_rejected }}</b><span>{{ T("推荐采纳","Recommendations accepted") }}</span></div>
 </section>
 <section class="panel stats">
-  <div class="stat"><b>{{ m.introductions }}</b><span>引荐 Introductions</span></div>
-  <div class="stat"><b>{{ m.ndas }}</b><span>保密协议 NDAs</span></div>
-  <div class="stat"><b>{{ m.data_rooms }}</b><span>资料室开放 Data rooms</span></div>
-  <div class="stat"><b>{{ m.lois }}</b><span>意向书 LOIs</span></div>
-  <div class="stat"><b>{{ m.closed }}</b><span>成交 Closed</span></div>
-  <div class="stat"><b>{{ m.withdrawn }}</b><span>撤回 Withdrawn</span></div>
+  <div class="stat"><b>{{ m.introductions }}</b><span>{{ T("引荐","Introductions") }}</span></div>
+  <div class="stat"><b>{{ m.ndas }}</b><span>{{ T("保密协议","NDAs") }}</span></div>
+  <div class="stat"><b>{{ m.data_rooms }}</b><span>{{ T("资料室开放","Data rooms") }}</span></div>
+  <div class="stat"><b>{{ m.lois }}</b><span>{{ T("意向书","LOIs") }}</span></div>
+  <div class="stat"><b>{{ m.closed }}</b><span>{{ T("成交","Closed") }}</span></div>
+  <div class="stat"><b>{{ m.withdrawn }}</b><span>{{ T("撤回","Withdrawn") }}</span></div>
 </section>
 <div class="cols">
 <section class="panel">
-  <h2>按状态 Mandates by status</h2>
-  <table class="small">{% for code, label in m.statuses.items() if m.status.get(code) %}<tr><td>{{ label }}</td><td class="num">{{ m.status[code] }}</td></tr>{% endfor %}</table>
+  <h2>{{ T("按状态","Mandates by status") }}</h2>
+  <table class="small">{% for code, label in m.statuses.items() if m.status.get(code) %}<tr><td>{{ L(label) }}</td><td class="num">{{ m.status[code] }}</td></tr>{% endfor %}</table>
 </section>
 <section class="panel">
-  <h2>拒绝推荐的原因 Why recommendations were rejected</h2>
-  <table class="small">{% for code, n in m.reject_reasons.most_common() %}<tr><td>{{ REJECT_REASONS.get(code, code) }}</td><td class="num">{{ n }}</td></tr>{% else %}<tr><td class="empty">—</td></tr>{% endfor %}</table>
+  <h2>{{ T("拒绝推荐的原因","Why recommendations were rejected") }}</h2>
+  <table class="small">{% for code, n in m.reject_reasons.most_common() %}<tr><td>{{ L(REJECT_REASONS.get(code, code)) }}</td><td class="num">{{ n }}</td></tr>{% else %}<tr><td class="empty">—</td></tr>{% endfor %}</table>
 </section>
 <section class="panel">
-  <h2>收入 Revenue</h2>
-  <table class="small"><tr><td>已记录费用 Fees recorded</td><td class="num">RMB {{ '{:,.0f}'.format(m.fees_total) }}</td></tr>
-    <tr><td>平台分成 Platform share</td><td class="num">RMB {{ '{:,.0f}'.format(m.platform_share) }}</td></tr>
-    <tr><td>AI 起草的简介 AI-drafted teasers</td><td class="num">{{ m.ai_teasers }}</td></tr></table>
+  <h2>{{ T("费用汇总","Fee summary") }}</h2>
+  <table class="small"><tr><td>{{ T("已记录费用","Fees recorded") }}</td><td class="num">{{ T("人民币","RMB") }} {{ '{:,.0f}'.format(m.fees_total) }}</td></tr>
+    <tr><td>{{ T("平台分成","Platform share") }}</td><td class="num">{{ T("人民币","RMB") }} {{ '{:,.0f}'.format(m.platform_share) }}</td></tr>
+    <tr><td>{{ T("人工智能起草的项目简介","AI-drafted teasers") }}</td><td class="num">{{ m.ai_teasers }}</td></tr></table>
 </section>
 </div>
 {% endblock %}

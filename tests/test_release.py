@@ -43,7 +43,7 @@ def test_memo_needs_seller_approval_for_same_version(seeded):
     assert infomemo.shared_memo(t, 'en') is None
 
 
-def test_real_evidence_requires_owned_document_and_named_review(seeded):
+def test_real_evidence_requires_owned_document_and_named_review(seeded, clean_file):
     t = jade(seeded)
     a = teaser.draft(seeded, t, 'en', use_llm=False)
     t.is_example = False
@@ -55,6 +55,7 @@ def test_real_evidence_requires_owned_document_and_named_review(seeded):
     wrong = Document(target_id=seeded.scalar(select(Target.id).where(Target.code_name == 'Project Delta')),
                      kind='other', filename='wrong.txt', stored_path='/not-served', sha256='wrong')
     source = Document(target_id=t.id, kind='other', filename='source.txt', stored_path='/not-served', sha256='first')
+    clean_file(source)
     seeded.add_all([wrong, source]); seeded.flush()
     with pytest.raises(ValueError, match='this mandate'):
         release.review_claim(a, path, 'page 1', reviewer, wrong.id)
@@ -99,10 +100,11 @@ def test_drafting_never_calls_ai_with_intake_or_financials(seeded, monkeypatch):
     assert infomemo.draft(seeded, t, use_llm=True).generated_by == 'offline'
 
 
-def test_real_mandates_cannot_click_sign_or_download_uploads(seeded):
+def test_real_mandates_cannot_click_sign_or_download_uploads(seeded, clean_file):
     t = jade(seeded)
     m = next(m for m in t.matches if m.stage in offers.AFTER_NDA)
     doc = Document(target_id=t.id, kind='other', filename='confidential.txt', stored_path='/not-served', in_data_room=True)
+    clean_file(doc)
     seeded.add(doc); seeded.flush()
     from mamatch import handoff
     manager = seeded.scalar(select(User).where(User.role == 'deal_manager'))

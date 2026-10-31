@@ -302,11 +302,14 @@ def _seed_offers(session: Session, t: Target) -> None:
 
 def _seed_users(session: Session, targets: dict[str, Target]) -> None:
     for email, role, name, target_code, buyer_ext in DEMO_USERS:
-        if session.scalar(select(User.id).where(User.email == email)):
+        existing = session.scalar(select(User).where(User.email == email))
+        if existing:
+            existing.is_demo = True
             continue
         buyer = session.scalar(select(Buyer).where(Buyer.external_id == buyer_ext)) if buyer_ext else None
         user = auth.create_user(session, email=email, password=DEMO_PASSWORD, role=role, name=name,
                                 organization=buyer.name if buyer else "", buyer_id=buyer.id if buyer else None)
+        user.is_demo = True
         if target_code and target_code in targets:
             targets[target_code].seller_user_id = user.id
             targets[target_code].seller_token = ""  # invite used
