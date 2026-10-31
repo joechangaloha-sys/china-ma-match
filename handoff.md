@@ -289,3 +289,9 @@ Validation: all 147 tests pass; public/demo language isolation includes listing 
 report form, gate screen and all document stages. Chinese LOI browser preview and
 downloaded text contain no English prose or abbreviations. User explicitly requested
 and received a standing language-style preference note in Codex memory.
+
+Tencent deployed `aba63ed`; 52 live public/demo views passed rendered-language
+isolation checks. Chinese teaser, edition links, export script and passcode gate
+verified. Existing counts remain 3 targets / 40 buyers / 13 matches / 0 documents /
+2 handoffs / 6 events. Internal operating screens are not covered by this public/demo
+language audit; stored identities and technical identifiers are preserved.
