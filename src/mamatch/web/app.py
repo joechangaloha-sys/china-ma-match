@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .. import config, db, i18n
-from . import adviser, buyer, demo, internal, public, seller, workflow, security, handoffs, standalone_teaser
+from . import adviser, buyer, demo, internal, public, seller, workflow, security, handoffs, standalone_teaser, document_demos
 
 HERE = Path(__file__).parent
 
@@ -78,6 +78,7 @@ app.include_router(seller.router)
 app.include_router(buyer.router)
 app.include_router(adviser.router)
 app.include_router(standalone_teaser.router)
+app.include_router(document_demos.router)
 app.include_router(workflow.router)
 app.include_router(handoffs.router)
 app.include_router(public.router)  # last: it ends with a catch-all for information pages
