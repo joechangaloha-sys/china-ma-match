@@ -283,3 +283,9 @@ Chinese text exports and filenames are localised. No cross-language fallback for
 product descriptions. Stored identities, records, economics and release controls
 are not changed. Public/demo language isolation checks include all document stages.
 Branch: `kimi/language-editions`, cumulative prior review work, no merge to main.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/6.
+Validation: all 147 tests pass; public/demo language isolation includes listing detail,
+report form, gate screen and all document stages. Chinese LOI browser preview and
+downloaded text contain no English prose or abbreviations. User explicitly requested
+and received a standing language-style preference note in Codex memory.
