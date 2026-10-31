@@ -199,3 +199,16 @@ recorded), durable COS uploads, and production database migrations. PostgreSQL a
 prepared and locally smoke-tested, but no cloud resource has been deployed. Production hosting, ICP and
 data-location setup in China are handled by Joe outside this code. The NDA text in `offers.py` is a template for
 counsel to review.
+
+## Kimi standalone teaser integration — 31 October 2026
+
+The original Project Willow page from Kimi's ZIP is served at `/teaser-demo/` inside
+the existing demo passcode gate. Open **Teaser demo** in the main navigation or
+**Open the standalone teaser demo** on the homepage. Chinese navigation labels
+the original English page clearly. The approval workflow also links to it.
+
+The original rendering, checks, data/rules panels, copy, JSON download and print/PDF
+controls remain available. This is fictional demonstration data; browser checks
+and illustrative approval fields do not approve or publish real deals. External
+e-signature and VDR connections remain deferred. Assets are packaged with the app;
+the routes are disabled outside demo mode. Work branch: `kimi/standalone-teaser`.
