@@ -86,3 +86,33 @@ def test_demo_mode_requires_a_real_passcode(monkeypatch):
     monkeypatch.setattr(config, "DEMO_ACCESS_KEY", "short")
     with pytest.raises(RuntimeError, match="at least 12"):
         config.validate_runtime()
+
+
+def test_standalone_kimi_teaser_and_assets_share_the_demo_gate(demo_app, monkeypatch):
+    c = TestClient(demo_app, follow_redirects=False)
+    protected = ['/teaser-demo/', '/teaser-demo/assets/app.js', '/teaser-demo/assets/styles.css',
+                 '/teaser-demo/assets/favicon.svg', '/teaser-demo/data/teaser.json']
+    for path in protected:
+        assert c.get(path).status_code == 303
+    c.post('/demo-access', data={'access_key': PASSCODE})
+    page = c.get('/teaser-demo/')
+    assert page.status_code == 200
+    assert 'Project Willow' in page.text
+    assert 'Kimi’s original standalone teaser' in page.text
+    assert 'id="teaser-content"' in page.text and 'id="print-button"' in page.text
+    assert 'Fictional preview' in page.text and 'Ready for demo' not in page.text
+    for path in protected:
+        r = c.get(path)
+        assert r.status_code == 200, path
+        assert r.headers['x-robots-tag'] == 'noindex, nofollow, noarchive'
+    assert c.get('/teaser-demo/data/teaser.json').json()['project_code'] == 'Project Willow'
+    assert c.get('/teaser-demo/unknown.txt').status_code == 404
+    assert c.get('/teaser-demo/assets/%2e%2e/%2e%2e/config.py').status_code == 404
+    for lang in ('zh', 'en'):
+        home = c.get(f'/{lang}/').text
+        assert home.count('href="/teaser-demo/"') >= 2  # menu and prominent homepage action
+        assert c.get(f'/{lang}/teaser-demo/').status_code == 200
+    monkeypatch.setattr(config, 'DEMO_MODE', False)
+    for path in protected:
+        assert c.get(path).status_code == 404
+    assert 'href="/teaser-demo/"' not in c.get('/en/').text
