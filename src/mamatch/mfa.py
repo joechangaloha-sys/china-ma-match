@@ -52,7 +52,7 @@ def safe_path(value):
 
 
 def begin(session, user, next_path='/', enrollment=False):
-    if not available() or not user.active or blocked(session, user):
+    if not config.MFA_ENABLED or not available() or not user.active or blocked(session, user):
         raise ValueError('MFA unavailable')
     if enrollment and (user.mfa_secret or (config.DEMO_MODE and user.is_demo)):
         raise ValueError('Use a personal account for enrollment')

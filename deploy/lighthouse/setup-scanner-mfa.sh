@@ -21,8 +21,10 @@ p.write_text('\n'.join(lines)+'\n'+'\n'.join(f'{k} {v}' for k,v in settings.item
 import base64, secrets, grp
 p=Path('/opt/mamatch/.env')
 lines=p.read_text().splitlines()
-settings={'MAMATCH_CLAMD_SOCKET':'/run/clamav/clamd.ctl', 'MAMATCH_CLAMAV_GID':str(grp.getgrnam('clamav').gr_gid),
-          'MAMATCH_MFA_REQUIRED':'true'}
+settings={'MAMATCH_CLAMD_SOCKET':'/run/clamav/clamd.ctl', 'MAMATCH_CLAMAV_GID':str(grp.getgrnam('clamav').gr_gid)}
+for name in ('MAMATCH_MFA_ENABLED', 'MAMATCH_MFA_REQUIRED'):
+    if not any(line.startswith(name+'=') for line in lines):
+        settings[name]='false'
 if not any(line.startswith('MAMATCH_MFA_ENCRYPTION_KEY=') and line.split('=',1)[1] for line in lines):
     settings['MAMATCH_MFA_ENCRYPTION_KEY']=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
 lines=[line for line in lines if line.split('=',1)[0] not in settings]

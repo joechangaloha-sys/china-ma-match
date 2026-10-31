@@ -34,6 +34,8 @@ SECURE_COOKIES = os.environ.get("MAMATCH_SECURE_COOKIES", "").lower() in ("1", "
 
 
 def validate_runtime() -> None:
+    if MFA_REQUIRED and not MFA_ENABLED:
+        raise RuntimeError("MFA required policy needs the feature enabled")
     if MFA_REQUIRED:
         from cryptography.fernet import Fernet
         try:
@@ -59,3 +61,6 @@ MFA_ENCRYPTION_KEY = os.environ.get('MAMATCH_MFA_ENCRYPTION_KEY', '')
 MFA_REQUIRED = os.environ.get('MAMATCH_MFA_REQUIRED', '').lower() in ('1', 'true', 'yes')
 CLAMD_SOCKET = os.environ.get('MAMATCH_CLAMD_SOCKET', '')
 CLAMD_DATABASE_DIR = os.environ.get('MAMATCH_CLAMD_DATABASE_DIR', '/var/lib/clamav')
+
+# Prepared by default; explicit activation is required before exposing MFA routes.
+MFA_ENABLED = os.environ.get("MAMATCH_MFA_ENABLED", "").lower() in ("1", "true", "yes")

@@ -1,5 +1,10 @@
 # Personal-account MFA
 
+Current decision (31 October 2026): Joe wants MFA prepared but not live. Tencent sets both
+`MAMATCH_MFA_ENABLED=false` and `MAMATCH_MFA_REQUIRED=false`. MFA/activation routes return 404,
+navigation links are hidden and no personal account/email/enrollment is needed. The scanner remains live.
+Enable both flags only after a new activation instruction. Preserve the encryption key meanwhile.
+
 `MAMATCH_MFA_REQUIRED=true` requires password plus authenticator enrollment/verification before a
 non-demo account receives any business session. Existing sessions without the second factor are
 rejected. Password-only enrollment challenges are limited to five minutes and cannot open business

@@ -10,6 +10,7 @@ from mamatch.models import MfaChallenge, User
 
 @pytest.fixture
 def personal(seeded, monkeypatch):
+    monkeypatch.setattr(config, 'MFA_ENABLED', True)
     monkeypatch.setattr(config, 'MFA_ENCRYPTION_KEY', Fernet.generate_key().decode())
     return auth.create_user(seeded, email='personal@example.test', password='test-password-long', role='deal_manager')
 

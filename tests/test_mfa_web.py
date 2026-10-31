@@ -12,6 +12,7 @@ from test_web import app, client, DM, BrowserClient
 @pytest.fixture
 def policy(app, db_url, monkeypatch):
     monkeypatch.setattr(config, 'MFA_REQUIRED', True)
+    monkeypatch.setattr(config, 'MFA_ENABLED', True)
     monkeypatch.setattr(config, 'MFA_ENCRYPTION_KEY', Fernet.generate_key().decode())
     # Shared seed exemptions exist only inside an explicit fictional-data demo.
     monkeypatch.setattr(config, 'DEMO_MODE', False)
@@ -70,3 +71,13 @@ def test_required_policy_also_gates_public_registration(policy):
     c.post('/en/register', data={'email':'new-buyer@example.test','password':'buyer-long-password','name':'Buyer','consent':'1'})
     assert c.cookies.get('mm_mfa') and not c.cookies.get('mm_session')
     assert c.get('/buyer', follow_redirects=False).status_code == 303
+
+
+def test_staged_mfa_has_no_live_routes_or_navigation(app, monkeypatch):
+    monkeypatch.setattr(config, 'MFA_ENABLED', False)
+    c = client(app, DM)
+    for path in ['/account/mfa','/mfa/challenge','/account/activate/unused']:
+        assert c.get(path).status_code == 404
+    assert c.post('/account/mfa/enroll',data={'password':'unused'}).status_code == 404
+    for path in ['/en/internal/readiness','/zh/account/sessions']:
+        assert '/account/mfa' not in c.get(path).text

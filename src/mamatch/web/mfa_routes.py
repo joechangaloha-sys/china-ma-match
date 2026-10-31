@@ -1,6 +1,6 @@
 """MFA bootstrap is a limited challenge, never an authenticated business session."""
 import io
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -10,7 +10,12 @@ from .. import auth, config, mfa
 from ..models import AccountInvite, User
 from .common import COOKIE, back, current_user, get_session, render
 
-router = APIRouter()
+def feature_enabled():
+    if not config.MFA_ENABLED:
+        raise HTTPException(404, 'Not found')
+
+
+router = APIRouter(dependencies=[Depends(feature_enabled)])
 
 
 def page(request, name, user=None, **ctx):

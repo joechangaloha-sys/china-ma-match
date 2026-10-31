@@ -14,7 +14,7 @@ queue shows their status and lets a deal manager run a configured local scanner.
 cannot release files; source hashes are checked again at use. Tencent uses a local ClamAV daemon with automatic signature updates; unavailable or stale scans keep files quarantined. See [operating notes](docs/UPLOAD_SECURITY.md).
 Sessions expire after thirty idle minutes or twelve hours; **Session security** can sign out every
 session belonging to the current account. Existing sessions require a fresh login after this upgrade.
-Personal-account MFA is required on Tencent; shared fictional demo accounts remain separate. See [MFA setup](docs/MFA.md). External signing and VDR integration remain deferred.
+MFA is prepared but disabled on Tencent at Joe’s request; no personal email or device enrollment is needed now. See [MFA setup](docs/MFA.md). External signing and VDR integration remain deferred.
 
 ## NDA/VDR workflow with connections deferred (31 Oct 2026)
 

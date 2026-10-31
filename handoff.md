@@ -8,6 +8,16 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## MFA prepared but not live — 31 October 2026
+
+Joe: "got it. set it up but no need to make it live. so i don't ned to send an email".
+No email, invitation, personal account or phone enrollment is needed now. Keep MFA code prepared,
+but set MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false on Tencent. The feature switch hides
+links and disables all enrollment/challenge/activation routes. Existing enrolled users must never be
+downgraded to password-only access; confirmed live enrollment count is zero. Local scanner stays active.
+199 offline tests pass. Branch kimi/mfa-staged is cumulative over #15; do not merge older PRs independently.
+Enable MFA only after a new explicit activation instruction. No merge authorised for this task.
+
 ## Local scanner and personal MFA — 31 October 2026
 
 PR: https://github.com/joechangaloha-sys/china-ma-match/pull/15 (unmerged).
