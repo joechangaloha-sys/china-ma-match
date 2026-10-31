@@ -32,7 +32,7 @@ def test_listed_target_cannot_send_offers_even_when_paid(seeded):
     assert not plans.seller_outreach(kiln)
 
 
-def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
+def test_publish_requires_approved_teaser_and_card_is_coarse(seeded, clean_file):
     from mamatch.models import AdviserFirm
 
     t = Target(firm=seeded.scalar(select(AdviserFirm)), code_name="Project New", legal_name="新公司", city="嘉兴市",
@@ -49,6 +49,7 @@ def test_publish_requires_approved_teaser_and_card_is_coarse(seeded):
     t.seller_user_id = owner.id
     from mamatch.models import Document
     source = Document(target_id=t.id, kind='other', filename='fixture.txt', stored_path='/not-served', sha256='fixture-sha')
+    clean_file(source)
     seeded.add(source); seeded.flush()
     for path, _ in release.assertions(tz.body):
         release.review_claim(tz, path, 'Test source, page 1; checked against fixture', reviewer, source.id)

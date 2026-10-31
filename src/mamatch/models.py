@@ -331,6 +331,7 @@ class UserSession(Base):
     __tablename__ = "user_sessions"
 
     token: Mapped[str] = mapped_column(String(64), primary_key=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -353,6 +354,9 @@ class Document(Base):
     size: Mapped[int] = mapped_column(Integer, default=0)
     sha256: Mapped[str] = mapped_column(String(64), default="")
     text: Mapped[str] = mapped_column(Text, default="")  # "[page N]" markers between pages
+    security_status: Mapped[str] = mapped_column(String(20), default="quarantined")
+    scanned_sha256: Mapped[str] = mapped_column(String(64), default="")
+    scanned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     in_data_room: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 

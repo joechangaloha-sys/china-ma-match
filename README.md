@@ -7,6 +7,16 @@ a secure operating system for a concierge pilot, not an open marketplace.
 
 Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
+## Upload quarantine and pilot access (31 Oct 2026)
+
+Uploads are quarantined before any parsing, review or download. The private **Upload security**
+queue shows their status and lets a deal manager run a configured local scanner. Missing/failed scans
+cannot release files; source hashes are checked again at use. The Tencent review environment has no
+scanner configured, so uploads remain blocked. See [operating notes](docs/UPLOAD_SECURITY.md).
+Sessions expire after thirty idle minutes or twelve hours; **Session security** can sign out every
+session belonging to the current account. Existing sessions require a fresh login after this upgrade.
+External signing and VDR integration remain deferred; MFA remains outstanding for real-data use.
+
 ## NDA/VDR workflow with connections deferred (31 Oct 2026)
 
 Joe explicitly deferred external setup. The full checklist is in `docs/INTEGRATIONS_TODO.md` and on the

@@ -69,6 +69,7 @@ class LanguageEditions:
 
 app = FastAPI(title="mamatch", lifespan=lifespan)
 app.add_middleware(security.RequestProtection)
+app.add_middleware(security.BodyLimit)
 app.add_middleware(demo.DemoAccess)
 app.add_middleware(LanguageEditions)  # outermost: strips /zh or /en before the demo gate
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")

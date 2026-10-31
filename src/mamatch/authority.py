@@ -100,7 +100,8 @@ def verify_authority(session: Session, target: Target, by: User, note: str = "")
     """Deal manager checked the owner's stated role against the business licence and ownership documents."""
     if target.owner_confirmed_at is None:
         raise ValueError("The owner has not confirmed their authority yet.")
-    kinds = {d.kind for d in target.documents}
+    from . import upload_security
+    kinds = {d.kind for d in target.documents if upload_security.usable(d)}
     if not {"license", "ownership"} <= kinds:
         raise ValueError("Upload the business licence and the ownership documents before verifying authority.")
     now = datetime.now(timezone.utc)

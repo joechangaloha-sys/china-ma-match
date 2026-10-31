@@ -51,10 +51,11 @@ def test_access_scope_changes_invalidate_owner_approval(flow, changed):
     assert handoff.access_status(h) == 'blocked'
 
 
-def test_expiry_and_revocation_block_actual_demo_documents(flow, seeded):
+def test_expiry_and_revocation_block_actual_demo_documents(flow, seeded, clean_file):
     match, h, manager, seller = flow
     h = activate(flow)
     doc = Document(target_id=match.target_id, kind='other', filename='fixture.txt', stored_path='/not-served', in_data_room=True)
+    clean_file(doc)
     seeded.add(doc); seeded.flush()
     assert offers.can_view_document(match, doc)
     h.access_expires_at = handoff.now() - timedelta(seconds=1)

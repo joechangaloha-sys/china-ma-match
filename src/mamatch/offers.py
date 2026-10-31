@@ -200,8 +200,8 @@ def grant_data_room(session: Session, match: Match, user) -> None:
 
 
 def can_view_document(match: Match | None, doc) -> bool:
-    from . import handoff
-    return (match is not None and match.target.is_example and doc.in_data_room and match.target_id == doc.target_id
+    from . import handoff, upload_security
+    return (match is not None and upload_security.usable(doc) and match.target.is_example and doc.in_data_room and match.target_id == doc.target_id
             and match.stage in AFTER_NDA and handoff.access_active(handoff.get(match)))
 
 

@@ -16,7 +16,8 @@ from sqlalchemy.orm import Session
 from .models import AuditEvent, User, UserSession
 
 ROLES = {"seller": "卖方 Seller", "buyer": "买方 Buyer", "adviser": "顾问 Adviser", "deal_manager": "交易经理 Deal manager"}
-SESSION_DAYS = 14
+SESSION_HOURS = 12
+IDLE_MINUTES = 30
 _N, _R, _P = 2**14, 8, 1
 
 
@@ -71,7 +72,7 @@ def authenticate(session: Session, email: str, password: str) -> User | None:
 def start_session(session: Session, user: User) -> str:
     token = secrets.token_urlsafe(32)
     now = datetime.now(timezone.utc)
-    session.add(UserSession(token=token, user_id=user.id, expires_at=now + timedelta(days=SESSION_DAYS)))
+    session.add(UserSession(token=token, user_id=user.id, last_seen_at=now, expires_at=now + timedelta(hours=SESSION_HOURS)))
     user.last_login_at = now
     log(session, user, "sign_in")
     return token
@@ -84,8 +85,13 @@ def user_for_token(session: Session, token: str | None) -> User | None:
     if us is None:
         return None
     expires = us.expires_at if us.expires_at.tzinfo else us.expires_at.replace(tzinfo=timezone.utc)
-    if expires < datetime.now(timezone.utc) or not us.user.active:
+    now = datetime.now(timezone.utc)
+    seen = us.last_seen_at
+    if seen and not seen.tzinfo:
+        seen = seen.replace(tzinfo=timezone.utc)
+    if expires <= now or not seen or now - seen >= timedelta(minutes=IDLE_MINUTES) or not us.user.active:
         return None
+    us.last_seen_at = now
     return us.user
 
 
@@ -100,3 +106,9 @@ def log(session: Session, user: User | None, action: str, *, target_id: int | No
                     document_id=document_id, detail=detail)
     session.add(ev)
     return ev
+
+
+def end_all_sessions(session, user):
+    from sqlalchemy import delete
+    session.execute(delete(UserSession).where(UserSession.user_id == user.id))
+    log(session, user, 'sign_out_all')

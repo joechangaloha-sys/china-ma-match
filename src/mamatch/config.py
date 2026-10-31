@@ -44,3 +44,6 @@ def validate_runtime() -> None:
 
 # Public address used in share links and QR codes (the static export sets the GitHub Pages address).
 PUBLIC_BASE_URL = os.environ.get("MAMATCH_PUBLIC_URL", "")
+
+# Optional trusted, locally installed ClamAV executable. No scanner means no file release.
+CLAMSCAN_PATH = os.environ.get("MAMATCH_CLAMSCAN_PATH", "")
