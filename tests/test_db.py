@@ -39,3 +39,23 @@ def test_legacy_files_quarantined_and_sessions_invalidated(tmp_path):
         doc = s.get(Document, 1)
         assert doc.security_status == 'quarantined' and doc.scanned_sha256 == ''
         assert s.get(UserSession, 'old-token').last_seen_at is None
+
+
+def test_boolean_migration_uses_portable_sql_literals():
+    from mamatch.models import Base
+    from sqlalchemy.dialects import postgresql
+    statements = []
+    class Inspector:
+        def get_columns(self, name):
+            return [{'name':c.name} for c in Base.metadata.tables[name].columns if c.name != 'is_demo']
+    class Connection:
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def execute(self,statement):statements.append(str(statement))
+    class Engine:
+        dialect = postgresql.dialect()
+        def begin(self):return Connection()
+    from unittest.mock import patch
+    with patch('sqlalchemy.inspect',return_value=Inspector()):
+        db._add_missing_columns(Engine())
+    assert 'ALTER TABLE users ADD COLUMN is_demo BOOLEAN DEFAULT FALSE' in statements
