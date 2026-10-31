@@ -24,6 +24,12 @@ are not configured. Private env/MFA encryption key must be retained separately. 
 219 local tests pass. The first 25-table restore rehearsal passed; a deployment-stdin handling
 issue stopped before the live migration, leaving live data untouched. Child command input is now explicitly
 isolated and regression-tested; the guarded deployment is repeated after that fix. Deploy branch for review and record actual Tencent rehearsal evidence below.
+Verified Tencent deployment 0c5dada: live schema 0002_audit_index, healthy bilingual/demo routes,
+scanner ready and both MFA flags false. Pre-upgrade 25-table and post-upgrade 26-table restore rehearsals
+passed, including row/digest comparison after the clone migration. Latest verified bundle:
+/opt/mamatch/backups/20261031T104705Z-c72a8483 (0700 directory, 0600 artifacts), no scratch DBs left.
+Current live uploads count is zero; synthetic file-byte recovery passed using the same exporter.
+Live business counts remain 3 targets, 40 buyers, 13 matches, 0 documents, 2 handoffs and 6 handoff events.
 Do not merge without a new instruction. Keep MAMATCH_MFA_ENABLED=false and MAMATCH_MFA_REQUIRED=false.
 
 ## Internal language cleanup — 31 October 2026
