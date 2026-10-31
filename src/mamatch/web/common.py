@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import upload_security, auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid, release, handoff, connections
+from .. import internal_display, upload_security, auth, authority, config, datacheck, db, dealstatus, documents, fees, i18n, offers, pipeline, reid, release, handoff, connections
 from ..editorial import mainland
 from ..models import AdviserFirm, Buyer, Match, Target, User
 from ..taxonomy import (BUYER_KINDS, DEAL_TYPES, FOUNDER_TRANSITION, FUNDING_EVIDENCE, INVENTORY, MACRO_REGIONS, PAYMENT_TERMS,
@@ -96,6 +96,9 @@ def render(request: Request, name: str, user: User | None = None, **ctx) -> HTML
            "T": lambda zh, en: mainland(zh) if lang == "zh" else en,
            "L": lambda s: mainland(i18n.tr(s, lang)) if lang == "zh" else i18n.tr(s, lang),
            "V": lambda s: mainland(i18n.val(s, lang)) if lang == "zh" else i18n.val(s, lang),
+           "D": lambda s: internal_display.record(s, lang),
+           "audit_action": lambda s: internal_display.audit_action(s, lang),
+           "audit_details": lambda s: internal_display.audit_details(s, lang),
            "R": lambda s: i18n.reason(s, lang), **ctx}
     response = templates.TemplateResponse(request, name, ctx)
     from .security import csrf_token

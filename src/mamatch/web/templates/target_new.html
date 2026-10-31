@@ -1,46 +1,46 @@
 {% extends "base.html" %}
-{% block title %}新建项目{% endblock %}
+{% block title %}{{ T("新建项目","New mandate") }}{% endblock %}
 {% block body %}
 <div>
-  <h1>新建卖方项目 New seller</h1>
-  <p class="sub">识别信息只保存在本工作台，用于检查简介是否泄露身份 · Identifying details stay here and are used to check teasers for leaks</p>
+  <h1>{{ T("新建卖方项目","New seller") }}</h1>
+  <p class="sub">{{ T("识别信息只保存在本工作台，用于检查简介是否泄露身份","Identifying details stay here and are used to check teasers for leaks") }}</p>
 </div>
 
-<form class="panel grid" method="post" action="{{ I }}/targets">
-  <label>项目代号 Code name <input id="code_name" name="code_name" required placeholder="Project Jade"></label>
-  <label>行业 Sector
-    <select id="sector" name="sector" required>{% for code in SECTORS %}<option value="{{ code }}">{{ sector_label(code) }}</option>{% endfor %}</select></label>
-  <label>省份 Province
-    <select id="province" name="province" required>{% for p in REGIONS %}<option>{{ p }}</option>{% endfor %}</select></label>
-  <label>交易方式 Deal type
-    <select id="deal_type" name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>出售原因 Reason
-    <select id="sale_reason" name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
+<form class="panel grid" method="post" action="{{ P }}{{ I }}/targets">
+  <label>{{ T("项目代号","Code name") }} <input id="code_name" name="code_name" required placeholder="{{ T('示例项目代号','Example mandate code') }}"></label>
+  <label>{{ T("行业","Sector") }}
+    <select id="sector" name="sector" required>{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
+  <label>{{ T("省份","Province") }}
+    <select id="province" name="province" required>{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
+  <label>{{ T("交易方式","Deal type") }}
+    <select id="deal_type" name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("出售原因","Reason") }}
+    <select id="sale_reason" name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
 
   <fieldset class="wide private">
-    <legend>识别信息（不对外）Identifying details, never shared</legend>
-    <label>公司全称 Legal name <input id="legal_name" name="legal_name" required></label>
-    <label>简称 Short name <input id="short_name" name="short_name"></label>
-    <label>实控人 Owner <input id="owner_name" name="owner_name"></label>
-    <label>城市 City <input id="city" name="city"></label>
-    <label>统一社会信用代码 USCC <input id="uscc" name="uscc" maxlength="18"></label>
-    <label>品牌（逗号分隔）Brands <input id="brands" name="brands"></label>
+    <legend>{{ T("识别信息（不对外）","Identifying details, never shared") }}</legend>
+    <label>{{ T("公司全称","Legal name") }} <input id="legal_name" name="legal_name" required></label>
+    <label>{{ T("简称","Short name") }} <input id="short_name" name="short_name"></label>
+    <label>{{ T("实控人","Owner") }} <input id="owner_name" name="owner_name"></label>
+    <label>{{ T("城市","City") }} <input id="city" name="city"></label>
+    <label>{{ T("统一社会信用代码","USCC") }} <input id="uscc" name="uscc" maxlength="18"></label>
+    <label>{{ T("品牌（逗号分隔）","Brands") }} <input id="brands" name="brands"></label>
   </fieldset>
 
-  <label>成立年份 Founded <input id="founded_year" name="founded_year" inputmode="numeric"></label>
-  <label>员工人数 Employees <input id="employees" name="employees" inputmode="numeric"></label>
-  <label>营业收入 Revenue (RMB m) <input id="revenue" name="revenue" inputmode="decimal"></label>
-  <label>净利润 Net profit (RMB m) <input id="net_profit" name="net_profit" inputmode="decimal"></label>
-  <label>期望价格 Asking price (RMB m) <input id="asking_value" name="asking_value" inputmode="decimal"></label>
-  <label>出让股权 Stake offered (%) <input id="stake_pct" name="stake_pct" inputmode="decimal" placeholder="100"></label>
-  <label>付款方式 Payment <select id="payment_terms" name="payment_terms"><option value="">—</option>{% for k, v in PAYMENT_TERMS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>创始人交接 Founder <select id="founder_transition" name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>保留员工 Keep all staff <select id="keep_employees" name="keep_employees"><option value="">—</option><option value="yes">是 Yes</option><option value="no">可协商 Negotiable</option></select></label>
-  <label>期望时间 Timing <select id="timing" name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>经营场所 Premises <select id="premises" name="premises"><option value="">—</option>{% for k, v in PREMISES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>资质 Permits <select id="permits" name="permits"><option value="">—</option>{% for k, v in PERMITS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label>存货 Inventory <select id="inventory" name="inventory"><option value="">—</option>{% for k, v in INVENTORY.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label>
-  <label class="wide">访谈记录 Intake notes <textarea id="description" name="description" placeholder="业务、客户、优势、卖方诉求……"></textarea></label>
-  <div class="wide"><button>保存 Save target</button></div>
+  <label>{{ T("成立年份","Founded") }} <input id="founded_year" name="founded_year" inputmode="numeric"></label>
+  <label>{{ T("员工人数","Employees") }} <input id="employees" name="employees" inputmode="numeric"></label>
+  <label>{{ T("营业收入（人民币百万元）","Revenue (RMB m)") }} <input id="revenue" name="revenue" inputmode="decimal"></label>
+  <label>{{ T("净利润（人民币百万元）","Net profit (RMB m)") }} <input id="net_profit" name="net_profit" inputmode="decimal"></label>
+  <label>{{ T("期望价格（人民币百万元）","Asking price (RMB m)") }} <input id="asking_value" name="asking_value" inputmode="decimal"></label>
+  <label>{{ T("出让股权","Stake offered (%)") }} <input id="stake_pct" name="stake_pct" inputmode="decimal" placeholder="100"></label>
+  <label>{{ T("付款方式","Payment") }} <select id="payment_terms" name="payment_terms"><option value="">—</option>{% for k, v in PAYMENT_TERMS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("创始人交接","Founder") }} <select id="founder_transition" name="founder_transition"><option value="">—</option>{% for k, v in FOUNDER_TRANSITION.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("保留员工","Keep all staff") }} <select id="keep_employees" name="keep_employees"><option value="">—</option><option value="yes">{{ T("是","Yes") }}</option><option value="no">{{ T("可协商","Negotiable") }}</option></select></label>
+  <label>{{ T("期望时间","Timing") }} <select id="timing" name="timing"><option value="">—</option>{% for k, v in TIMING.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("经营场所","Premises") }} <select id="premises" name="premises"><option value="">—</option>{% for k, v in PREMISES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("资质","Permits") }} <select id="permits" name="permits"><option value="">—</option>{% for k, v in PERMITS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T("存货","Inventory") }} <select id="inventory" name="inventory"><option value="">—</option>{% for k, v in INVENTORY.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label class="wide">{{ T("访谈记录","Intake notes") }} <textarea id="description" name="description" placeholder="{{ T('业务、客户、竞争优势及卖方诉求……','Business, customers, strengths and seller objectives…') }}"></textarea></label>
+  <div class="wide"><button>{{ T("保存","Save target") }}</button></div>
 </form>
 {% endblock %}

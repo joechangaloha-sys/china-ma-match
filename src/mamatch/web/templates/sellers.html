@@ -1,50 +1,50 @@
 {% extends "base.html" %}
-{% block title %}卖方项目{% endblock %}
+{% block title %}{{ T("卖方项目","Mandates") }}{% endblock %}
 {% block body %}
 <div>
-  <h1>{{ firm.name }}</h1>
-  <p class="sub">卖方委托、待办与咨询 · Seller mandates, queues and inquiries</p>
+  <h1>{{ D(firm.name) }}</h1>
+  <p class="sub">{{ T("卖方委托、待办与咨询","Seller mandates, queues and inquiries") }}</p>
 </div>
 
 <section class="panel">
-  <h2>卖方项目 Mandates <a class="small" href="{{ I }}/targets/new">+ 新建 New</a></h2>
+  <h2>{{ T("卖方项目","Mandates") }} <a class="small" href="{{ P }}{{ I }}/targets/new">{{ T("+ 新建","New") }}</a></h2>
   <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table>
-    <tr><th>代号 Code name</th><th>状态 Status</th><th>行业 Sector</th><th>省份</th><th class="num">期望价格 Ask (RMB m)</th><th>公开 Visibility</th><th>资料 Docs</th><th class="num">进行中 Active</th></tr>
+    <tr><th>{{ T("代号","Code name") }}</th><th>{{ T("状态","Status") }}</th><th>{{ T("行业","Sector") }}</th><th>{{ T("省份","Province") }}</th><th class="num">{{ T("期望价格","Ask (RMB m)") }}</th><th>{{ T("公开","Visibility") }}</th><th>{{ T("资料","Docs") }}</th><th class="num">{{ T("进行中","Active") }}</th></tr>
     {% for t in targets %}
     <tr>
-      <td><a href="{{ I }}/targets/{{ t.id }}">{{ t.code_name }}</a> {% if t.is_example %}<span class="pill example">示例</span>{% endif %}
-        {% if t.contact_info and not t.seller_user_id %}<br><span class="small muted">网站登记 web intake · {{ t.contact_name }} {{ t.contact_info }}</span>{% endif %}
-        {% if t.submitted_by == 'adviser' %}<br><span class="pill">顾问代登记 via adviser: {{ t.adviser_firm }}</span>{% endif %}</td>
-      <td><span class="pill status-{{ t.status }}">{{ STATUSES[t.status] }}</span></td>
-      <td class="small">{{ sector_label(t.sector) }}</td>
-      <td>{{ t.province }}</td>
+      <td><a href="{{ P }}{{ I }}/targets/{{ t.id }}">{{ V(t.code_name) }}</a> {% if t.is_example %}<span class="pill example">{{ T("示例","Example") }}</span>{% endif %}
+        {% if t.contact_info and not t.seller_user_id %}<br><span class="small muted">{{ T("网站登记","web intake") }} {{ t.contact_name }} {{ t.contact_info }}</span>{% endif %}
+        {% if t.submitted_by == 'adviser' %}<br><span class="pill">{{ T("顾问代登记","via adviser") }} {{ D(t.adviser_firm) }}</span>{% endif %}</td>
+      <td><span class="pill status-{{ t.status }}">{{ L(STATUSES[t.status]) }}</span></td>
+      <td class="small">{{ L(sector_label(t.sector)) }}</td>
+      <td>{{ V(t.province) }}</td>
       <td class="num">{{ '%g'|format(t.asking_value) if t.asking_value is not none else '—' }}</td>
-      <td>{% if t.visibility == 'listed' %}<a class="pill listed" href="/opportunities/{{ t.id }}" target="_blank" rel="noopener">公开 Listed ↗</a>{% else %}<span class="pill">不公开 Private</span>{% endif %}</td>
+      <td>{% if t.visibility == 'listed' %}<a class="pill listed" href="/opportunities/{{ t.id }}" target="_blank" rel="noopener">{{ T("公开","Listed ↗") }}</a>{% else %}<span class="pill">{{ T("不公开","Private") }}</span>{% endif %}</td>
       <td class="num">{{ t.documents|length }}</td>
       <td class="num">{{ t.matches|rejectattr('stage', 'in', ['suggested', 'dropped', 'closed'])|list|length }}</td>
     </tr>
     {% else %}
-    <tr><td colspan="8" class="empty">还没有项目。No mandates yet.</td></tr>
+    <tr><td colspan="8" class="empty">{{ T("还没有项目。","No mandates yet.") }}</td></tr>
     {% endfor %}
   </table></div>
 </section>
 
 <div class="cols">
 <section class="panel">
-  <h2>待审核买方 Buyers to verify</h2>
+  <h2>{{ T("待审核买方","Buyers to verify") }}</h2>
   {% for b in to_verify %}
-  <div class="row"><b>{{ b.name }}</b> <span class="small muted">{{ BUYER_KINDS.get(b.kind, b.kind) }} · {{ FUNDING_EVIDENCE.get(b.funding_evidence, '无资金证明 no funding evidence') }}</span></div>
-  {% else %}<p class="empty">没有。None.</p>{% endfor %}
-  <p class="small"><a href="{{ I }}/buyers">买方审核 Buyer checks →</a></p>
+  <div class="row"><b>{{ D(b.name) }}</b> <span class="small muted">{{ L(BUYER_KINDS.get(b.kind, b.kind)) }} · {{ L(FUNDING_EVIDENCE.get(b.funding_evidence, '无资金证明 no funding evidence')) }}</span></div>
+  {% else %}<p class="empty">{{ T("没有。","None.") }}</p>{% endfor %}
+  <p class="small"><a href="{{ P }}{{ I }}/buyers">{{ T("买方审核","Buyer checks →") }}</a></p>
 </section>
 <section class="panel">
-  <h2>引荐申请与网站咨询 Introduction requests and web inquiries</h2>
+  <h2>{{ T("引荐申请与网站咨询","Introduction requests and web inquiries") }}</h2>
   {% for m in inquiries %}
-  <div class="row"><a href="{{ I }}/targets/{{ m.target_id }}#matches">{{ m.target.code_name }}</a> ← <b>{{ m.buyer.name }}</b>
-    <span class="muted small">{{ '已认证 verified' if m.buyer.status == 'verified' else '未认证 not verified' }} · {{ m.buyer.contact_name }} {{ m.buyer.contact_email }}</span>
-    {% if nda_available(m) %}<span class="pill">已批准，待签保密协议 approved, awaiting NDA</span>{% endif %}
-    {% if m.events %}<div class="small muted">{{ m.events[-1].note }}</div>{% endif %}</div>
-  {% else %}<p class="empty">暂无。None yet.</p>{% endfor %}
+  <div class="row"><a href="{{ P }}{{ I }}/targets/{{ m.target_id }}#matches">{{ V(m.target.code_name) }}</a> ← <b>{{ D(m.buyer.name) }}</b>
+    <span class="muted small">{{ L('已认证 verified' if m.buyer.status == 'verified' else '未认证 not verified') }} · {{ m.buyer.contact_name }} {{ m.buyer.contact_email }}</span>
+    {% if nda_available(m) %}<span class="pill">{{ T("已批准，待签保密协议","approved, awaiting NDA") }}</span>{% endif %}
+    {% if m.events %}<div class="small muted">{{ D(m.events[-1].note) }}</div>{% endif %}</div>
+  {% else %}<p class="empty">{{ T("暂无。","None yet.") }}</p>{% endfor %}
 </section>
 </div>
 {% endblock %}

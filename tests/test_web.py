@@ -818,3 +818,53 @@ def test_request_size_limit_checks_declared_and_chunked_body(app, monkeypatch):
         yield b'a' * 60
         yield b'b' * 60
     assert c.post('/zh/login', content=chunks()).status_code == 413
+
+
+@pytest.mark.parametrize('route', ['/internal/dashboard','/internal/advisers','/internal/buyers','/internal',
+                                 '/internal/pipeline','/internal/targets/new','/internal/audit'])
+def test_internal_editions_localise_interface_copy(app, route):
+    from html.parser import HTMLParser
+    class Visible(HTMLParser):
+        def __init__(self):super().__init__();self.skip=0;self.parts=[]
+        def handle_starttag(self,tag,attrs):
+            if tag in ('script','style'):self.skip+=1
+        def handle_endtag(self,tag):
+            if tag in ('script','style'):self.skip-=1
+        def handle_data(self,data):
+            if not self.skip:self.parts.append(data)
+    c=client(app,DM)
+    for lang in ('en','zh'):
+        r=c.get('/'+lang+route);assert r.status_code==200
+        p=Visible();p.feed(r.text);text=' '.join(p.parts)
+        if lang=='en':assert not re.search('[一-鿿]',text),text
+        else:
+            # Registry, licence and contact identifiers are immutable data, not English UI copy.
+            text=re.sub(r'[\w.+-]+@[\w.-]+','',text)
+            text=re.sub(r'\b(?:EX-CPA-[\d]+|[0-9]{8}MA[0-9]+)\b','',text)
+            assert not re.search('[A-Za-z]',text),text
+        assert '/zh/en/' not in r.text and '/en/zh/' not in r.text
+
+
+def test_internal_documents_only_show_selected_edition(app):
+    c=client(app,DM)
+    for lang, own,other in [('en','English version','中文版本'),('zh','中文版本','English version')]:
+        page=c.get('/'+lang+'/internal/targets/1')
+        assert own in page.text and other not in page.text
+        assert '/en/en/' not in page.text and '/zh/zh/' not in page.text
+
+
+def test_language_display_does_not_rewrite_mandate_records(app,db_url):
+    def snapshot():
+        with db.session_scope(db_url) as s:
+            t=s.get(Target,1)
+            return (t.code_name,t.legal_name,t.description,[(x.id,x.body,x.version) for x in t.teasers])
+    before=snapshot()
+    c=client(app,DM)
+    assert c.get('/en/internal/targets/1').status_code==200
+    assert c.get('/zh/internal/targets/1').status_code==200
+    assert snapshot()==before
+
+
+def test_english_region_label_preserves_submitted_value(app):
+    page=client(app,DM).get('/en/internal/targets/new').text
+    assert '<option value="浙江">Zhejiang</option>' in page

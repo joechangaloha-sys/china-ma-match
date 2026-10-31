@@ -1,26 +1,26 @@
 {% extends "base.html" %}
-{% block title %}进度{% endblock %}
+{% block title %}{{ T("进度","Pipeline") }}{% endblock %}
 {% block body %}
 <div>
-  <h1>卖方交易进度（内部）Seller deal pipeline <span class="pill internal-pill">内部 INTERNAL</span></h1>
-  <p class="sub">每个卖方项目与买方的推进情况，仅供顾问内部使用 · Where each seller's deals stand with each buyer. For the adviser only.</p>
+  <h1>{{ T("卖方交易进度（内部）","Seller deal pipeline") }} <span class="pill internal-pill">{{ T("内部","INTERNAL") }}</span></h1>
+  <p class="sub">{{ T("每个卖方项目与买方的推进情况，仅供顾问内部使用","Where each seller's deals stand with each buyer. For the adviser only.") }}</p>
 </div>
 <section class="board">
   {% for stage, matches in by_stage.items() %}
   <div class="panel">
-    <h2>{{ STAGES[stage] }} <span class="muted small">{{ matches|length }}</span></h2>
+    <h2>{{ L(STAGES[stage]) }} <span class="muted small">{{ matches|length }}</span></h2>
     {% for m in matches %}
     <div class="card">
-      <div><a href="{{ I }}/targets/{{ m.target_id }}">{{ m.target.code_name }}</a> → {{ m.buyer.name }}</div>
-      <div class="small muted">{{ '公开咨询 inquiry' if m.channel == 'listing' else '推介 outreach' }}{% if m.name_disclosed_at %} · 已披露名称{% endif %}</div>
-      {% if m.events %}<div class="small muted">{{ m.events[-1].created_at.strftime('%Y-%m-%d') }}{% if m.events[-1].note %} · {{ m.events[-1].note }}{% endif %}</div>{% endif %}
+      <div><a href="{{ P }}{{ I }}/targets/{{ m.target_id }}">{{ V(m.target.code_name) }}</a> → {{ D(m.buyer.name) }}</div>
+      <div class="small muted">{{ L('公开咨询 inquiry' if m.channel == 'listing' else '推介 outreach') }}{% if m.name_disclosed_at %} · 已披露名称{% endif %}</div>
+      {% if m.events %}<div class="small muted">{{ m.events[-1].created_at.strftime('%Y-%m-%d') }}{% if m.events[-1].note %} · {{ D(m.events[-1].note) }}{% endif %}</div>{% endif %}
       {% set nexts = allowed_next(m.stage) %}
       {% if nexts %}
-      <form class="inline small" method="post" action="{{ I }}/matches/{{ m.id }}/move">
-        <input type="hidden" name="back" value="{{ I }}/pipeline">
-        <select name="to_stage" aria-label="Next stage">{% for n in nexts if n != 'teaser_sent' %}<option value="{{ n }}">{{ STAGES[n] }}</option>{% endfor %}</select>
-        <input name="note" placeholder="备注 note" aria-label="Note">
-        <button class="ghost">更新</button>
+      <form class="inline small" method="post" action="{{ P }}{{ I }}/matches/{{ m.id }}/move">
+        <input type="hidden" name="back" value="{{ P }}{{ I }}/pipeline">
+        <select name="to_stage" aria-label="{{ T('下一阶段','Next stage') }}">{% for n in nexts if n != 'teaser_sent' %}<option value="{{ n }}">{{ L(STAGES[n]) }}</option>{% endfor %}</select>
+        <input name="note" placeholder="{{ T('备注','note') }}" aria-label="{{ T('备注','Note') }}">
+        <button class="ghost">{{ T("更新","Update") }}</button>
       </form>
       {% endif %}
     </div>

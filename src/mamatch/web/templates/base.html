@@ -28,7 +28,7 @@
   <a class="brand" href="{{ P }}/">{{ T('中小企业并购平台', 'mamatch') }} <small>{{ T('中小企业并购', 'Small-company M&A') }}</small></a>
   {% endif %}
   <span class="who">
-    {% if user %}<span class="small muted">{% if not omit_profile_name %}{{ user.name or user.email }} · {% endif %}{{ L(ROLES[user.role]) }}</span>
+    {% if user %}<span class="small muted">{% if not omit_profile_name and portal != 'internal' %}{{ user.name or user.email }} · {% endif %}{{ L(ROLES[user.role]) }}</span>
       {% if portal not in ('seller', 'buyer', 'adviser', 'internal') %}<a class="small" href="{{ P ~ {'seller': '/seller', 'buyer': '/buyer', 'adviser': '/adviser', 'deal_manager': I}[user.role] }}">{{ T('我的页面', 'My page') }}</a>{% endif %}
       <form method="post" action="{{ P }}/logout" class="inline"><button class="ghost small">{{ T('退出', 'Sign out') }}</button></form>
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
