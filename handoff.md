@@ -295,3 +295,15 @@ isolation checks. Chinese teaser, edition links, export script and passcode gate
 verified. Existing counts remain 3 targets / 40 buyers / 13 matches / 0 documents /
 2 handoffs / 6 events. Internal operating screens are not covered by this public/demo
 language audit; stored identities and technical identifiers are preserved.
+
+## Institutional palette — 31 October 2026
+
+Joe requested a Wall Street style closer to Japan IR Index. The original mamatch
+house palette and Japan IR Index's current last-loaded navy edition were inspected.
+Shared `web/static/palette.css` now supplies navy/white/cool-grey tokens to the main
+site and Kimi teaser. Removed bright yellow, sky-blue and olive fills, gold accents,
+oversized condensed headings and pill controls. Serif headings and restrained navy
+actions align the teaser and document demos. `docs/VISUAL_STYLE.md` records the guide.
+147 tests pass; browser checks confirm matching navy headers/white paper, white text
+on primary actions, working teaser checks and no horizontal overflow at 375px.
+Branch `kimi/institutional-palette` includes prior review work; no merge to main.
