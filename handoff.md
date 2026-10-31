@@ -346,3 +346,6 @@ Information memo, NDA and LOI editions share one template and now a dedicated
 parity checks for all nine stages in both languages, including controls and print
 styles. Chinese download filenames identify the document type. No document terms,
 workflow permissions or provider connections changed. Branch: `kimi/document-layout-parity`.
+
+Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/9.
+All 150 tests passed, including all nine English/Chinese structural parity pairs.
