@@ -19,7 +19,7 @@
 
 <section class="panel">
   <h2>{{ T('客户项目', 'Client mandates') }}</h2>
-  <div class="tbl"><table>
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table>
     <tr><th>{{ T('项目', 'Mandate') }}</th><th>{{ T('授权', 'Authorisation') }}</th><th>{{ T('出售权限', 'Authority to sell') }}</th><th>{{ T('状态', 'Status') }}</th></tr>
     {% for a in auths %}
     <tr><td>{% if a.status != 'revoked' %}<a href="{{ P }}/adviser/{{ a.target_id }}">{{ a.target.code_name }}</a>{% else %}{{ a.target.code_name }}{% endif %}</td>

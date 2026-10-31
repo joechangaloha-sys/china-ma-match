@@ -22,7 +22,7 @@
 
 <section class="panel" id="documents">
   <h2>{{ T('资料清单', 'Document checklist') }}</h2>
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>{{ T('资料', 'Item') }}</th><th>{{ T('已上传', 'Uploaded') }}</th></tr>
     {% for k, label in CHECKLIST.items() %}
     {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}

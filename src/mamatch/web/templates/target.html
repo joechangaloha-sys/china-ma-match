@@ -64,7 +64,7 @@
 {% if reports %}
 <section class="panel" id="reports">
   <h2>问题报告 Reports from visitors <span class="pill high">{{ reports|length }}</span></h2>
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>日期 Date</th><th>类型 Reason</th><th>说明 Message</th><th>联系方式 Contact</th></tr>
     {% for r in reports %}
     <tr><td>{{ r.created_at.strftime('%Y-%m-%d') }}</td><td>{{ REPORT_REASONS.get(r.detail.reason, r.detail.reason) }}</td>
@@ -102,7 +102,7 @@
     <input type="file" name="file" required aria-label="File"><button class="ghost">上传 Upload</button>
   </form>
   {% if t.documents %}
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>文件 File</th><th>类型 Type</th><th>上传 Uploaded</th><th>文字 Text</th><th></th></tr>
     {% for d in t.documents %}
     <tr><td><a href="{{ I }}/documents/{{ d.id }}">{{ d.filename }}</a></td><td>{{ CHECKLIST[d.kind] }}</td>
@@ -117,7 +117,7 @@
   {% set proposed = t.fields|selectattr('status', 'equalto', 'proposed')|list %}
   {% if proposed %}
   <h3>待审核数字 Figures to review ({{ proposed|length }})</h3>
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>期间 Period</th><th>项目 Field</th><th class="num">RMB m</th><th>来源 Source</th><th>置信度</th><th></th></tr>
     {% for f in proposed %}
     <tr><td>{{ f.period }}</td><td>{{ FIN_FIELDS[f.field] }}</td>
@@ -206,7 +206,7 @@
 {% if rows %}
 <section class="panel" id="offers">
   <h2>意向报价 Indicative offers</h2>
-  <div class="tbl"><table class="small compare">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small compare">
     <tr><th>买方 Buyer</th><th class="num">报价 Price (RMB m)</th><th class="num">股权 Stake</th><th class="num">折合100% Implied 100%</th>
       <th class="num">交割支付 At closing</th><th>对价 Consideration</th><th>资金 Financing</th><th>尽调 Diligence</th><th>交割 Closing</th><th>条件 Conditions</th></tr>
     {% for m, o in rows %}
@@ -224,7 +224,7 @@
   <h2>买方匹配与引荐 Matches and introductions <span class="muted small">先硬性条件，再 AI 排序，最后由您判断 · Hard gates, then ranking, then your judgement</span></h2>
   <form class="inline" method="post" action="{{ I }}/targets/{{ t.id }}/match"><button>匹配已认证买方 Find matching buyers</button></form>
   {% if t.matches %}
-  <div class="tbl"><table>
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table>
     <tr><th>买方 Buyer</th><th>理由 Why</th><th>来源</th><th>阶段 Stage</th><th>决定 Decision</th></tr>
     {% for m in t.matches %}
     <tr>

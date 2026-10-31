@@ -45,7 +45,7 @@
   <h2>{{ T('资料清单', 'Document checklist') }}</h2>
   <p class="small muted">{{ T('文件只有您和交易经理可见；只有您同意的买方，在签署保密协议后才能查看标记为“资料室”的文件。',
                              'Only you and your deal manager can see these. A buyer sees data-room documents only after an NDA and your consent.') }}</p>
-  <div class="tbl"><table class="small">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small">
     <tr><th>{{ T('资料', 'Item') }}</th><th>{{ T('已上传', 'Uploaded') }}</th></tr>
     {% for k, label in CHECKLIST.items() %}
     {% set docs = t.documents|selectattr('kind', 'equalto', k)|list %}
@@ -122,7 +122,7 @@
   {% endif %}
   {% if sent %}
   <h3>{{ T('进展', 'Progress') }}</h3>
-  <div class="tbl"><table>
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table>
     <tr><th>{{ T('买方', 'Buyer') }}</th><th>{{ T('阶段', 'Stage') }}</th><th></th></tr>
     {% for m in sent %}
     <tr>
@@ -150,7 +150,7 @@
   <h2>{{ T('意向报价比较', 'Offers side by side') }}</h2>
   <p class="small muted">{{ T('各买方按统一格式提交的非约束性报价，按对应100%股权的价值从高到低排列。价格不是唯一标准：付款方式、资金来源、员工和交接安排同样重要。',
                              'Non-binding offers in one format, highest implied value for 100% first. Price is not everything: payment terms, financing, staff and handover matter too.') }}</p>
-  <div class="tbl"><table class="small compare">
+  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small compare">
     <tr><th>{{ T('买方', 'Buyer') }}</th><th class="num">{{ T('报价（百万元）', 'Price (RMB m)') }}</th><th class="num">{{ T('股权', 'Stake') }}</th>
       <th class="num">{{ T('折合100%', 'Implied 100%') }}</th><th class="num">{{ T('交割时支付', 'Paid at closing') }}</th>
       <th>{{ T('对价', 'Consideration') }}</th><th>{{ T('资金', 'Financing') }}</th><th>{{ T('尽调', 'Diligence') }}</th>

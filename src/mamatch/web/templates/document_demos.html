@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ T(doc.title[0],doc.title[1]) if kind else T('交易文件演示','Deal document demos') }}{% endblock %}
 {% block body %}
-<link rel="stylesheet" href="/static/document-demos.css?v=layout-parity-20261031">
+<link rel="stylesheet" href="/static/document-demos.css?v=layout-parity-20261031-responsive">
 <header class="doc-demo-head">
 <p class="doc-demo-kicker">{{ T('柳树项目', 'Project Willow') }} / {{ T('虚构交易资料','Fictional deal materials') }}</p>
 <h1>{{ T(doc.title[0],doc.title[1]) if kind else T('交易文件演示','Deal document demos') }}</h1>
@@ -11,6 +11,7 @@
 <a class="button ghost" href="{{ P }}/teaser-demo/">{{ T('项目简介','Teaser') }}</a>
 {% for key,item in documents.items() %}<a class="button {{ 'ghost' if key != kind }}" href="{{ P }}/document-demos/{{ key }}" {% if key == kind %}aria-current="page"{% endif %}>{{ T(item.title[0],item.title[1]) }}</a>{% endfor %}
 </nav>
+{% if kind %}<a class="doc-demo-controls-jump" href="#document-controls">{{ T('跳至文档操作','Jump to document controls') }} ↓</a>{% endif %}
 </header>
 {% if not kind %}
 <div class="doc-demo-grid">
@@ -28,7 +29,7 @@
 {% for zh,en,body_zh,body_en in doc.sections %}<section><h2>{{ '%02d'|format(loop.index) }} / {{ T(zh,en) }}</h2><p>{{ T(body_zh,body_en) }}</p></section>{% endfor %}
 <section><h2>{{ T('审核及版本记录','Review and version record') }}</h2><p>{{ T('资料来源：原型项目简介及新增的示例交易假设。所涉数据及交易主体均为虚构。','Source: Kimi’s fictional Project Willow teaser and added illustrative transaction assumptions. No figures or parties represent a real transaction.') }}</p><p>{{ T('未取得证据审核、当事人确认或法律审核。下载与打印仅导出本演示，不创建签名、批准、报价或访问权。','Evidence review, party approval and legal review are outstanding. Downloading or printing exports this preview only; it creates no signature, approval, offer or access grant.') }}</p></section>
 </article>
-<aside>
+<aside id="document-controls">
 <section class="doc-demo-card"><p class="doc-demo-kicker">{{ T('演示控制台','Demo controls') }}</p><h2>{{ T('预览流程阶段','Change stage') }}</h2><p>{{ T('仅改变此页预览，不修改交易记录。','Changes this preview only, without changing deal records.') }}</p><div class="doc-demo-tabs">{% for key,zh,en in doc.states %}<a class="button {{ 'ghost' if key != state }}" href="{{ P }}/{{ 'teaser-demo/' if kind == 'teaser' else 'document-demos/' ~ kind }}?state={{ key }}" {% if key == state %}aria-current="page"{% endif %}>{{ T(zh,en) }}</a>{% endfor %}</div><p class="doc-demo-banner">{{ T(doc.notes[state][0],doc.notes[state][1]) }}</p>
 <div class="doc-demo-controls"><button type="button" id="document-download">{{ T('下载演示文本','Download demo text') }}</button><button type="button" id="document-print">{{ T('打印或另存文档','Print / save PDF') }}</button></div><p class="doc-demo-status" id="document-status" role="status"></p></section>
 <section class="panel" style="margin-top:1rem"><h2>{{ T('正式使用前','Before real use') }}</h2><ul><li>{{ T('核验资料、主体及签署权限','Verify evidence, parties and signing authority') }}</li><li>{{ T('取得当前版本的审核及卖方确认','Obtain review and seller approval for the current version') }}</li><li>{{ T('法律审核及确定交易条款','Complete legal review and settle deal terms') }}</li><li>{{ T('接入电子签署与外部资料室（已列为待办）','Connect e-signature and external VDR (deferred to-dos)') }}</li></ul><a href="{{ P }}/handoff">{{ T('查看签署与资料室演示','View signing and VDR demonstration') }} →</a></section>
