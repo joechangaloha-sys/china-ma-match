@@ -113,9 +113,10 @@ READINESS = {
 def readiness(target: Target) -> list[str]:
     """What a buyer can get to next. A listed company always has the platform NDA."""
     ready = ["nda"]
-    if any(m.status == "approved" for m in target.memos):
+    from . import release
+    if any(release.ready(m) for m in target.memos):
         ready.append("memo")
-    if any(d.in_data_room for d in target.documents):
+    if target.is_example and any(d.in_data_room for d in target.documents):
         ready.append("data_room")
     return ready
 
@@ -199,7 +200,10 @@ def public_board(session: Session, sector: str = "", macro: str = "", **filters)
     """Everything sellers chose to list, newest first, narrowed by `search_filter`. Anyone can browse it."""
     rows = session.scalars(select(Target).where(Target.visibility == "listed")
                            .order_by(Target.listed_at.desc())).all()
-    return [t for t in rows if matches(t, sector=sector, macro=macro, **filters)]
+    from . import release
+    return [t for t in rows if t.authority_verified_at is not None
+            and any(release.ready(tz) for tz in t.teasers)
+            and matches(t, sector=sector, macro=macro, **filters)]
 
 
 def _years(target: Target) -> int | None:
@@ -267,13 +271,13 @@ def card_profitable(t: Target) -> bool | None:
 
 
 def publish(target: Target) -> None:
-    from . import dealstatus
+    from . import dealstatus, release
 
     if target.status in dealstatus.TERMINAL or target.status == "matching_paused":
         raise ValueError("This mandate is not in market.")
     if not any(t.status == "approved" for t in target.teasers):
         raise ValueError("Approve a low-risk teaser before listing this target.")
-    if not any(t.seller_approved_at for t in target.teasers):
+    if not any(release.seller_current(t) for t in target.teasers):
         raise ValueError("The seller must approve the teaser before it is published.")
     if target.authority_verified_at is None:
         raise ValueError("卖方的出售权限尚未核验 The owner's authority to sell has not been verified yet.")

@@ -1,8 +1,8 @@
 {% macro listing_card(c, link='', full=false) %}
 <div class="card listing">
-  <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ c.code_name }}</a>{% else %}{{ c.code_name }}{% endif %}</b>
+  <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ V(c.code_name) }}</a>{% else %}{{ V(c.code_name) }}{% endif %}</b>
     <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span>
-    {% set prod = (c.products_zh if lang == 'zh' else c.products_en) or c.products_zh or c.products_en %}
+    {% set prod = c.products_zh if lang == 'zh' else c.products_en %}
     {% if prod %}<span class="small">{{ prod }}</span>{% endif %}</div>
   <div class="ask">
     <div><span class="muted small">{{ T('期望价格', 'Asking price') }}</span><b>{{ V(c.price_band) }}</b></div>

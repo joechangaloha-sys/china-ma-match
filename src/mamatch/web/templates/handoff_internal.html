@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}NDA / VDR handoff{% endblock %}
+{% block body %}
+<p><a href="{{ I }}/targets/{{ m.target_id }}#matches">← {{ m.target.code_name }}</a> · <a href="{{ I }}/connections">{{ T('外部连接待办', 'Connection to-dos') }}</a></p>
+<h1>{{ T('保密协议与资料室交接', 'NDA and VDR handoff') }}</h1>
+<p class="sub">{{ m.target.code_name }} · {{ m.buyer.name }} · {{ T('仅内部可见', 'Internal only') }}</p>
+<section class="panel">
+<p class="flash">{{ T('外部服务已推迟。仅可操作虚构项目；无真实签署、邀请或访问权限。', 'External connections are deferred. Fictional mandates only; no real signing, invitations or access permissions.') }}</p>
+{% if not m.target.is_example %}<p>{{ T('真实项目暂不可继续此流程。', 'This workflow remains blocked for real mandates.') }}</p>
+{% else %}
+{% if not h or not handoff.current(h) or h.nda_state == 'cancelled' %}<form method="post" action="{{ I }}/handoffs/{{ m.id }}/start"><button>{{ T('创建虚构签署请求', 'Prepare mock signing request') }}</button></form>{% endif %}
+{% if h %}
+<h2>{{ L(NDA_LABELS[h.nda_state]) }}</h2>
+<p class="small">{{ T('协议版本', 'NDA version') }} {{ h.template_version }} · {{ h.provider }}</p>
+{% if h.nda_state == 'requested' %}<div class="actions">
+<form method="post" action="{{ I }}/handoffs/{{ m.id }}/complete"><button>{{ T('模拟收到签署完成凭据', 'Simulate signing completion receipt') }}</button></form>
+<form method="post" action="{{ I }}/handoffs/{{ m.id }}/cancel"><button class="ghost">{{ T('取消模拟请求', 'Cancel mock request') }}</button></form></div>{% endif %}
+{% if handoff.signature_complete(h) %}
+<form class="grid" method="post" action="{{ I }}/handoffs/{{ m.id }}/review">
+<label class="wide">{{ T('模拟签署权限审核说明（仅内部）', 'Fictional signatory-authority review (internal only)') }}<textarea name="reference" required maxlength="2000">{{ h.authority_review_ref }}</textarea></label>
+<div class="wide"><button class="ghost">{{ T('记录人工审核', 'Record human review') }}</button></div></form>
+{% endif %}
+{% if handoff.evidence_reviewed(h) %}<form class="inline" method="post" action="{{ I }}/handoffs/{{ m.id }}/request-access"><label>{{ T('只读访问天数', 'Read-only access days') }}<input name="days" type="number" min="1" max="30" value="7" required></label><button class="ghost">{{ T('申请访问并等待卖方批准', 'Request access; await seller approval') }}</button></form>{% endif %}
+<h2>{{ L(HANDOFF_ACCESS_LABELS[handoff.access_status(h)]) }}</h2>
+<p class="small">{{ h.room_ref or '—' }} · {{ h.access_role }} · {{ T('到期', 'Expires') }} {{ h.access_expires_at or '—' }}</p>
+{% if h.vdr_state == 'awaiting_seller' %}<p>{{ T('请由项目所属卖方在其卖方页面批准此范围。交易经理不能代替卖方批准。', 'The mandate owner must approve this scope in their seller portal. A deal manager cannot substitute for seller approval.') }}</p>{% endif %}
+{% if h.vdr_state == 'pending_provisioning' %}<form method="post" action="{{ I }}/handoffs/{{ m.id }}/provision"><button>{{ T('确认模拟资料室已开通', 'Confirm mock room provisioning') }}</button></form>{% endif %}
+{% if h.vdr_state == 'active' %}<div class="actions"><form method="post" action="{{ I }}/handoffs/{{ m.id }}/revoke"><button class="ghost">{{ T('撤销模拟访问', 'Revoke mock access') }}</button></form><form method="post" action="{{ I }}/handoffs/{{ m.id }}/expire"><button class="ghost">{{ T('模拟时间到期', 'Simulate access expiry') }}</button></form></div>{% endif %}
+<details><summary>{{ T('版本、凭据与批准记录', 'Version, receipt and approval records') }}</summary><dl class="small hash"><dt>Envelope</dt><dd>{{ h.envelope_id }}</dd><dt>Template SHA-256</dt><dd class="hash">{{ h.template_hash }}</dd><dt>Signed mock document SHA-256</dt><dd class="hash">{{ h.signed_document_hash or '—' }}</dd><dt>Evidence</dt><dd>{{ h.evidence_ref or '—' }}</dd><dt>Authority review</dt><dd>{{ h.reviewed_by or '—' }} · {{ h.reviewed_at or '—' }}</dd><dt>Seller approval</dt><dd>{{ h.seller_approved_by or '—' }} · {{ h.seller_approved_at or '—' }}</dd></dl></details>
+{% endif %}{% endif %}
+</section>
+<section class="panel"><h2>{{ T('交接历史', 'Handoff history') }}</h2><div class="tbl"><table class="small"><tr><th>{{ T('时间', 'Time') }}</th><th>{{ T('事件', 'Event') }}</th><th>{{ T('操作人', 'Actor') }}</th></tr>{% for event in history %}<tr><td>{{ event.created_at }}</td><td>{{ event.action }}</td><td>{{ event.actor }}</td></tr>{% else %}<tr><td colspan="3">{{ T('尚无记录', 'No events yet') }}</td></tr>{% endfor %}</table></div></section>
+{% endblock %}
