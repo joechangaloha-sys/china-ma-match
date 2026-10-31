@@ -7,6 +7,32 @@ a secure operating system for a concierge pilot, not an open marketplace.
 
 Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
+## NDA/VDR workflow with connections deferred (31 Oct 2026)
+
+Joe explicitly deferred external setup. The full checklist is in `docs/INTEGRATIONS_TODO.md` and on the
+signed-in deal-manager page `/internal/connections`. No provider account, credentials, subscription,
+real signing process or external room invitation has been created.
+
+The dynamic demo adds `/zh/handoff` and `/en/handoff`: nine isolated scenarios covering pending signing,
+missing authority review, seller approval, pending provisioning, active/expired/revoked access, changed
+parties and cancellation of an unsigned request. These use the same offline state machine as the private
+portals and do not change saved mandates.
+
+Open **NDA / VDR handoff** from a buyer row in an internal mandate to operate the persisted mock workflow:
+prepare a request → simulate a receipt → review signatory authority → request view-only access for 1–30 days
+→ mandate owner approves room/role/expiry in their seller portal → deal manager confirms mock provisioning.
+Owner approval alone does not activate access. Owner/deal manager may revoke it; the demo can also advance
+past expiry. Every action is recorded in `handoff_events`; duplicate/stale signing receipts cannot revive a
+grant. Changed parties, agreement version, room, role or expiry invalidate the corresponding approvals.
+Completed NDA evidence is retained; cancellation applies to unsigned requests, not executed contracts.
+
+The mock adapter is rejected for real mandates. It produces only labelled illustrative hashes/references,
+not signed PDFs, legal signatures or real VDR acknowledgements. Buyer demo downloads and memo display
+require an active, current, unexpired grant on every request, replacing the old timestamp-only control.
+Real provider callbacks, reconciliation, provider-side expiry/revocation, durable evidence archives and
+external room connections remain deferred. A future real adapter must not treat mock state as production
+proof or treat a local flag as confirmation that an external provider has revoked access.
+
 ## Evidence and approval controls (31 Oct 2026)
 
 The dynamic fictional demo includes `/zh/workflow` and `/en/workflow`: a read-only walkthrough of

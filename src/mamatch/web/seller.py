@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import auth, authority, documents, listing, offers, plans, teaser, infomemo
+from .. import auth, authority, documents, listing, offers, plans, teaser, infomemo, handoff
 from ..models import MandateAuthorization, Match, Target, Teaser, InfoMemo, User
 from .common import anon_buyer, back, get_lang, get_session, not_found, num, render, require, save_data, seller_reasons
 
@@ -133,7 +133,13 @@ def seller_match_action(target_id: int, match_id: int, action: str, user: User =
             msg = "已跳过 Buyer skipped"
         elif action == "grant":
             offers.grant_data_room(s, m, user)
-            msg = "已开放资料室 Data room opened to this buyer"
+            msg = "已批准，等待交易经理确认开通 Approved; awaiting deal-manager provisioning"
+        elif action == "revoke":
+            h = handoff.get(m)
+            if h is None:
+                raise ValueError('No access request exists.')
+            handoff.revoke(h, user)
+            msg = "演示访问已撤销 Demo access revoked"
         elif action == "disclose":
             offers.disclose_names(m)
             msg = "已互相披露名称 Names disclosed to each other"
