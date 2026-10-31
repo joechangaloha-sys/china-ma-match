@@ -34,9 +34,11 @@
     {% else %}<a href="{{ P }}/login">{{ T('登录', 'Sign in') }}</a>{% endif %}
   </span>
   <nav>
+  {% if user %}<a href="{{ P }}/account/sessions">{{ T("登录安全", "Session security") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/document-demos">{{ T("交易文件演示", "Document demos: IM / NDA / LOI") }}</a>{% endif %}
   {% if cfg.DEMO_MODE %}<a href="{{ P }}/teaser-demo/" class="{{ 'on' if request.url.path.startswith('/teaser-demo') }}">{{ T('项目简介演示', 'Teaser demo') }}</a>{% endif %}
   {% if portal == 'internal' %}
+    <a href="{{ P }}{{ I }}/upload-security">{{ T("文件安全检查", "Upload security") }}</a>
     <a href="{{ P }}{{ I }}/readiness">{{ T('项目准备情况', 'Deal readiness') }}</a>
     <a href="{{ P }}{{ I }}" class="{{ 'on' if request.url.path == I or request.url.path.startswith(I + '/targets') }}">{{ T('卖方项目', 'Mandates') }}</a>
     <a href="{{ P }}{{ I }}/buyers" class="{{ 'on' if request.url.path.startswith(I + '/buyers') }}">{{ T('买方审核', 'Buyer checks') }}</a>

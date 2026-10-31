@@ -8,13 +8,15 @@ analyst confirms it.
 
 import hashlib
 import re
+import subprocess
+import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from . import auth, config, llm
+from . import auth, config, llm, upload_security
 from .datacheck import FIN_FIELDS, years
 from .models import Document, ExtractedField, Target, User
 
@@ -62,30 +64,63 @@ def save(session: Session, target: Target, user: User | None, kind: str, filenam
         raise ValueError("文件为空 The file is empty.")
     if len(data) > MAX_BYTES:
         raise ValueError("文件超过20MB File is larger than 20 MB.")
+    upload_security.validate(ext, data)
     if kind not in CHECKLIST:
         kind = "other"
-    folder = upload_dir() / str(target.id)
+    folder = upload_dir() / "quarantine" / str(target.id)
     folder.mkdir(parents=True, exist_ok=True)
     stored = folder / f"{uuid.uuid4().hex}{ext}"
-    stored.write_bytes(data)
+    with stored.open("xb") as stream:
+        stream.write(data)
+    stored.chmod(0o600)
     safe_name = re.sub(r"[^\w.\-（）()一-鿿 ]", "_", Path(filename).name)[:200]
     doc = Document(target_id=target.id, uploaded_by=user.id if user else None, kind=kind, filename=safe_name,
                    stored_path=str(stored), content_type=ALLOWED[ext], size=len(data),
-                   sha256=hashlib.sha256(data).hexdigest(), text=read_text(stored))
+                   sha256=hashlib.sha256(data).hexdigest(), text="", security_status="quarantined")
     target.documents.append(doc)
     session.flush()
     auth.log(session, user, "document_upload", target_id=target.id, document_id=doc.id, filename=safe_name)
     return doc
 
 
+def scan(session, doc, user):
+    if user.role != 'deal_manager' or not user.active:
+        raise ValueError('Only an active deal manager may scan files.')
+    doc.text = ''
+    doc.in_data_room = False
+    doc.security_status = 'quarantined'
+    doc.scanned_sha256 = ''
+    try:
+        doc.security_status = upload_security.scan(doc)
+    except (ValueError, OSError):
+        doc.security_status = 'error'
+    doc.scanned_at = datetime.now(timezone.utc)
+    if doc.security_status == 'clean':
+        doc.scanned_sha256 = doc.sha256
+        doc.text = read_text(Path(doc.stored_path))[:200000]
+    auth.log(session, user, 'document_scan', target_id=doc.target_id, document_id=doc.id,
+             status=doc.security_status, sha256=doc.sha256)
+    return doc.security_status
+
+
 def read_text(path: Path) -> str:
+    # Parsers run outside the web process with bounded CPU, address space and output.
+    try:
+        result = subprocess.run([sys.executable, '-m', 'mamatch.extract_worker', str(path)],
+                                capture_output=True, timeout=15, check=False)
+        return result.stdout.decode('utf-8')[:200000] if result.returncode == 0 else ''
+    except (OSError, subprocess.TimeoutExpired, UnicodeDecodeError):
+        return ''
+
+
+def _read_text_untrusted(path: Path) -> str:
     ext = path.suffix.lower()
     try:
         if ext == ".pdf":
             from pypdf import PdfReader
 
             pages = PdfReader(str(path)).pages
-            return "\n".join(f"[page {i}]\n{(p.extract_text() or '').strip()}" for i, p in enumerate(pages, 1))
+            return "\n".join(f"[page {i}]\n{(p.extract_text() or '').strip()}" for i, p in enumerate(pages[:100], 1))
         if ext in (".csv", ".txt"):
             raw = path.read_bytes()
             for enc in ("utf-8-sig", "gb18030"):
@@ -99,7 +134,7 @@ def read_text(path: Path) -> str:
 
 
 def missing_kinds(target: Target) -> list[str]:
-    have = {d.kind for d in target.documents}
+    have = {d.kind for d in target.documents if upload_security.usable(d)}
     return [k for k in REQUIRED if k not in have]
 
 
@@ -185,6 +220,8 @@ EXTRACT_SYSTEM = (
 
 
 def extract(session: Session, doc: Document, user: User | None = None, use_llm: bool = True) -> list[ExtractedField]:
+    if not upload_security.usable(doc):
+        raise ValueError("文件尚未通过安全检查 File has not passed security checks.")
     rows, method = None, "rules"
     if use_llm and doc.text:
         result = llm.structured(EXTRACT_SYSTEM, f"<document name=\"{doc.filename}\">\n{doc.text[:60000]}\n</document>",
@@ -211,6 +248,8 @@ def extract(session: Session, doc: Document, user: User | None = None, use_llm: 
 
 def review(session: Session, f: ExtractedField, user: User, confirm: bool, value: float | None = None) -> None:
     """Analyst decision. Confirming (optionally with a corrected value) writes it into the financials."""
+    if confirm and not upload_security.usable(f.document):
+        raise ValueError("文件尚未通过安全检查 File has not passed security checks.")
     corrected = value is not None and abs(value - f.value) > 1e-9
     f.status = "confirmed" if confirm else "rejected"
     f.reviewed_by, f.reviewed_at = user.id, datetime.now(timezone.utc)
