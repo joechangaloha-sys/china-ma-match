@@ -27,7 +27,7 @@ Keep this file current after each meaningful piece of work (Joe's standing instr
   MFA, malware scanning, formal migrations, legal/data review; opt-in alerts/WeChat. The website labels
   these limits. Do not present this as a production launch or mainland CloudBase deployment.
 - Validation: full offline test suite, legacy SQLite upgrade preserving 3 targets/40 buyers/13 matches,
-  browser scenario checks and 375px layouts. PR: pending creation. Existing seller FAQ PR #1 is included
+  browser scenario checks and 375px layouts. PR: https://github.com/joechangaloha-sys/china-ma-match/pull/2. All 117 offline tests pass. Existing seller FAQ PR #1 is included
   in this branch; no merge or direct main push. Deploy only the pushed review branch to Lighthouse.
 
 ## Seller-page success-fee FAQ (31 Oct 2026, branch kimi/seller-fee-faq)
