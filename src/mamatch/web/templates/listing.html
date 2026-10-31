@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import listing_card with context %}
-{% block title %}{{ t.code_name }}{% endblock %}
+{% block title %}{{ V(t.code_name) }}{% endblock %}
 {% block body %}
 <p class="small"><a href="{{ P }}/opportunities">← {{ T('全部项目', 'All opportunities') }}</a></p>
 <div class="cols">
@@ -29,7 +29,7 @@
     <h2>{{ T('类似项目', 'Similar opportunities') }}</h2>
     <ul class="similar">
       {% for o in similar %}{% set sc = similar_cards[o.id] %}
-      <li><a href="{{ P }}/opportunities/{{ o.id }}">{{ o.code_name }}</a>
+      <li><a href="{{ P }}/opportunities/{{ o.id }}">{{ V(o.code_name) }}</a>
         <span class="muted small">{{ V(sc.region) }} · {{ sc.sector_zh if lang == 'zh' else sc.sector_en }} · {{ T('期望价格', 'Asking') }} {{ V(sc.price_band) }}</span></li>
       {% endfor %}
     </ul>

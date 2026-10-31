@@ -79,14 +79,15 @@ def _share(request: Request, t: Target) -> dict:
     import segno
 
     from .. import config, i18n
+    from ..editorial import mainland
 
     lang = get_lang(request)
     base = (config.PUBLIC_BASE_URL or str(request.base_url)).rstrip("/")
     url = f"{base}/{lang}/opportunities/{t.id}/"
     c = listing.card(t)
-    product = (t.products_zh if lang == "zh" else t.products_en) or t.products_zh or t.products_en
+    product = t.products_zh if lang == "zh" else t.products_en
     if lang == "zh":
-        text = (f"【出售项目】{t.code_name}：{i18n.val(c['region'], 'zh')}{c['sector_zh']}企业，"
+        text = (f"【出售项目】{mainland(t.code_name)}：{i18n.val(c['region'], 'zh')}{c['sector_zh']}企业，"
                 f"营业收入{c['revenue_band']}，期望价格{i18n.tr(c['price_band'], 'zh')}。"
                 + (f"{product}。" if product else "") + f"把企业交棒给对的人：{url}")
     else:
