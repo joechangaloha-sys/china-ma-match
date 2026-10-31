@@ -195,3 +195,30 @@ def test_public_and_document_editions_do_not_mix_language(demo_app):
     assert '息税折旧及摊销前利润' in c.get('/zh/document-demos/info-memo').text
     assert c.get('/zh/teaser-demo/?state=preview').status_code == 200
     assert c.get('/zh/teaser-demo/?state=unknown').status_code == 400
+
+
+def test_chinese_teaser_uses_the_same_shell_controls_and_styles_as_english(demo_app):
+    from html.parser import HTMLParser
+    class Structure(HTMLParser):
+        def __init__(self): super().__init__(); self.items = []
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            self.items.append((tag, attrs.get('class'), attrs.get('id'), attrs.get('role')))
+    c = TestClient(demo_app)
+    c.post('/demo-access', data={'access_key': PASSCODE})
+    pages = [c.get(f'/{lang}/teaser-demo/') for lang in ('en', 'zh')]
+    structures = []
+    for page in pages:
+        assert page.status_code == 200
+        parser = Structure(); parser.feed(page.text); structures.append(parser.items)
+        assert 'assets/styles.css?v=navy-20261031' in page.text
+        for control in ('render-button','checks-button','copy-button','download-button','print-button',
+                        'tab-button-checks','tab-button-data','tab-button-rules'):
+            assert f'id="{control}"' in page.text
+    assert structures[0] == structures[1]
+    assert 'href="/en/teaser-demo/"' in pages[1].text
+    assert 'href="/zh/document-demos"' in pages[1].text
+    data = [c.get(f'/{lang}/teaser-demo/data/teaser.json').json() for lang in ('en','zh')]
+    for key in ('revenue_min','revenue_max','profit_min','profit_max','employee_count_min','site_count_max'):
+        assert data[0][key] == data[1][key]
+    assert data[1]['project_code'] == '柳树项目'

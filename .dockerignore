@@ -20,3 +20,4 @@ package.json
 # The standalone teaser's fictional JSON is a packaged application asset.
 !src/mamatch/web/teaser_demo/data
 !src/mamatch/web/teaser_demo/data/teaser.json
+!src/mamatch/web/teaser_demo/data/teaser_zh.json

@@ -314,3 +314,17 @@ Tencent deployed `5b3c75f`: shared palette verified on nine live English/Chinese
 home/teaser/document-demo views; new teaser CSS and favicon verified. Passcode gate
 remains active. Existing counts: 3 targets / 40 buyers / 13 matches / 0 documents /
 2 handoffs / 6 events.
+
+## Matching Chinese/English teaser layout — 31 October 2026
+
+The Chinese teaser now uses the canonical standalone teaser shell and the same
+CSS, JavaScript renderer, sidebar, actions, tabs and print layout as the English
+version. Removed the separate generic Chinese document preview. An explicit
+Chinese shell dictionary translates visible copy and accessibility labels; Chinese
+fictional data, dates, validation feedback and labelled JSON export are localised.
+Financial ranges and source-claim relationships remain the same in both editions.
+Chinese data is bundled explicitly in the Docker context and wheel.
+English: `/en/teaser-demo/`; Chinese: `/zh/teaser-demo/`.
+Checks compare shell and rendered-body structure, require Chinese-only rendered
+copy/export, preserve validation regressions and verify unchanged numeric values.
+Branch `kimi/chinese-teaser-layout` includes prior review work; no merge to main.
