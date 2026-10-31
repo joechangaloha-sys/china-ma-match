@@ -8,6 +8,21 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Deal-readiness review build — 31 October 2026
+
+PR: https://github.com/joechangaloha-sys/china-ma-match/pull/13 (unmerged).
+Added private `/zh/internal/readiness` and `/en/internal/readiness`, linked from internal navigation
+and mandate pages. Read-only snapshots use latest language-specific versions, existing evidence/source
+approval gates, verified buyers and current unexpired demo access. Links lead to actual review/handoff
+screens; no approval, disclosure, signature, invitation or access grant is created. Non-example mandates
+remain blocked pending external services. External connections remain deferred.
+Shared institutional layout and locale-preserving navigation; static export included.
+Validation: 156 offline tests pass, including role isolation, language purity, stale approvals,
+expired access and no-write checks. Laptop and phone layouts checked. Deploy review branch
+`kimi/deal-readiness` to Tencent; do not merge without Joe's review instruction.
+Recommended next work: secure upload validation/quarantine, then pilot access hardening;
+provider onboarding only when Joe resumes it.
+
 ## Main merged and Tencent deployment — 31 October 2026
 
 Joe explicitly instructed: "merge the new pages with main so the website will show all the changes".
