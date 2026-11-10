@@ -35,6 +35,7 @@ access to that repository (a GitHub connection or a token Joe provides); without
 - English and Chinese editions must have matching layouts and shared visual styling.
 - Use the Japan IR Index-inspired institutional Wall Street style: navy, white,
   cool greys, serif headlines, fine rules and restrained controls. Use the shared palette.
+- The company name "Easy Deal" is shown unchanged in both editions. Otherwise:
 - English pages are English-only and Chinese pages Chinese-only, including controls,
   notices, document content and downloads. Avoid cross-language fallback.
 - Chinese finance copy must use a formal mainland investment-banking register,

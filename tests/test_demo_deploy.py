@@ -187,6 +187,7 @@ def test_public_and_document_editions_do_not_mix_language(demo_app):
             assert r.status_code == 200
             parser = VisibleText(); parser.feed(r.text)
             text = re.sub(r'https?://\S+', '', ' '.join(parser.parts))
+            text = text.replace('Easy Deal', '')  # the company name is shown as is in both editions
             forbidden = r'[\u4e00-\u9fff]' if lang == 'en' else r'[A-Za-z]'
             assert not re.search(forbidden, text), (lang, path, re.findall(r'.{0,20}' + forbidden + r'.{0,20}', text))
     page = c.get('/zh/document-demos/loi').text

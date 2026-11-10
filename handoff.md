@@ -495,8 +495,9 @@ Browser checks confirm 44px phone actions and a working document-controls shortc
 ## Easy Deal rename (11 Nov 2026)
 
 Branch `claude/easy-deal-rebrand`. The English brand shown on the site, the teaser demo and the static-export
-title is now "Easy Deal" (was "mamatch" / "M&A Match"); the authenticator issuer label is "Easy Deal". The
-Chinese edition still shows 中小企业并购平台 pending Joe's choice of a Chinese name. The company domain is
+title is now "Easy Deal" (was "mamatch" / "M&A Match"); the authenticator issuer label is "Easy Deal". Joe chose to show
+"Easy Deal" unchanged on the Chinese edition too (the brand slot previously read 中小企业并购平台); it is the one
+Latin-script exception to the Chinese-only rule, and the monolingual tests allow exactly that name. The company domain is
 `easydeal.com.cn`; `deploy/lighthouse/install.sh` now takes it as an optional second argument, but no deployment
 has been switched (on 11 Nov the domain resolved to 82.157.169.23, not the Lighthouse demo server, and did not
 answer on ports 80/443). Not renamed: the repository, the `mamatch` package and command, `MAMATCH_*` settings,
