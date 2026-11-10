@@ -58,7 +58,7 @@ def challenge_page(request, s, failed=False):
     if item.purpose == 'enroll':
         try:
             import pyotp
-            uri = pyotp.TOTP(mfa.secret_for(item, user)).provisioning_uri(name=user.email, issuer_name='mamatch')
+            uri = pyotp.TOTP(mfa.secret_for(item, user)).provisioning_uri(name=user.email, issuer_name='Easy Deal')
             # Generated locally; no third-party QR endpoint ever receives the seed.
             qr = segno.make(uri).svg_data_uri(scale=4)
         except (ValueError, TypeError, InvalidToken):

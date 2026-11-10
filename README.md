@@ -1,4 +1,4 @@
-# china-ma-match (mamatch)
+# Easy Deal (china-ma-match)
 
 A curated, AI-assisted marketplace and deal workspace for selling and buying small private operating
 businesses, in Chinese and English. Pilot deals: about RMB 2–20m. It follows

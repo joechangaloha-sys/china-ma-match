@@ -139,7 +139,9 @@ Never run `docker compose down -v`: `-v` deletes the database and upload volumes
 This is a functional demonstration with HTTPS, not a production launch. The demo accounts are public fixtures;
 sign-in throttling, CSRF tokens, deal-manager MFA, malware scanning, monitored backups and legal review are not
 complete. Use fictional data only. The free `sslip.io` hostname is a temporary testing dependency, not a substitute
-for your own production domain.
+for your own production domain. The company domain is `easydeal.com.cn`: once its DNS A record points at this
+server, rerun `sudo bash install.sh SERVER_PUBLIC_IP easydeal.com.cn` and Caddy will obtain a certificate for it.
+Mainland hosting on that domain also needs the ICP filing to be complete.
 
 To stop future charges, disable auto-renewal and delete/release the Lighthouse instance when finished. Check the
 Billing Center afterward. Stopping containers alone does not stop Lighthouse subscription charges.

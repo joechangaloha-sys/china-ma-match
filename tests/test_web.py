@@ -552,7 +552,7 @@ def test_listing_share_panel(app, db_url):
     kiln = _get(db_url, Target, code_name="Project Kiln")
     page = client(app).get(f"/zh/opportunities/{kiln.id}").text
     assert "分享此项目" in page and "<svg" in page and "复制链接" in page
-    assert re.search(r"<title>窑炉项目 · 中小企业并购平台</title>", page)  # nothing leaked into the title
+    assert re.search(r"<title>窑炉项目 · Easy Deal</title>", page)  # nothing leaked into the title
     assert f"/zh/opportunities/{kiln.id}/" in page and "把企业交棒给对的人" in page
     for secret in (kiln.legal_name, kiln.short_name, kiln.owner_name, "无锡"):
         assert secret not in page
@@ -763,7 +763,7 @@ def test_readiness_is_private_monolingual_and_read_only(app,db_url):
             if not self.skip:self.parts.append(d)
     for lang in ('en','zh'):
         page=c.get(f'/{lang}/internal/readiness');assert page.status_code==200
-        p=Text();p.feed(page.text);text=' '.join(p.parts)
+        p=Text();p.feed(page.text);text=' '.join(p.parts).replace('Easy Deal','')
         assert not re.search(r'[\u4e00-\u9fff]' if lang=='en' else r'[A-Za-z]',text)
         assert f'/{lang}/internal/targets/' in page.text
         assert p.actions==[f'/{lang}/logout']
@@ -839,7 +839,7 @@ def test_internal_editions_localise_interface_copy(app, route):
         if lang=='en':assert not re.search('[一-鿿]',text),text
         else:
             # Registry, licence and contact identifiers are immutable data, not English UI copy.
-            text=re.sub(r'[\w.+-]+@[\w.-]+','',text)
+            text=re.sub(r'[\w.+-]+@[\w.-]+','',text).replace('Easy Deal','')
             text=re.sub(r'\b(?:EX-CPA-[\d]+|[0-9]{8}MA[0-9]+)\b','',text)
             assert not re.search('[A-Za-z]',text),text
         assert '/zh/en/' not in r.text and '/en/zh/' not in r.text

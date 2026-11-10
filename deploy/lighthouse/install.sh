@@ -2,13 +2,15 @@
 set -Eeuo pipefail
 
 SERVER_IP="${1:-}"
+PUBLIC_DOMAIN="${2:-}"
 if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "Usage: sudo bash install.sh SERVER_PUBLIC_IP"
+  echo "Usage: sudo bash install.sh SERVER_PUBLIC_IP [DOMAIN]"
+  echo "DOMAIN (for example easydeal.com.cn) must already point at SERVER_PUBLIC_IP; default is the free sslip.io name."
   exit 1
 fi
 
 if [[ "$(id -u)" -ne 0 ]]; then
-  exec sudo bash "$0" "$SERVER_IP"
+  exec sudo bash "$0" "$SERVER_IP" "$PUBLIC_DOMAIN"
 fi
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +40,7 @@ if [[ "$SOURCE_DIR" != "$TARGET_DIR" ]]; then
 fi
 cd "$TARGET_DIR"
 
-PUBLIC_HOST="${SERVER_IP}.sslip.io"
+PUBLIC_HOST="${PUBLIC_DOMAIN:-${SERVER_IP}.sslip.io}"
 if [[ ! -f .env ]]; then
   if ! command -v openssl >/dev/null 2>&1; then
     apt-get update

@@ -1,6 +1,6 @@
 # Instructions for coding agents (Kimi and others)
 
-Project: Mamatch (china-ma-match)
+Project: Easy Deal (repository china-ma-match, Python package `mamatch`; company domain easydeal.com.cn)
 GitHub: https://github.com/joechangaloha-sys/china-ma-match (remote `origin`, account joechangaloha-sys)
 On Joe's Mac the repository is at ~/Documents/china-ma-match. Anywhere else (a cloud agent), clone it first:
 `git clone https://github.com/joechangaloha-sys/china-ma-match.git && cd china-ma-match`. Pushing needs write
@@ -35,6 +35,7 @@ access to that repository (a GitHub connection or a token Joe provides); without
 - English and Chinese editions must have matching layouts and shared visual styling.
 - Use the Japan IR Index-inspired institutional Wall Street style: navy, white,
   cool greys, serif headlines, fine rules and restrained controls. Use the shared palette.
+- The company name "Easy Deal" is shown unchanged in both editions. Otherwise:
 - English pages are English-only and Chinese pages Chinese-only, including controls,
   notices, document content and downloads. Avoid cross-language fallback.
 - Chinese finance copy must use a formal mainland investment-banking register,
