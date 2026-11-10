@@ -22,45 +22,14 @@ def get_engine(url: str | None = None):
 
 
 def init_db(url: str | None = None) -> None:
-    engine = get_engine(url)
-    Base.metadata.create_all(engine)
-    _add_missing_columns(engine)
+    """Explicit initialization for CLI/tests. Web startup never mutates schema."""
+    from .migrations import upgrade
+    upgrade(get_engine(url))
 
 
-def _add_missing_columns(engine) -> None:
-    """Additive migration for local databases: new model columns are added with their defaults.
-
-    Enough for the MVP's SQLite files; switch to Alembic before any production deployment.
-    """
-    import json
-
-    from sqlalchemy import inspect, text
-
-    insp = inspect(engine)
-    with engine.begin() as conn:
-        for table in Base.metadata.sorted_tables:
-            existing = {c["name"] for c in insp.get_columns(table.name)}
-            for col in table.columns:
-                if col.name in existing:
-                    continue
-                default = col.default.arg if col.default is not None else None
-                if callable(default):
-                    # JSON columns default to list() or dict(); SQLAlchemy wraps them to take a context.
-                    # Other callables (random ids) must not give every old row the same value.
-                    if col.type.__class__.__name__ == "JSON":
-                        literal = "'" + json.dumps(default(None)) + "'"
-                    else:
-                        literal = "NULL"
-                elif isinstance(default, bool):
-                    literal = "TRUE" if default else "FALSE"
-                elif isinstance(default, (int, float)):
-                    literal = str(default)
-                elif isinstance(default, str):
-                    literal = "'" + default.replace("'", "''") + "'"
-                else:
-                    literal = "NULL"
-                coltype = col.type.compile(dialect=engine.dialect)
-                conn.execute(text(f'ALTER TABLE {table.name} ADD COLUMN {col.name} {coltype} DEFAULT {literal}'))
+def check_schema(url: str | None = None) -> None:
+    from .migrations import check
+    check(get_engine(url))
 
 
 def session_factory(url: str | None = None) -> sessionmaker[Session]:
