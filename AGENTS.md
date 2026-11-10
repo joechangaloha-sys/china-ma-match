@@ -1,6 +1,6 @@
 # Instructions for coding agents (Kimi and others)
 
-Project: Mamatch (china-ma-match)
+Project: Easy Deal (repository china-ma-match, Python package `mamatch`; company domain easydeal.com.cn)
 GitHub: https://github.com/joechangaloha-sys/china-ma-match (remote `origin`, account joechangaloha-sys)
 On Joe's Mac the repository is at ~/Documents/china-ma-match. Anywhere else (a cloud agent), clone it first:
 `git clone https://github.com/joechangaloha-sys/china-ma-match.git && cd china-ma-match`. Pushing needs write

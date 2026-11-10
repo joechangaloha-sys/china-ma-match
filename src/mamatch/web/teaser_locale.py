@@ -5,10 +5,10 @@ from html.parser import HTMLParser
 ZH = {
 'Project Willow · Teaser Automation Demo':'柳树项目 · 项目简介演示',
 'Fictional-data teaser automation demo for a China M&A listing platform.':'中小企业并购平台项目简介演示，所涉资料均为虚构。',
-'mamatch navigation':'平台导航','← Back to mamatch':'← 返回并购平台',
+'Easy Deal navigation':'平台导航','← Back to Easy Deal':'← 返回并购平台',
 'Kimi’s original standalone teaser · English · fictional data':'独立项目简介 · 中文版 · 虚构资料',
 'Chinese edition →':'英文版 →','Info memo · NDA · LOI →':'信息备忘录 · 保密协议 · 收购意向书 →','Approval workflow →':'审核流程 →',
-'Jump to controls':'跳至文档操作','Skip to teaser':'跳至项目简介','M&A Match demonstration platform':'中小企业并购演示平台','MA':'并购','M&A Match':'中小企业并购',
+'Jump to controls':'跳至文档操作','Skip to teaser':'跳至项目简介','Easy Deal demonstration platform':'中小企业并购演示平台','ED':'并购','Easy Deal':'中小企业并购',
 'Demo sections':'演示栏目','Teaser':'项目简介','Automation':'自动编排','Data spec':'数据说明','Deployment':'部署说明','Fictional data':'虚构资料',
 'Teaser automation v0.1':'项目简介自动编排 · 版本0.1','Project Willow':'柳树项目',
 'A fictional teaser rendered from structured demonstration data. The layout separates buyer-facing content from provenance, checks and release controls.':'本页根据结构化虚构资料生成项目简介，分别展示投资方阅览内容、资料来源、核查结果及对外提供控制。',
@@ -34,7 +34,7 @@ ZH = {
 'Financial':'财务及经营指标','Period, currency, revenue range, profit metric, employee range and site range.':'报告期间、币种、营业收入区间、盈利指标、员工人数区间及经营网点数量。',
 'Verification':'资料核查','Claim IDs, reviewer role, checks completed, information date and approval records.':'陈述编号、审核人员角色、已完成核查事项、资料基准日及审核记录。',
 'Tencent Lighthouse demo':'腾讯云轻量应用服务器演示','Deployment boundary':'部署及使用范围',
-'This is Kimi’s original standalone fictional-data prototype, now served inside the passcode-gated mamatch Tencent Lighthouse demo. Its layout, rendering controls, JSON download and print/PDF view are preserved. It contains no real seller information, AI calls or confidential documents.':'本页与英文版共用独立项目简介的页面结构、编排功能及样式，通过并购平台的腾讯云演示访问密码验证后提供。支持生成简介、资料下载及打印，不包含真实卖方信息、人工智能调用或机密文件。',
+'This is Kimi’s original standalone fictional-data prototype, now served inside the passcode-gated Easy Deal Tencent Lighthouse demo. Its layout, rendering controls, JSON download and print/PDF view are preserved. It contains no real seller information, AI calls or confidential documents.':'本页与英文版共用独立项目简介的页面结构、编排功能及样式，通过并购平台的腾讯云演示访问密码验证后提供。支持生成简介、资料下载及打印，不包含真实卖方信息、人工智能调用或机密文件。',
 'Browser checks here are demonstrations only. Real claim/evidence review, version-bound approval and publication gates belong to the separate server-side mandate workflow. This page never calls those publication actions.':'浏览器核查仅用于演示。真实项目的陈述及依据核验、版本审核和对外提供控制，应在业务系统的委托项目流程中完成。本页不调用任何对外提供操作。',
 'Demonstration teaser using fictional data. Not an offer, recommendation, valuation or guarantee.':'本项目简介使用虚构资料，仅供演示，不构成要约、投资建议、估值意见或任何保证。','Back to top':'返回顶部',
 }

@@ -228,7 +228,8 @@ these changes and should not be merged over main. External providers remain defe
 - **Fees** (placeholders in `config.py`): free listing and browsing; preparation pack RMB 40k; outreach retainer
   RMB 20k per 182 days; success fee 4% (min RMB 300k) for outreach clients, earlier fees credited; the platform
   takes 25% of fees the partner adviser invoices (site copy says so, disclosed to the client).
-- **Brand:** "mamatch" for now; tagline 把企业交棒给对的人 / Hand your company on to the right owner. Founders
+- **Brand:** "Easy Deal", company domain `easydeal.com.cn` (renamed from "mamatch" on 11 Nov 2026; the Python
+  package, `MAMATCH_*` settings and `@demo.mamatch.test` demo sign-ins keep the old identifier); tagline 把企业交棒给对的人 / Hand your company on to the right owner. Founders
   described as having bulge-bracket, major law firm and Big Four experience; no personal names on the site.
   "Relay"/接棒 rejected as a brand (too close to existing M&A platforms and "Relay" M&A firms).
 - **Look and languages** follow a separate reference project in `~/Documents` (read-only; never modify it):
@@ -490,3 +491,13 @@ Branch `kimi/responsive-layouts`.
 
 Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/12. All 151 tests pass.
 Browser checks confirm 44px phone actions and a working document-controls shortcut.
+
+## Easy Deal rename (11 Nov 2026)
+
+Branch `claude/easy-deal-rebrand`. The English brand shown on the site, the teaser demo and the static-export
+title is now "Easy Deal" (was "mamatch" / "M&A Match"); the authenticator issuer label is "Easy Deal". The
+Chinese edition still shows 中小企业并购平台 pending Joe's choice of a Chinese name. The company domain is
+`easydeal.com.cn`; `deploy/lighthouse/install.sh` now takes it as an optional second argument, but no deployment
+has been switched (on 11 Nov the domain resolved to 82.157.169.23, not the Lighthouse demo server, and did not
+answer on ports 80/443). Not renamed: the repository, the `mamatch` package and command, `MAMATCH_*` settings,
+`/opt/mamatch`, database names and the `@demo.mamatch.test` demo sign-ins.
