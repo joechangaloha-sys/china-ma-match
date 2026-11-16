@@ -93,6 +93,7 @@ def render(request: Request, name: str, user: User | None = None, **ctx) -> HTML
     query = f"?{request.url.query}" if request.url.query else ""
     ctx = {"msg": request.query_params.get("msg", ""), "user": user, "lang": lang, "P": f"/{lang}",
            "edition_path": path + query, "here": path,
+           "base_url": (config.PUBLIC_BASE_URL or str(request.base_url)).rstrip("/"),
            "T": lambda zh, en: mainland(zh) if lang == "zh" else en,
            "L": lambda s: mainland(i18n.tr(s, lang)) if lang == "zh" else i18n.tr(s, lang),
            "V": lambda s: mainland(i18n.val(s, lang)) if lang == "zh" else i18n.val(s, lang),

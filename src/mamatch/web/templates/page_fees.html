@@ -1,28 +1,29 @@
 {% extends "base.html" %}
 {% block title %}{{ T('费用', 'Fees') }}{% endblock %}
+{% block description %}{{ T('Easy Deal 试点期收费：匿名挂牌免费，出售准备包、主动推介服务与成交费的价格及示例，以及利益冲突披露。', 'Easy Deal pilot pricing: free anonymous listing, the sale preparation pack, active outreach and completion fees with worked examples, and how conflicts are disclosed.') }}{% endblock %}
 {% block body %}
 <div>
   <h1>{{ T('费用与利益冲突', 'Fees and conflicts') }}</h1>
   <p class="sub">{{ T('试点期价格，不含税', 'Pilot prices, before VAT') }}</p>
 </div>
-<section class="panel tbl">
+<section class="panel tbl stack-tbl">
   <table>
     <tr><th>{{ T('服务', 'Service') }}</th><th>{{ T('卖方', 'Seller') }}</th><th>{{ T('买方', 'Buyer') }}</th></tr>
-    <tr><td>{{ T('匿名挂牌与浏览', 'Anonymous listing and browsing') }}</td><td>{{ T('免费', 'Free') }}</td><td>{{ T('免费', 'Free') }}</td></tr>
-    <tr><td>{{ T('出售准备包：资料核查 + 信息备忘录', 'Sale preparation: data check and info memo') }}</td><td class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.PREP_PACK_FEE_RMB)) }}</td><td>—</td></tr>
-    <tr><td>{{ T('主动推介服务', 'Active outreach') }}</td><td class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.SELLER_PLAN_FEE_RMB)) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} {{ T('天', 'days') }}</td><td>—</td></tr>
-    <tr><td>{{ T('成交费', 'Completion fee') }}</td><td>{{ T('推介服务客户：成交价 %g%%，最低 %s 元，已付费用抵扣', 'Outreach clients: %g%% of the deal value, minimum RMB %s, earlier fees credited')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</td><td>{{ T('试点中测试', 'Being tested in the pilot') }}</td></tr>
-    <tr><td>{{ T('律师、会计、税务、尽调', 'Legal, accounting, tax, diligence') }}</td><td colspan="2">{{ T('合作专业机构固定报价，单独签约', 'Fixed prices from partner firms, contracted separately') }}</td></tr>
+    <tr><td data-label="{{ T('服务', 'Service') }}">{{ T('匿名挂牌与浏览', 'Anonymous listing and browsing') }}</td><td data-label="{{ T('卖方', 'Seller') }}">{{ T('免费', 'Free') }}</td><td data-label="{{ T('买方', 'Buyer') }}">{{ T('免费', 'Free') }}</td></tr>
+    <tr><td data-label="{{ T('服务', 'Service') }}">{{ T('出售准备包：资料核查 + 信息备忘录', 'Sale preparation: data check and info memo') }}</td><td data-label="{{ T('卖方', 'Seller') }}" class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.PREP_PACK_FEE_RMB)) }}</td><td data-label="{{ T('买方', 'Buyer') }}">—</td></tr>
+    <tr><td data-label="{{ T('服务', 'Service') }}">{{ T('主动推介服务', 'Active outreach') }}</td><td data-label="{{ T('卖方', 'Seller') }}" class="num">{{ T('%s 元', 'RMB %s')|format('{:,}'.format(cfg.SELLER_PLAN_FEE_RMB)) }} / {{ cfg.OUTREACH_PERIOD_DAYS }} {{ T('天', 'days') }}</td><td data-label="{{ T('买方', 'Buyer') }}">—</td></tr>
+    <tr><td data-label="{{ T('服务', 'Service') }}">{{ T('成交费', 'Completion fee') }}</td><td data-label="{{ T('卖方', 'Seller') }}">{{ T('推介服务客户：成交价 %g%%，最低 %s 元，已付费用抵扣', 'Outreach clients: %g%% of the deal value, minimum RMB %s, earlier fees credited')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</td><td data-label="{{ T('买方', 'Buyer') }}">{{ T('试点中测试', 'Being tested in the pilot') }}</td></tr>
+    <tr><td data-label="{{ T('服务', 'Service') }}">{{ T('律师、会计、税务、尽调', 'Legal, accounting, tax, diligence') }}</td><td data-label="{{ T('卖方', 'Seller') }} / {{ T('买方', 'Buyer') }}" colspan="2">{{ T('合作专业机构固定报价，单独签约', 'Fixed prices from partner firms, contracted separately') }}</td></tr>
   </table>
 </section>
 <section class="panel">
   <h2>{{ T('成功费示例', 'Success-fee examples') }}</h2>
   <p>{{ T('仅适用于推介服务客户。未成交不收取成功费；准备费与推介费另按约定收取。以下为税前示例，假设此前已支付一次准备包与一期推介费；抵扣减少成交时应付余额，不重复收费。', 'For outreach clients only. No success fee without closing; preparation and outreach fees are charged separately as agreed. These pre-tax examples assume one preparation pack and one outreach period already paid. Credits reduce the balance due at closing.') }}</p>
-  <div class="tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small"><tr><th>{{ T('成交价', 'Deal value') }}</th><th>{{ T('成功费（抵扣前）', 'Gross success fee') }}</th><th>{{ T('实际费率', 'Effective rate') }}</th><th>{{ T('此前费用抵扣', 'Earlier-fee credit') }}</th><th>{{ T('成交时余额', 'Balance at closing') }}</th></tr>
+  <div class="tbl stack-tbl" tabindex="0" role="region" aria-label="{{ T('可横向滚动的表格', 'Horizontally scrollable table') }}"><table class="small"><tr><th>{{ T('成交价', 'Deal value') }}</th><th>{{ T('成功费（抵扣前）', 'Gross success fee') }}</th><th>{{ T('实际费率', 'Effective rate') }}</th><th>{{ T('此前费用抵扣', 'Earlier-fee credit') }}</th><th>{{ T('成交时余额', 'Balance at closing') }}</th></tr>
   {% for deal in [2000000, 7500000, 20000000] %}
   {% set gross = [deal * cfg.SUCCESS_FEE_RATE, cfg.SUCCESS_FEE_MIN_RMB]|max %}
   {% set credit = [cfg.PREP_PACK_FEE_RMB + cfg.SELLER_PLAN_FEE_RMB, gross]|min %}
-  <tr><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(deal) }}</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross) }}</td><td>{{ '%g'|format(gross / deal * 100) }}%</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(credit) }}</td><td>{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross - credit) }}</td></tr>
+  <tr><td data-label="{{ T('成交价', 'Deal value') }}">{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(deal) }}</td><td data-label="{{ T('成功费（抵扣前）', 'Gross success fee') }}">{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross) }}</td><td data-label="{{ T('实际费率', 'Effective rate') }}">{{ '%g'|format(gross / deal * 100) }}%</td><td data-label="{{ T('此前费用抵扣', 'Earlier-fee credit') }}">{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(credit) }}</td><td data-label="{{ T('成交时余额', 'Balance at closing') }}">{{ T('人民币', 'RMB') }} {{ '{:,.0f}'.format(gross - credit) }}</td></tr>
   {% endfor %}</table></div>
   <p class="small muted">{{ T('最低成功费对小额交易的实际费率较高。价格仍为试点方案，请在委托前确认。', 'The minimum creates a higher effective rate on smaller transactions. Pricing remains a pilot proposal to confirm before engagement.') }}</p>
 </section>

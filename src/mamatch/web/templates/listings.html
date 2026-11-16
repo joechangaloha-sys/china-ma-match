@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import listing_card with context %}
 {% block title %}{{ T('出售项目', 'Opportunities') }}{% endblock %}
+{% block description %}{{ T('浏览经交易经理审核的匿名中小企业出售项目，可按行业、地区、营业收入、利润和期望价格筛选。', 'Browse anonymised small-business sale listings reviewed by a deal manager. Filter by sector, region, revenue, earnings and asking price.') }}{% endblock %}
 {% macro money(e) %}{{ T('%g 百万元', 'RMB %gm')|format(e) }}{% endmacro %}
 {% macro edge_select(name, values, current, any_label, fmt) %}
 <select id="{{ name }}" name="{{ name }}"><option value="">{{ any_label }}</option>

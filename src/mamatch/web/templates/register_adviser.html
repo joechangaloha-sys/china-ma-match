@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ T('顾问注册', 'Register as an adviser') }}{% endblock %}
+{% block description %}{{ T('会计师、律师和顾问注册 Easy Deal，在客户授权下为其准备企业出售。', 'Accountants, lawyers and advisers can register to prepare a sale on Easy Deal under their client\'s authorisation.') }}{% endblock %}
 {% block body %}
 <form class="panel narrow grid" method="post" action="{{ P }}/register/adviser">
   <h1 class="wide">{{ T('会计师、律师和顾问注册', 'Accountants, lawyers and advisers') }}</h1>

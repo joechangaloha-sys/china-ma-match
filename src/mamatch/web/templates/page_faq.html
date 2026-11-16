@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ T('常见问题', 'FAQ') }}{% endblock %}
+{% block description %}{{ T('关于 Easy Deal 的常见问题：为什么做中小企业并购、流程如何运作、费用与保密安排。', 'Common questions about Easy Deal: why small-business M&A, how the process works, fees and confidentiality.') }}{% endblock %}
 {% macro qa(q_zh, q_en, a_zh, a_en, open=false) %}
 <details {{ 'open' if open }}><summary>{{ T(q_zh, q_en) }}</summary><p>{{ T(a_zh, a_en) }}</p></details>
 {% endmacro %}

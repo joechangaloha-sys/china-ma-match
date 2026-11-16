@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ T('出售企业', 'Sell your business') }}{% endblock %}
+{% block description %}{{ T('出售您的企业：保密访谈、委托授权核验、交易准备、匿名简介，每位买方由您决定是否接触。', 'Selling your business: a confidential call, mandate checks, preparation and an anonymous teaser. You decide on every buyer.') }}{% endblock %}
 {% block body %}
 <div>
   <h1>{{ T('出售您的企业', 'Selling your business') }}</h1>
@@ -9,12 +10,12 @@
 <section class="panel">
   <h2>{{ T('流程', 'What happens') }}</h2>
   <ol class="steps small">
-    <li><b>{{ T('保密访谈', 'A confidential call') }}</b>: {{ T('项目负责人了解企业经营情况及股权转让诉求。', 'a deal manager learns about your business and what you want.') }}</li>
-    <li><b>{{ T('委托授权核验', 'Mandate and checks') }}</b>: {{ T('核实委托人身份及交易授权。', 'we confirm you are authorised to sell.') }}</li>
-    <li><b>{{ T('交易准备', 'Preparation') }}</b>: {{ T('整理项目资料，核对财务数据并梳理投资方关注事项。', 'organise documents, check financial figures and identify buyer diligence questions.') }}</li>
-    <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>: {{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, with no name, city or exact figures.') }}</li>
-    <li><b>{{ T('引荐与披露', 'Introductions and disclosure') }}</b>: {{ T('每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。', 'you decide on each buyer; details open only after an NDA and your consent.') }}</li>
-    <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>: {{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers at fixed prices.') }}</li>
+    <li><b>{{ T('保密访谈', 'A confidential call') }}</b>{{ T('：', ': ') }}{{ T('项目负责人了解企业经营情况及股权转让诉求。', 'a deal manager learns about your business and what you want.') }}</li>
+    <li><b>{{ T('委托授权核验', 'Mandate and checks') }}</b>{{ T('：', ': ') }}{{ T('核实委托人身份及交易授权。', 'we confirm you are authorised to sell.') }}</li>
+    <li><b>{{ T('交易准备', 'Preparation') }}</b>{{ T('：', ': ') }}{{ T('整理项目资料，核对财务数据并梳理投资方关注事项。', 'organise documents, check financial figures and identify buyer diligence questions.') }}</li>
+    <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>{{ T('：', ': ') }}{{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, with no name, city or exact figures.') }}</li>
+    <li><b>{{ T('引荐与披露', 'Introductions and disclosure') }}</b>{{ T('：', ': ') }}{{ T('每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。', 'you decide on each buyer; details open only after an NDA and your consent.') }}</li>
+    <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>{{ T('：', ': ') }}{{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers at fixed prices.') }}</li>
   </ol>
   <p class="small"><a href="{{ P }}/fees">{{ T('费用说明', 'Fees') }}</a> · <a href="{{ P }}/security">{{ T('保密措施', 'Confidentiality') }}</a></p>
 </section>
@@ -23,12 +24,12 @@
   <fieldset class="wide"><legend>{{ T('您是', 'You are') }}</legend>
     <label class="check"><input type="radio" name="submitted_by" value="owner" checked> {{ T('企业主', 'The owner') }}</label>
     <label class="check"><input type="radio" name="submitted_by" value="adviser"> {{ T('企业主的会计师、律师或顾问', "The owner's accountant, lawyer or adviser") }}</label>
-    <label>{{ T('您的机构（顾问填写）', 'Your firm (advisers)') }} <input name="adviser_firm"></label>
+    <label>{{ T('您的机构（顾问填写）', 'Your firm (advisers)') }} <input name="adviser_firm" autocomplete="organization"></label>
     <p class="small">{{ T('会计师、律师和顾问请先', 'Accountants, lawyers and advisers can') }} <a href="{{ P }}/register/adviser">{{ T('注册顾问账户', 'register an adviser account') }}</a>{{ T('，在客户本人授权下为其准备出售。', ' to prepare a sale under the client’s own authorisation.') }}</p>
     <p class="small muted">{{ T('顾问代表客户登记，继续以自己的委托关系服务客户。平台服务费由顾问向客户开票时，按事先约定的比例与平台分成，并向客户披露。', 'Advisers listing for a client keep their own client relationship and engagement. Where the platform’s services are invoiced through the adviser, the fee is shared with the platform on terms agreed in advance and disclosed to the client.') }}</p>
   </fieldset>
-  <label>{{ T('公司名称', 'Company') }} <input name="company" required></label>
-  <label>{{ T('您的姓名', 'Your name') }} <input name="name" required></label>
+  <label>{{ T('公司名称', 'Company') }} <input name="company" autocomplete="organization" required></label>
+  <label>{{ T('您的姓名', 'Your name') }} <input name="name" autocomplete="name" required></label>
   <label class="wide">{{ T('电话或邮箱', 'Phone or email') }} <input name="contact" required></label>
   <label>{{ T('行业', 'Sector') }} <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
   <label>{{ T('省市', 'Province') }} <select name="province">{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
