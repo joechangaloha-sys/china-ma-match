@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ T('买方注册', 'Register as a buyer') }}{% endblock %}
+{% block description %}{{ T('注册 Easy Deal 买方账户，核验后可申请引荐并查看信息备忘录。', 'Register as an Easy Deal buyer. Once verified you can request introductions and read info memos.') }}{% endblock %}
 {% block body %}
 <form class="panel narrow grid" method="post" action="{{ P }}/register">
   <h1 class="wide">{{ T('买方注册', 'Register as a buyer') }}</h1>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ T('登录', 'Sign in') }}{% endblock %}
+{% block description %}{{ T('登录 Easy Deal 账户，查看您的出售或收购进展。', 'Sign in to your Easy Deal account to follow your sale or acquisition.') }}{% endblock %}
 {% block body %}
 <form class="panel narrow grid" method="post" action="{{ P }}/login">
   <h1 class="wide">{{ T('登录', 'Sign in') }}</h1>
@@ -7,6 +8,7 @@
   <label class="wide">{{ T('邮箱', 'Email') }} <input id="email" name="email" type="email" autocomplete="username" required></label>
   <label class="wide">{{ T('密码', 'Password') }} <input id="password" name="password" type="password" autocomplete="current-password" required></label>
   <div class="wide"><button>{{ T('登录', 'Sign in') }}</button></div>
+  <p class="wide small">{{ T('忘记密码？请联系您的交易经理重置。', 'Forgot your password? Ask your deal manager to reset it.') }}</p>
   <p class="wide small muted">{{ T('买方可', 'Buyers can') }} <a href="{{ P }}/register">{{ T('注册', 'register') }}</a>{{ T('；卖方账户由交易经理邀请开通。', '; seller accounts are opened by invitation from your deal manager.') }}</p>
 </form>
 {% endblock %}

@@ -258,3 +258,40 @@ main > *, .cols > *, .cards > *, .board > *, .adv-grid > * { min-width: 0; }
   .pill { max-width:100%; white-space:normal; }
   .stat { flex-basis:auto; }
 }
+
+/* Phone UX pass (Nov 2026). Everything below applies under 640px only; laptops are unchanged. */
+header.bar .who nav.langs-phone, a.button.jump-inquiry { display: none; }
+@media (max-width: 640px) {
+  /* Header: language switch joins the brand row; the menu stays on one row and scrolls sideways. */
+  .util { display: none; }
+  header.bar .who { gap: 8px; }
+  header.bar .who nav.langs-phone { display: flex; gap: 10px; font: 600 .7rem/1 var(--font); letter-spacing: .06em; }
+  header.bar nav.langs-phone { flex-basis: auto; order: 0; gap: 12px; }
+  header.bar .langs-phone a { color: var(--on-dark-soft); text-decoration: none; min-height: 44px; padding: 0; margin: 0; border: 0; text-transform: none; font-size: .8rem; }
+  a.button.jump-inquiry { display: flex; width: 100%; }
+  header.bar .langs-phone a.on { color: #fff; }
+  header.bar .who > a { padding-left: 4px; }
+  header.bar nav:not(.langs) { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); padding-right: 24px; }
+  header.bar nav:not(.langs)::-webkit-scrollbar { display: none; }
+  header.bar nav:not(.langs) a { flex: 0 0 auto; }
+  /* Opportunity page: the enquiry (or introduction request) comes straight after the listing card. */
+  .cols.detail > section { display: contents; }
+  .cols.detail > section > * { order: 3; }
+  .cols.detail .card.listing { order: 1; }
+  .cols.detail > section:last-child > * { order: 2; }
+  /* Panels end at their content: no stray margin under the last paragraph. */
+  .panel > :last-child { margin-bottom: 0; }
+  /* Opportunities search: sector and region share one row. */
+  .search-row > label:not(.grow) { flex: 1 1 calc(50% - 7px); }
+  /* Fee tables: each row becomes a small block with labelled values. */
+  .stack-tbl { overflow: visible; }
+  .stack-tbl table, .stack-tbl tbody, .stack-tbl tr, .stack-tbl td { display: block; width: 100%; }
+  .stack-tbl tr:first-child { display: none; }
+  .stack-tbl tr { border-top: 1px solid var(--rule-hair); padding: 8px 0; }
+  .stack-tbl tr:nth-child(2) { border-top: 0; }
+  .stack-tbl td { border: 0; padding: 2px 0; text-align: left; }
+  .stack-tbl td::before { content: attr(data-label); display: block; font-size: .72rem; color: var(--ink-soft); font-weight: 600; }
+  .stack-tbl td:first-child::before { display: none; }
+  .stack-tbl td:first-child { font-weight: 600; }
+}

@@ -502,3 +502,24 @@ Latin-script exception to the Chinese-only rule, and the monolingual tests allow
 has been switched (on 11 Nov the domain resolved to 82.157.169.23, not the Lighthouse demo server, and did not
 answer on ports 80/443). Not renamed: the repository, the `mamatch` package and command, `MAMATCH_*` settings,
 `/opt/mamatch`, database names and the `@demo.mamatch.test` demo sign-ins.
+
+## Phone UX pass (16 Nov 2026)
+
+Branch `claude/phone-ux-pass`, from an iPhone 17 simulator review (notes in Joe's vault). Unless noted, changes apply
+only under 640px, so laptops are unchanged.
+- The header is 147→106px: the language switch sits on the brand row next to Sign in (the separate top strip is hidden on
+  phones), and the menu stays on one row that scrolls sideways with a fade at the right edge.
+- Opportunity page: an "Ask about this company ↓" button sits under the asking price (it reads "Request an introduction"
+  for signed-in buyers), and the enquiry form now follows the listing card, ahead of Share and Similar.
+  The button moved from 1,795px to 371px down the page.
+- Opportunities list: sector and region share one row, so the first result starts at 603px.
+- Fees: both tables stack into labelled blocks with no sideways scrolling inside the box.
+- Panels no longer leave empty space under their last paragraph.
+- On all screen sizes: every page now has a meta description (public pages each have their own; a listing page's is
+  built from its region, sector, asking price and revenue), Open Graph tags, theme-color, and JSON-LD
+  (Organization / WebSite / WebPage). Absolute URLs come from `MAMATCH_PUBLIC_URL`, falling back to the request host.
+- Also on all screen sizes: the sell page's Chinese process list uses full-width ：. Login now says to ask the deal manager
+  to reset a forgotten password, because there is no self-service reset. The sell and enquiry forms have
+  name/organization autocomplete hints.
+- Not changed, waiting on Joe's decision: the language switch still reads 英文 / Chinese (not 中文 / English).
+- Review PR: https://github.com/joechangaloha-sys/china-ma-match/pull/20. All 210 tests pass.

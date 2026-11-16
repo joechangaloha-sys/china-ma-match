@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% from "_macros.html" import listing_card with context %}
 {% block title %}{{ V(t.code_name) }}{% endblock %}
+{% block description %}{{ T('匿名出售项目：', 'Anonymised sale listing: ') }}{{ V(card.region) }} · {{ card.sector_zh if lang == 'zh' else card.sector_en }} · {{ T('期望价格', 'asking') }} {{ V(card.price_band) }} · {{ T('营业收入', 'revenue') }} {{ V(card.revenue_band) }}{{ T('。经交易经理审核，签署保密协议后提供信息备忘录。', '. Reviewed by a deal manager; the info memo follows an NDA.') }}{% endblock %}
 {% block body %}
 <p class="small"><a href="{{ P }}/opportunities">← {{ T('全部项目', 'All opportunities') }}</a></p>
-<div class="cols">
+<div class="cols detail">
 <section>
-  {{ listing_card(card, full=true) }}
+  {% set jump %}<a class="button jump-inquiry" href="#{{ 'request' if user and user.role == 'buyer' else 'inquiry' }}">{{ T('申请引荐', 'Request an introduction') if user and user.role == 'buyer' else T('咨询此项目', 'Ask about this company') }} ↓</a>{% endset %}
+  {{ listing_card(card, full=true, after_ask=jump) }}
   <div class="panel share" id="share">
     <h2>{{ T('分享此项目', 'Share this listing') }}</h2>
     <div class="share-grid">
@@ -38,7 +40,7 @@
 </section>
 <section>
   {% if user and user.role == 'buyer' %}
-  <div class="panel">
+  <div class="panel" id="request">
     <h2>{{ T('申请引荐', 'Request an introduction') }}</h2>
     {% if requested %}<p><span class="pill">{{ T('已申请', 'Requested') }}</span> <a href="{{ P }}/buyer#deals">{{ T('查看进展', 'See progress') }}</a></p>
     {% else %}
@@ -50,8 +52,8 @@
   <form class="panel grid" id="inquiry" method="post" action="{{ P }}/opportunities/{{ t.id }}/inquiry">
     <h2 class="wide">{{ T('咨询此项目', 'Ask about this company') }}</h2>
     <p class="wide small muted">{{ T('已注册买方请', 'Registered buyers can') }} <a href="{{ P }}/login?next=/opportunities/{{ t.id }}">{{ T('登录', 'sign in') }}</a> {{ T('直接申请引荐。', 'to request an introduction.') }}</p>
-    <label>{{ T('姓名', 'Your name') }} <input id="name" name="name" required></label>
-    <label>{{ T('公司或机构', 'Company or fund') }} <input id="company" name="company"></label>
+    <label>{{ T('姓名', 'Your name') }} <input id="name" name="name" autocomplete="name" required></label>
+    <label>{{ T('公司或机构', 'Company or fund') }} <input id="company" name="company" autocomplete="organization"></label>
     <label>{{ T('类型', 'You are') }}
       <select id="kind" name="kind">{% for k, v in BUYER_KINDS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
     <label>{{ T('电话或邮箱', 'Phone or email') }} <input id="contact" name="contact" required></label>

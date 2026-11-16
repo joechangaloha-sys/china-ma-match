@@ -1,4 +1,4 @@
-{% macro listing_card(c, link='', full=false) %}
+{% macro listing_card(c, link='', full=false, after_ask='') %}
 <div class="card listing">
   <div class="card-head"><b>{% if link %}<a href="{{ link }}">{{ V(c.code_name) }}</a>{% else %}{{ V(c.code_name) }}{% endif %}</b>
     <span class="muted small">{{ V(c.region) }} · {{ c.sector_zh if lang == 'zh' else c.sector_en }}</span>
@@ -9,6 +9,7 @@
     <div><span class="muted small">{{ T('出让股权', 'Stake') }}</span><b>{{ V(c.stake) }}</b></div>
     {% if c.implied_ev_band %}<div><span class="muted small">{{ T('对应整体估值', 'Implied 100% value') }}</span><b>{{ V(c.implied_ev_band) }}</b></div>{% endif %}
   </div>
+  {{ after_ask }}
   <table class="small">
     <tr><th>{{ T('营业收入', 'Revenue') }}</th><td>{{ V(c.revenue_band) }}</td></tr>
     {% if c.profitable is not none %}<tr><th>{{ T('盈利', 'Profitable') }}</th><td>{{ T('是', 'Yes') if c.profitable else T('否', 'No') }}</td></tr>{% endif %}
