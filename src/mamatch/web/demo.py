@@ -101,6 +101,8 @@ def live():
 @router.get("/health/ready")
 def ready(s: Session = Depends(get_session)):
     try:
+        from .. import db
+        db.check_schema()
         s.execute(text("SELECT 1"))
     except Exception:
         return JSONResponse({"status": "unavailable"}, status_code=503)

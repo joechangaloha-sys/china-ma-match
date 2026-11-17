@@ -7,6 +7,14 @@ a secure operating system for a concierge pilot, not an open marketplace.
 
 Background research and design notes are kept privately, outside this repository. Current status and next steps: [handoff.md](handoff.md).
 
+## Controlled database upgrades and recovery
+
+Web startup checks a versioned schema; it does not add columns automatically. Explicit migrations,
+verified pre-deployment snapshot backups and isolated restore rehearsals are now part of the Tencent
+deployment workflow. See [database recovery](docs/DATABASE_RECOVERY.md) for commands, evidence and limits.
+For a new local database, run `uv run mamatch init-db --seed` before `uv run mamatch serve`.
+MFA remains disabled and external signing/VDR connections remain deferred.
+
 ## Upload quarantine and pilot access (31 Oct 2026)
 
 Uploads are quarantined before any parsing, review or download. The private **Upload security**

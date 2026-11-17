@@ -441,7 +441,7 @@ class AuditEvent(Base):
     match_id: Mapped[int | None] = mapped_column(ForeignKey("matches.id"), nullable=True)
     document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"), nullable=True)
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
 
     user: Mapped[User | None] = relationship()
 
