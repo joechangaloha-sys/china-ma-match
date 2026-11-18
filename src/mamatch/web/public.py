@@ -147,19 +147,21 @@ def seller_intake(s: Session = Depends(get_session), company: str = Form(""), na
                   contact: str = Form(""), sector: str = Form(""), province: str = Form(""),
                   revenue: str = Form(""), net_profit: str = Form(""), deal_type: str = Form("full_sale"),
                   sale_reason: str = Form("succession"), notes: str = Form(""), consent: str = Form(""),
-                  submitted_by: str = Form("owner"), adviser_firm: str = Form("")):
+                  submitted_by: str = Form("owner"), adviser_firm: str = Form(""), unit: str = Form("m")):
     if not consent:
         return back("/sell#intake", "请同意顾问与您联系 Please agree to be contacted.")
-    if not (company.strip() and name.strip() and contact.strip()):
-        return back("/sell#intake", "请填写公司、姓名和联系方式 Company, name and contact are required.")
+    if not (name.strip() and contact.strip()):
+        return back("/sell#intake", "请填写姓名和联系方式 Name and contact are required.")
     adviser = submitted_by == "adviser"
     if adviser and not adviser_firm.strip():
         return back("/sell#intake", "请填写您的机构名称 Please give your firm's name.")
     try:
         rev, np_ = num(revenue), num(net_profit)
+        if unit == "wan":  # Chinese edition asks for 万元; figures are stored in RMB m
+            rev, np_ = (None if v is None else v / 100 for v in (rev, np_))
     except ValueError:
         return back("/sell#intake", "收入和利润请填写数字 Revenue and profit must be numbers.")
-    t = Target(firm=firm(s), code_name="待定 New", legal_name=company.strip()[:200], contact_name=name.strip()[:50],
+    t = Target(firm=firm(s), code_name="待定 New", legal_name=company.strip()[:200] or "未提供 Not given", contact_name=name.strip()[:50],
                contact_info=contact.strip()[:100], sector=sector if sector in SECTORS else "industrial_services",
                province=province if province in REGIONS else "上海", revenue=rev, net_profit=np_,
                deal_type=deal_type if deal_type in DEAL_TYPES else "full_sale",

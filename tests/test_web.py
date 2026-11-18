@@ -90,6 +90,27 @@ def test_seller_intake_creates_a_draft_mandate(app, db_url):
     assert "示例·某贸易公司" not in c.get("/opportunities").text
 
 
+def test_seller_intake_without_company_name_and_in_wan(app, db_url):
+    c = client(app)
+    r = c.post("/zh/sell", data={"name": "王", "contact": "138-intake-wan", "sector": "industrial_services",
+                                 "province": "广西", "revenue": "3000", "net_profit": "250", "unit": "wan", "consent": "1"})
+    assert "已收到" in r.text
+    t = _get(db_url, Target, contact_info="138-intake-wan")
+    assert t.legal_name == "未提供 Not given" and t.province == "广西"
+    assert t.revenue == 30 and t.net_profit == 2.5
+
+
+def test_sell_page_editions_are_clean(app):
+    zh = client(app).get("/zh/sell").text
+    assert "工业服务（检测、维保）</option>" in zh and ">新疆<" in zh and ">其他<" in zh
+    assert 'name="unit" value="wan"' in zh and "为什么现在考虑出售" in zh and "privacy-promise" in zh
+    en = client(app, lang="en").get("/en/sell").text
+    assert ">Industrial services</option>" in en and ") / Industrial" not in en
+    assert 'name="unit" value="m"' in en and "Why plan a sale now" in en
+    for cjk in ("为什么", "接班", "万元"):
+        assert cjk not in en
+
+
 def test_anonymous_inquiry_reaches_the_deal_manager(app, db_url):
     c = client(app)
     kiln = _get(db_url, Target, code_name="Project Kiln")

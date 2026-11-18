@@ -8,6 +8,30 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Sell page trust and wording fixes, plus a debug crawl — 18 November 2026
+
+A blind review of `/sell` (as an owner in their 60s, an accountant and a skeptical owner) found trust gaps, stiff
+wording and two bugs. Branch `claude/sell-page-trust`:
+- Company name is now optional (stored as `未提供 Not given`). Only name and contact are required.
+- A confidentiality promise sits beside the submit button.
+- The Chinese form asks for revenue and profit in 万元, using a hidden `unit=wan` field. The server divides by 100,
+  so figures are still stored in RMB m. The English form still uses RMB m.
+- Plainer wording:
+  - 委托授权核验 → 确认出售权限
+  - 投资方关注事项 → 买方会问的问题
+  - New third "why now" point
+  - Adviser fee-share sentence rewritten
+  - English step and field labels fixed
+- Nav item 出售项目/Opportunities is now 在售企业/Businesses for sale.
+- Bug: the label `工业服务(检测/维保)` broke the Chinese/English split, so it is now `工业服务（检测、维保）`.
+- Bug: added the ten missing provinces (new macro-region 华南) and an `其他` option. The listings filter skips `其他`.
+- Debug crawl: 330 GET loads (5 roles × both editions). No 5xx or exceptions. The remaining mixed-language flags
+  are seeded names or user-entered data. The demo offer conditions stay
+  in both languages on purpose (the seller page splits them). The buyer's edit box shows the raw text, which is fine for data.
+
+Waiting on Joe: an operator identity line above the form (entity, city, phone, named deal manager) and actual
+amounts for the preparation and outreach fees in the seller FAQ.
+
 ## Sell page "why now" block — 18 November 2026
 
 Joe confirmed the pilot's main early problem is getting enough sellers to list. Branch `claude/sell-why-now`

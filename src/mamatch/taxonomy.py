@@ -20,7 +20,7 @@ SECTORS: dict[str, tuple[str, str, str]] = {
     "medical_devices": ("医疗器械", "Medical devices", "healthcare"),
     "healthcare_services": ("医疗服务", "Healthcare services", "healthcare"),
     "software": ("软件与信息服务", "Software & IT services", "tech"),
-    "industrial_services": ("工业服务(检测/维保)", "Industrial services", "services"),
+    "industrial_services": ("工业服务（检测、维保）", "Industrial services", "services"),
     "logistics": ("物流仓储", "Logistics & warehousing", "services"),
     "b2b_distribution": ("工业品分销", "B2B distribution", "services"),
     "environmental": ("环保工程", "Environmental services", "services"),
@@ -35,9 +35,12 @@ REGIONS: dict[str, str] = {
     "山东": "华北", "河南": "华中", "湖北": "华中", "湖南": "华中", "江西": "华中",
     "四川": "西南", "重庆": "西南", "云南": "西南", "贵州": "西南",
     "陕西": "西北", "辽宁": "东北", "吉林": "东北", "黑龙江": "东北",
+    "山西": "华北", "内蒙古": "华北", "广西": "华南", "海南": "华南",
+    "甘肃": "西北", "宁夏": "西北", "青海": "西北", "新疆": "西北", "西藏": "西南",
+    "其他": "中国",
 }
 
-MACRO_REGIONS = list(dict.fromkeys(REGIONS.values()))
+MACRO_REGIONS = [m for m in dict.fromkeys(REGIONS.values()) if m != "中国"]
 
 REGION_EN = {
     "长三角": "Yangtze River Delta", "珠三角": "Pearl River Delta", "东南": "Southeast", "京津冀": "Beijing–Tianjin–Hebei",
@@ -47,6 +50,8 @@ REGION_EN = {
     "北京": "Beijing", "天津": "Tianjin", "河北": "Hebei", "山东": "Shandong", "河南": "Henan", "湖北": "Hubei",
     "湖南": "Hunan", "江西": "Jiangxi", "四川": "Sichuan", "重庆": "Chongqing", "云南": "Yunnan", "贵州": "Guizhou",
     "陕西": "Shaanxi", "辽宁": "Liaoning", "吉林": "Jilin", "黑龙江": "Heilongjiang",
+    "华南": "South China", "山西": "Shanxi", "内蒙古": "Inner Mongolia", "广西": "Guangxi", "海南": "Hainan",
+    "甘肃": "Gansu", "宁夏": "Ningxia", "青海": "Qinghai", "新疆": "Xinjiang", "西藏": "Tibet", "其他": "Other",
 }
 
 # Simple keyword map for the offline extractor (announcement titles and summaries).

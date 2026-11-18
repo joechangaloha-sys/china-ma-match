@@ -65,7 +65,7 @@
 </section>
 
 <section>
-  <h2>{{ T('最新出售项目', 'Latest opportunities') }} · <a class="small" href="{{ P }}/opportunities">{{ T('全部', 'All') }} →</a></h2>
+  <h2>{{ T('最新在售企业', 'Latest businesses for sale') }} · <a class="small" href="{{ P }}/opportunities">{{ T('全部', 'All') }} →</a></h2>
   <div class="cards">
   {% for r in rows %}
     {% call listing_card(cards[r.id], P ~ '/opportunities/' ~ r.id) %}{% endcall %}
