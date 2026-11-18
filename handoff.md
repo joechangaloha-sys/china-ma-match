@@ -8,6 +8,14 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Sell page "why now" block — 18 November 2026
+
+Joe confirmed the pilot's main early problem is getting enough sellers to list. Branch `claude/sell-why-now`
+adds a short block above the process steps on `/zh/sell` and `/en/sell`: successors are hard to find, inheriting
+shares is complicated, starting early keeps the owner in control. There is deliberately no tax argument, because
+China has no inheritance tax. The tone stays gentle: no pressure or fear wording. 210 tests pass. Checked both
+editions on desktop and at 375px (no overflow). The static demo rebuilds from `main` via Pages.
+
 ## Internal language cleanup — 31 October 2026
 
 Joe reported mixed Chinese/English on 试点数据 and other internal pages; each edition must be monolingual.
