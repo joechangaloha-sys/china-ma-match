@@ -83,7 +83,7 @@
 <section class="panel">
   <h2>{{ T('公开方式', 'Visibility') }}</h2>
   {% if t.visibility == 'listed' %}
-  <p><b>{{ T('已匿名公开。', 'Listed publicly, anonymised.') }}</b> {{ T('右侧卡片显示在出售项目页（不含名称、城市或准确数字）。', 'The card on the right is on the opportunities page, with no name, city or exact figures.') }}</p>
+  <p><b>{{ T('已匿名公开。', 'Listed publicly, anonymised.') }}</b> {{ T('右侧卡片显示在“在售企业”页（不含名称、城市或准确数字）。', 'The card on the right is on the businesses-for-sale page, with no name, city or exact figures.') }}</p>
   <form method="post" action="{{ P }}/seller/{{ t.id }}/visibility"><input type="hidden" name="visibility" value="private"><button class="ghost">{{ T('改为不公开', 'Make private') }}</button></form>
   {% else %}
   <p><b>{{ T('不公开。', 'Private.') }}</b> {{ T('只有您批准的买方会收到匿名简介。', 'Only buyers you approve receive the anonymous teaser.') }}</p>

@@ -73,7 +73,7 @@
     {% if portal == 'seller' %}<a href="{{ P }}/seller" class="on">{{ T('我的出售', 'My sale') }}</a>
     {% elif portal == 'buyer' %}<a href="{{ P }}/buyer" class="on">{{ T('我的收购', 'My acquisitions') }}</a>
     {% elif portal == 'adviser' %}<a href="{{ P }}/adviser" class="on">{{ T('我的客户', 'My clients') }}</a>{% endif %}
-    <a href="{{ P }}/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">{{ T('出售项目', 'Opportunities') }}</a>
+    <a href="{{ P }}/opportunities" class="{{ 'on' if request.url.path.startswith('/opportunities') }}">{{ T('在售企业', 'Businesses for sale') }}</a>
     <a href="{{ P }}/sell" class="{{ 'on' if request.url.path == '/sell' }}">{{ T('出售企业', 'Sell') }}</a>
     <a href="{{ P }}/buy" class="{{ 'on' if request.url.path == '/buy' }}">{{ T('收购企业', 'Buy') }}</a>
     <a href="{{ P }}/fees" class="{{ 'on' if request.url.path == '/fees' }}">{{ T('费用', 'Fees') }}</a>

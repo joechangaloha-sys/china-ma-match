@@ -10,8 +10,8 @@
   <h2>{{ T('为什么现在考虑出售', 'Why plan a sale now') }}</h2>
   <ul class="steps small">
     <li><b>{{ T('接班人难找', 'Successors are hard to find') }}</b>{{ T('：', ': ') }}{{ T('子女往往有自己的事业，职业经理人也很少接手中小企业。', 'children often have careers of their own, and professional managers rarely take over smaller companies.') }}</li>
-    <li><b>{{ T('股权继承复杂', 'Inheriting shares is complicated') }}</b>{{ T('：', ': ') }}{{ T('继承公证、家庭共有财产和公司章程限制，常让企业在交接中停摆。', 'probate notarisation, jointly owned family property and limits in the articles can stall a business during handover.') }}</li>
-    <li><b>{{ T('越早准备，选择越多', 'Starting early keeps your options open') }}</b>{{ T('：', ': ') }}{{ T('由您亲自签字、亲自交接，价格和买方都由您决定。', 'you sign and hand over in person, and you decide on the price and the buyer.') }}</li>
+    <li><b>{{ T('股权继承复杂', 'Inheriting shares is complicated') }}</b>{{ T('：', ': ') }}{{ T('继承公证、家庭共有财产和公司章程限制，常让企业在交接中停摆。', 'inheritance paperwork, jointly owned family property and limits in the company’s articles can stall a business during handover.') }}</li>
+    <li><b>{{ T('越早准备，选择越多', 'Starting early gives you more choice') }}</b>{{ T('：', ': ') }}{{ T('有时间挑选买方、谈好价格，并亲自完成交接。', 'you have time to choose the buyer, agree the price and hand over yourself.') }}</li>
   </ul>
 </section>
 <div class="cols">
@@ -19,11 +19,11 @@
   <h2>{{ T('流程', 'What happens') }}</h2>
   <ol class="steps small">
     <li><b>{{ T('保密访谈', 'A confidential call') }}</b>{{ T('：', ': ') }}{{ T('项目负责人了解企业经营情况及股权转让诉求。', 'a deal manager learns about your business and what you want.') }}</li>
-    <li><b>{{ T('委托授权核验', 'Mandate and checks') }}</b>{{ T('：', ': ') }}{{ T('核实委托人身份及交易授权。', 'we confirm you are authorised to sell.') }}</li>
-    <li><b>{{ T('交易准备', 'Preparation') }}</b>{{ T('：', ': ') }}{{ T('整理项目资料，核对财务数据并梳理投资方关注事项。', 'organise documents, check financial figures and identify buyer diligence questions.') }}</li>
-    <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>{{ T('：', ': ') }}{{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, with no name, city or exact figures.') }}</li>
+    <li><b>{{ T('确认出售权限', 'Authority check') }}</b>{{ T('：', ': ') }}{{ T('核实您的身份，并确认您有权出售企业。', 'we confirm who you are and that you are entitled to sell.') }}</li>
+    <li><b>{{ T('交易准备', 'Preparation') }}</b>{{ T('：', ': ') }}{{ T('整理资料、核对财务数据，提前准备买方会问的问题。', 'we organise documents, check the figures and prepare answers to the questions buyers will ask.') }}</li>
+    <li><b>{{ T('匿名简介', 'Anonymous teaser') }}</b>{{ T('：', ': ') }}{{ T('您确认后才会公开或发给买方；不出现名称、城市或准确数字。', 'nothing goes out until you approve it, and it shows no name, city or exact figures.') }}</li>
     <li><b>{{ T('引荐与披露', 'Introductions and disclosure') }}</b>{{ T('：', ': ') }}{{ T('每位买方都由您决定是否接触；签保密协议后，经您同意才开放资料。', 'you decide on each buyer; details open only after an NDA and your consent.') }}</li>
-    <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>{{ T('：', ': ') }}{{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers at fixed prices.') }}</li>
+    <li><b>{{ T('交易与交接', 'Deal and handover') }}</b>{{ T('：', ': ') }}{{ T('合作律师、会计师和税务师按项目固定价格提供支持。', 'partner lawyers, accountants and tax advisers support the deal at fixed prices.') }}</li>
   </ol>
   <p class="small"><a href="{{ P }}/fees">{{ T('费用说明', 'Fees') }}</a> · <a href="{{ P }}/security">{{ T('保密措施', 'Confidentiality') }}</a></p>
 </section>
@@ -34,19 +34,21 @@
     <label class="check"><input type="radio" name="submitted_by" value="adviser"> {{ T('企业主的会计师、律师或顾问', "The owner's accountant, lawyer or adviser") }}</label>
     <label>{{ T('您的机构（顾问填写）', 'Your firm (advisers)') }} <input name="adviser_firm" autocomplete="organization"></label>
     <p class="small">{{ T('会计师、律师和顾问请先', 'Accountants, lawyers and advisers can') }} <a href="{{ P }}/register/adviser">{{ T('注册顾问账户', 'register an adviser account') }}</a>{{ T('，在客户本人授权下为其准备出售。', ' to prepare a sale under the client’s own authorisation.') }}</p>
-    <p class="small muted">{{ T('顾问代表客户登记，继续以自己的委托关系服务客户。平台服务费由顾问向客户开票时，按事先约定的比例与平台分成，并向客户披露。', 'Advisers listing for a client keep their own client relationship and engagement. Where the platform’s services are invoiced through the adviser, the fee is shared with the platform on terms agreed in advance and disclosed to the client.') }}</p>
+    <p class="small muted">{{ T('顾问继续以自己的委托关系为客户服务。若平台费用经顾问向客户开票，顾问按事先约定的比例获得分成，并书面告知客户。', 'Advisers keep their own client relationship. If our fee is invoiced through you, you receive a share agreed in advance, disclosed to the client in writing.') }}</p>
   </fieldset>
-  <label>{{ T('公司名称', 'Company') }} <input name="company" autocomplete="organization" required></label>
+  <label>{{ T('公司名称（选填，访谈前可不提供）', 'Company name (optional until the call)') }} <input name="company" autocomplete="organization"></label>
   <label>{{ T('您的姓名', 'Your name') }} <input name="name" autocomplete="name" required></label>
   <label class="wide">{{ T('电话或邮箱', 'Phone or email') }} <input name="contact" required></label>
   <label>{{ T('行业', 'Sector') }} <select name="sector">{% for code in SECTORS %}<option value="{{ code }}">{{ L(sector_label(code)) }}</option>{% endfor %}</select></label>
   <label>{{ T('省市', 'Province') }} <select name="province">{% for p in REGIONS %}<option value="{{ p }}">{{ V(p) }}</option>{% endfor %}</select></label>
-  <label>{{ T('年营业收入（人民币百万元）', 'Revenue, RMB m') }} <input name="revenue" inputmode="decimal"></label>
-  <label>{{ T('年净利润（人民币百万元）', 'Net profit, RMB m') }} <input name="net_profit" inputmode="decimal"></label>
-  <label>{{ T('交易方式', 'Deal') }} <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
-  <label>{{ T('出售原因', 'Reason') }} <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T('年营业收入（万元）', 'Annual revenue (RMB m)') }} <input name="revenue" inputmode="decimal"></label>
+  <label>{{ T('年净利润（万元）', 'Annual net profit (RMB m)') }} <input name="net_profit" inputmode="decimal"></label>
+  <label>{{ T('交易方式', 'Type of sale') }} <select name="deal_type">{% for k, v in DEAL_TYPES.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
+  <label>{{ T('出售原因', 'Reason for selling') }} <select name="sale_reason">{% for k, v in SALE_REASONS.items() %}<option value="{{ k }}">{{ L(v) }}</option>{% endfor %}</select></label>
   <label class="wide">{{ T('补充说明', 'Anything else') }} <textarea name="notes"></textarea></label>
   <label class="check wide"><input type="checkbox" name="consent" value="1" required> {{ T('同意交易经理就出售事宜与我联系，信息仅用于本次评估', 'I agree to be contacted; the information is used only for this assessment.') }}</label>
+  <input type="hidden" name="unit" value="{{ T('wan', 'm') }}">
+  <p class="small wide" id="privacy-promise">{{ T('您的信息只有项目负责人可见；未经您书面同意，不会向任何买方透露公司名称。', 'Only your deal manager sees this. No buyer learns your company name without your written consent.') }}</p>
   <div class="wide"><button>{{ T('提交', 'Send') }}</button></div>
 </form>
 </div>
