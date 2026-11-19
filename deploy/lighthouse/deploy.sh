@@ -3,7 +3,7 @@
 # Usage: deploy/lighthouse/deploy.sh [branch]   (default: main). Push your commits first.
 set -Eeuo pipefail
 
-SERVER="ubuntu@43.153.223.242"
+SERVER="${MAMATCH_DEPLOY_SERVER:-root@82.157.169.23}"
 REPO_URL="https://github.com/joechangaloha-sys/china-ma-match.git"
 BRANCH="${1:-main}"
 cd "$(dirname "$0")/../.."
@@ -43,6 +43,9 @@ git reset --quiet --hard "origin/$BRANCH"
 
 COMPOSE=(docker compose --env-file "$ENV_FILE"
   -f deploy/lighthouse/compose.lighthouse.yaml -f deploy/lighthouse/compose.git.yaml)
+if [[ -f /opt/mamatch/beijing.compose.yaml ]]; then
+  COMPOSE+=(-f /opt/mamatch/beijing.compose.yaml)
+fi
 "${COMPOSE[@]}" up -d --build
 
 for attempt in $(seq 1 60); do
