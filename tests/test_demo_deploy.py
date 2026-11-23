@@ -287,8 +287,8 @@ def test_scanner_setup_enables_only_needed_version_command():
 
 
 @pytest.mark.parametrize("lang,headline,draft", [
-    ("zh", "公司以后交给谁", "匿名简介草稿"),
-    ("en", "Who will take over", "Draft anonymous profile"),
+    ("zh", "从门店转让到中型企业并购", "匿名简介草稿"),
+    ("en", "From a single shop to a mid-sized company", "Draft anonymous profile"),
 ])
 def test_owner_introduction_and_invitation_are_isolated(demo_app, lang, headline, draft):
     from mamatch.web.demo import visitor_code

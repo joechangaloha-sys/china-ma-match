@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  {% set intro_title = T('公司以后交给谁？', 'Who will take over your business?') %}
+  {% set intro_title = T('从门店转让到中型企业并购', 'From a single shop to a mid-sized company') %}
   {% set page_title = T('体验匿名企业简介', 'Try an anonymous business profile') if preview else intro_title %}
-  {% set description = T('和 Easy Deal 私下聊十五分钟，谈谈企业交接、退休安排，以及您希望怎样照顾员工和老客户。', 'Talk privately with Easy Deal for fifteen minutes about succession, your employees and the customers who have been with you for years.') %}
+  {% set description = T('Easy Deal 帮企业主找合适的买家，也帮有收购打算的企业找项目。一家门店、一座工厂，或是一家在几个省都有业务的公司，都可以来谈。', 'Easy Deal helps business owners find the right buyer and buyers find businesses worth getting to know. That might be a single shop, a factory or a company with operations across several provinces.') %}
   <title>{{ page_title }} · Easy Deal</title>
   <meta name="description" content="{{ description }}">
   <meta property="og:type" content="website">
@@ -42,12 +42,18 @@
   <script src="/static/pilot.js" defer></script>
 {% else %}
   <h1>{{ intro_title }}</h1>
-  <p class="lead">{{ T('如果您开始考虑退休或交班，也许最挂念的是，谁能把生意接好，跟了您多年的员工和老客户怎么办。', 'If you are thinking about stepping back, you may already be wondering who will look after the business, the people you employ and the customers who have trusted you for years.') }}</p>
-  <p>{{ T('我们三位合伙人做 Easy Deal，希望企业主在还没拿定主意时，也有个可以私下商量的人。您可以先问一个最关心的问题，比如自己还想再做几年，交接该怎么安排。', 'The three of us started Easy Deal so owners have someone to talk to privately while they are still weighing their options. You might start with a question as simple as how to plan a handover if you want to stay involved for a few more years.') }}</p>
-  <p>{{ T('如果您决定了解潜在买家，我们会和您一起整理一页不具名的企业简介。资料给谁看、什么时候透露公司名称，都先征得您同意。', 'If you decide to explore potential buyers, we help you prepare a one-page anonymous profile. You decide who may see it and when we can disclose your company name.') }}</p>
+  <p class="lead">{{ T('Easy Deal 帮企业主找合适的买家，也帮有收购打算的企业找项目。一家门店、一座工厂，或是一家在几个省都有业务的公司，都可以来谈。', 'Easy Deal helps business owners find the right buyer and buyers find businesses worth getting to know. That might be a single shop, a factory or a company with operations across several provinces.') }}</p>
+  <p>{{ T('拿一家做了二十年精密加工的厂来说。老板有转让的打算，往往先问问熟悉的同行。同行自己有厂、有设备，可能最关心能留下多少订单。换一家买方，账就算得不一样。比如，一家主机厂常年把这道工序放在外面做，交货时间总是把握不住。对它来说，这家厂最值钱的，可能是几位能把精度做稳的老师傅。设备可以买，从头带出这样一支队伍，要花好几年。偏偏这两位老板，平时未必有机会认识。', 'Take a precision machining business that has been operating for twenty years. An owner considering a sale will often sound out a few competitors first. They already have machines and a shop floor. Their first question may be how many orders will stay. An equipment manufacturer that outsources this work and struggles with delivery dates might see the same business differently. What it values most could be the machinists who can hold tight tolerances day after day. It can buy machines. Training a team like that takes years. Yet the two owners may never have met.') }}</p>
+  <p>{{ T('这也是我们做 Easy Deal 的缘起。许多民营企业已经有了相当规模，但交易金额还不到大型并购机构通常承接的范围。跑工厂、看资料、找买家、谈条件，每一步都要花工夫。按大项目的方式来做，费用往往不合算；只在熟人圈里问一圈，又容易漏掉真正需要这门生意的人。', 'That is why we started Easy Deal. A privately owned company can have substantial operations and still fall below the deal size that larger advisory firms usually handle. Visiting the factory, reviewing the records, finding buyers and negotiating terms all take time. The cost of running a large sale process can be hard to justify. Relying on personal contacts alone can mean missing the buyer who needs the business most.') }}</p>
+  <p>{{ T('如果您有转让的打算，我们先听听您怎么想。是整家公司都可以谈，还是只想转让一块业务？希望一次交接清楚，还是愿意再带团队一两年？了解这些以后，我们和您一起整理一份不具名的企业简介，再商量哪些买家值得接触。买方也可以直接告诉我们，想补哪道工序、进哪个市场、预算多少。这样双方见面时，谈的都是具体的事。', 'If you are considering a sale, we start by listening. Would you sell the whole company or one part of it? Would you prefer to step away at closing or stay with the team for another year or two? We help you prepare an anonymous profile and discuss which buyers to approach. Buyers can tell us which production step they want to bring in-house, which market they want to enter and what they can spend. That gives both sides something concrete to discuss when they meet.') }} <strong>{{ T('简介给谁看，什么时候透露公司名称，都由企业主本人决定。', 'You decide who sees the profile and when to disclose your company name.') }}</strong></p>
+  <h2>{{ T('如果您是企业主的律师、会计师或税务顾问', 'If you are the owner’s lawyer, accountant or tax adviser') }}</h2>
+  <p>{{ T('客户收到收购意向，常会先找熟悉的顾问商量：“有人想买我的公司，这个价能不能谈？”您了解他的账，也可能比买家更清楚他的打算。比如，客户愿意转让生产业务，但想把厂房留下来收租。一份报价包含厂房，另一份只买业务，两个总价摆在一起，其实很难比较。', 'When a buyer approaches, an owner often turns to a trusted adviser first. “Someone wants to buy my company. Is this an offer I should consider?” You know the numbers and what your client has in mind. Perhaps the owner would sell the manufacturing business but keep the building and collect rent. Comparing the headline prices makes little sense if one offer includes the property and the other covers only the business.') }}</p>
+  <p>{{ T('有了客户的授权，您可以继续担任他的顾问。我们协助寻找和筛选买家，把各家的条件逐项列清楚：买的是什么、首期付多少、余款什么时候付、员工怎么安排。您和客户一起看，也就更容易判断哪家值得继续谈。', 'With your client’s authorization, you continue as their adviser. We help find and screen buyers and lay out what each offer covers, how much is paid up front, when the balance falls due and what happens to employees. You and your client can then decide which conversations are worth pursuing.') }}</p>
+  <section class="callout">
+  <h2>{{ T('如果您手上正好有这样一件事，可以先私下聊十五分钟。', 'Have a situation like this in mind? Let’s talk privately for fifteen minutes.') }}</h2>
+  <p>{{ T('第一次不用报公司名，也不用发报表。您可以直接回复转发这页的朋友，请他帮忙介绍。如果您是顾问，先把这页发给客户就好，等他愿意，再约个时间一起聊。', 'For the first conversation, you can keep the company name private and leave the financial statements for later. Reply to the friend who sent you this page and ask for an introduction. If you are an adviser, feel free to forward this page to your client and arrange a conversation together when they are ready.') }}</p>
+  </section>
   <div class="signature">{{ T('Easy Deal 合伙人', 'Easy Deal partners') }}</div>
-  <section class="callout"><h2>{{ T('先私下聊十五分钟', 'Start with a private fifteen-minute conversation') }}</h2>
-  <p>{{ T('直接回复给您转发这页的朋友，请他帮忙介绍。第一次聊，不用说公司名称，也不用准备财务报表。', 'Reply to the friend who sent you this page and ask for an introduction. For the first conversation, you can keep your company name private and leave the financial statements for later.') }}</p></section>
   <details {% if entry_error %}open{% endif %}><summary>{{ T('受邀体验演示', 'Try the preview by invitation') }}</summary>
     <p>{{ T('您可以用虚构企业体验匿名简介。请向介绍人领取访客体验码。', 'Use a fictional business to try an anonymous profile. Ask the person who invited you for the visitor code.') }}</p>
     <form method="post" action="{{ P }}/visitor-preview">
