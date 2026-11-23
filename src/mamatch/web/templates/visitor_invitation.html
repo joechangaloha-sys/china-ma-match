@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ T('访客体验码', 'Visitor invitation code') }}{% endblock %}
+{% block body %}
+<section class="panel">
+  <h1>{{ self.title() }}</h1>
+  <p>{{ T('可将以下介绍页转发给企业主。受邀体验者另行领取体验码。', 'Forward the introduction to owners. Send the invitation code privately to people trying the preview.') }}</p>
+  <p><a href="{{ P }}/introduction">{{ base_url }}{{ P }}/introduction</a></p>
+  <p><code>{{ invitation }}</code></p>
+</section>
+{% endblock %}

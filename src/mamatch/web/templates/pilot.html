@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  {% set intro_title = T('公司以后交给谁？', 'Who will take over your business?') %}
+  {% set page_title = T('体验匿名企业简介', 'Try an anonymous business profile') if preview else intro_title %}
+  {% set description = T('和 Easy Deal 私下聊十五分钟，谈谈企业交接、退休安排，以及您希望怎样照顾员工和老客户。', 'Talk privately with Easy Deal for fifteen minutes about succession, your employees and the customers who have been with you for years.') %}
+  <title>{{ page_title }} · Easy Deal</title>
+  <meta name="description" content="{{ description }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ intro_title }} · Easy Deal">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ base_url }}{{ P }}/introduction">
+  <link rel="canonical" href="{{ base_url }}{{ P }}/introduction">
+  {% for edition in ['zh','en'] %}<link rel="alternate" hreflang="{{ edition }}" href="{{ base_url }}/{{ edition }}/introduction">{% endfor %}
+  <link rel="stylesheet" href="/static/palette.css">
+  <link rel="stylesheet" href="/static/pilot.css">
+</head>
+<body>
+<header><div class="wrap mast">
+  <a class="brand" href="{{ P }}/introduction">Easy Deal</a>
+  <nav aria-label="{{ T('语言', 'Language') }}"><a href="/zh/introduction" lang="zh-CN" {% if lang == 'zh' %}aria-current="page"{% endif %}>中文</a> · <a href="/en/introduction" lang="en" {% if lang == 'en' %}aria-current="page"{% endif %}>English</a></nav>
+</div></header>
+<main class="wrap">
+{% if preview %}
+  <h1>{{ page_title }}</h1>
+  <p class="lead">{{ T('假设您经营一家工业设备维修企业。选一选交接时最看重的事，看看匿名简介怎么写。', 'Imagine you own an industrial equipment maintenance business. Choose what matters most in a handover and see how it reads in an anonymous profile.') }}</p>
+  <p>{{ T('以下均为虚构示例。您的选择只在当前页面显示。', 'This example is fictional. Your choices stay on this page.') }}</p>
+  <label for="priority">{{ T('您最看重什么？', 'What matters most to you?') }}</label>
+  <select id="priority">
+    <option value="{{ T('希望接手方保留现有维修团队，由熟悉设备的员工继续服务客户。', 'I would like the new owner to retain our maintenance team so customers can keep working with people who know their equipment.') }}">{{ T('保留现有团队', 'Keep the current team') }}</option>
+    <option value="{{ T('希望分阶段交接，愿意留任一年，陪新负责人走访老客户。', 'I would like to hand over gradually and stay for a year to introduce the new owner to long-standing customers.') }}">{{ T('分阶段交接', 'Hand over gradually') }}</option>
+    <option value="{{ T('希望接手方有行业经验，能够继续履行现有客户的维修合同。', 'I would like a buyer with industry experience who can continue servicing our existing maintenance contracts.') }}">{{ T('延续客户服务', 'Maintain customer service') }}</option>
+  </select>
+  <section class="callout"><h2>{{ T('匿名简介草稿', 'Draft anonymous profile') }}</h2>
+    <p>{{ T('华东地区一家工业设备维修企业，主要服务当地制造业客户，团队约二十人。企业主正在考虑逐步退休。', 'An industrial maintenance business in eastern China serves local manufacturers with a team of about twenty. The owner is considering a gradual retirement.') }}</p>
+    <p id="selection" aria-live="polite">{{ T('希望接手方保留现有维修团队，由熟悉设备的员工继续服务客户。', 'I would like the new owner to retain our maintenance team so customers can keep working with people who know their equipment.') }}</p>
+  </section>
+  <p>{{ T('实际委托中，我们会请您先核对简介，再逐一确认可以发给哪些买家。', 'In an actual engagement, you review the profile and approve each prospective recipient before we share it.') }}</p>
+  <p><a href="{{ P }}/introduction">{{ T('返回介绍页', 'Back to the introduction') }}</a></p>
+  <script src="/static/pilot.js" defer></script>
+{% else %}
+  <h1>{{ intro_title }}</h1>
+  <p class="lead">{{ T('如果您开始考虑退休或交班，也许最挂念的是，谁能把生意接好，跟了您多年的员工和老客户怎么办。', 'If you are thinking about stepping back, you may already be wondering who will look after the business, the people you employ and the customers who have trusted you for years.') }}</p>
+  <p>{{ T('我们三位合伙人做 Easy Deal，希望企业主在还没拿定主意时，也有个可以私下商量的人。您可以先问一个最关心的问题，比如自己还想再做几年，交接该怎么安排。', 'My two partners and I started Easy Deal so owners have someone to talk to privately while they are still weighing their options. You might start with a question as simple as how to plan a handover if you want to stay involved for a few more years.') }}</p>
+  <p>{{ T('如果您决定了解潜在买家，我们会和您一起整理一页不具名的企业简介。资料给谁看、什么时候透露公司名称，都先征得您同意。', 'If you decide to explore potential buyers, we help you prepare a one-page anonymous profile. You decide who may see it and when we can disclose your company name.') }}</p>
+  <div class="signature">{{ T('张书铭和 Easy Deal 合伙人', 'Joe Chang and the Easy Deal partners') }}</div>
+  <section class="callout"><h2>{{ T('先私下聊十五分钟', 'Start with a private fifteen-minute conversation') }}</h2>
+  <p>{{ T('直接回复给您转发这页的朋友，请他帮忙介绍。第一次聊，不用说公司名称，也不用准备财务报表。', 'Reply to the friend who sent you this page and ask for an introduction. For the first conversation, you can keep your company name private and leave the financial statements for later.') }}</p></section>
+  <details {% if entry_error %}open{% endif %}><summary>{{ T('受邀体验演示', 'Try the preview by invitation') }}</summary>
+    <p>{{ T('您可以用虚构企业体验匿名简介。请向介绍人领取访客体验码。', 'Use a fictional business to try an anonymous profile. Ask the person who invited you for the visitor code.') }}</p>
+    <form method="post" action="{{ P }}/visitor-preview">
+      <label for="invitation">{{ T('访客体验码', 'Visitor invitation code') }}</label>
+      {% if entry_error %}<p role="alert">{{ T('体验码不正确，请核对后再试。', 'That invitation code was not accepted. Please check it and try again.') }}</p>{% endif %}
+      <input type="password" id="invitation" name="invitation" required spellcheck="false" autocapitalize="none" autocomplete="off">
+      <button>{{ T('进入体验', 'Open the preview') }}</button>
+    </form>
+  </details>
+{% endif %}
+</main>
+<footer><div class="wrap">Easy Deal {% if cfg.PUBLIC_BASE_URL.rstrip('/') in ('https://easydeal.com.cn', 'https://www.easydeal.com.cn') %} · <a lang="zh-CN" href="https://beian.miit.gov.cn/">京ICP备2024097692号-2</a>{% endif %}</div></footer>
+</body>
+</html>

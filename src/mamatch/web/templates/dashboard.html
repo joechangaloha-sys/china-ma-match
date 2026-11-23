@@ -2,6 +2,9 @@
 {% block title %}{{ T("试点数据","Pilot metrics") }}{% endblock %}
 {% block body %}
 <div><h1>{{ T("试点数据","Pilot metrics") }}</h1><p class="sub">{{ T("90天试点的漏斗与服务指标","Funnel and service measures for the 90-day pilot") }}</p></div>
+{% if cfg.DEMO_MODE %}
+<p><a href="{{ P }}/internal/visitor-invitation">{{ T('查看访客体验码', 'View visitor invitation code') }}</a></p>
+{% endif %}
 <section class="panel stats">
   <div class="stat"><b>{{ m.mandates }}</b><span>{{ T("卖方委托","Mandates") }}</span></div>
   <div class="stat"><b>{{ m.docs_complete }}</b><span>{{ T("资料齐全","Documents complete") }}</span></div>

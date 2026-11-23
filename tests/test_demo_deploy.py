@@ -284,3 +284,45 @@ def test_scanner_setup_enables_only_needed_version_command():
     assert "'EnableReloadCommand':'false'" in script
     assert "'LocalSocketMode':'660'" in script
     assert "Environment=TZ=UTC" in script
+
+
+@pytest.mark.parametrize("lang,headline,draft", [
+    ("zh", "公司以后交给谁", "匿名简介草稿"),
+    ("en", "Who will take over", "Draft anonymous profile"),
+])
+def test_owner_introduction_and_invitation_are_isolated(demo_app, lang, headline, draft):
+    from mamatch.web.demo import visitor_code
+
+    c = TestClient(demo_app)
+    code = visitor_code()
+    introduction = c.get(f"/{lang}/")
+    assert introduction.status_code == 200 and headline in introduction.text
+    assert "x-robots-tag" not in introduction.headers
+    assert code not in introduction.text and "/internal/" not in introduction.text
+    endpoint = f"/{lang}/visitor-preview"
+    wrong = c.post(endpoint, data={"invitation": "错误"})
+    assert wrong.status_code == 403 and draft not in wrong.text
+    preview = c.post(endpoint, data={"invitation": code})
+    assert preview.status_code == 200 and draft in preview.text
+    assert preview.headers["cache-control"] == "no-store"
+    assert "noindex" in preview.headers["x-robots-tag"]
+    assert not c.cookies
+    for path in ("/internal", "/internal/visitor-invitation", "/sell", "/login"):
+        assert "/demo-access" in c.get(f"/{lang}{path}").url.path
+    c.post(f"/{lang}/demo-access", data={"access_key": code})
+    assert not c.cookies
+    c.post(f"/{lang}/demo-access", data={"access_key": PASSCODE})
+    assert c.get(f"/{lang}/internal/visitor-invitation").url.path.endswith("/login")
+
+
+def test_deal_manager_can_retrieve_visitor_code(demo_app):
+    from mamatch.seed import DEMO_PASSWORD, DEMO_USERS
+    from mamatch.web.demo import visitor_code
+
+    c = TestClient(demo_app)
+    c.post("/en/demo-access", data={"access_key": PASSCODE})
+    email = next(u[0] for u in DEMO_USERS if u[1] == "deal_manager")
+    c.post("/en/login", data={"email": email, "password": DEMO_PASSWORD})
+    page = c.get("/en/internal/visitor-invitation")
+    assert page.status_code == 200 and visitor_code() in page.text
+    assert page.headers["cache-control"] == "no-store"
