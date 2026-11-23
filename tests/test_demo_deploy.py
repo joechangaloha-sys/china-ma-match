@@ -299,6 +299,13 @@ def test_owner_introduction_and_invitation_are_isolated(demo_app, lang, headline
     assert introduction.status_code == 200 and headline in introduction.text
     assert "x-robots-tag" not in introduction.headers
     assert code not in introduction.text and "/internal/" not in introduction.text
+    assert f'/{lang}/services' in introduction.text
+    brochure = c.get(f"/{lang}/services")
+    assert brochure.status_code == 200 and "x-robots-tag" not in brochure.headers
+    assert ("两份报价" if lang == "zh" else "Do the two offers") in brochure.text
+    assert "/static/easydeal-businesses.jpg" in brochure.text
+    assert code not in brochure.text and "/internal/" not in brochure.text
+    assert not c.cookies
     endpoint = f"/{lang}/visitor-preview"
     wrong = c.post(endpoint, data={"invitation": "错误"})
     assert wrong.status_code == 403 and draft not in wrong.text

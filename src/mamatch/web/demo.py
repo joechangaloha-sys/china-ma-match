@@ -66,7 +66,7 @@ class DemoAccess:
 
         path = scope["path"]
         request = Request(scope)
-        if path == "/introduction" and request.method in {"GET", "HEAD"}:
+        if path in {"/introduction", "/services"} and request.method in {"GET", "HEAD"}:
             await self.app(scope, receive, send)
             return
         if path == "/visitor-preview" and request.method == "POST":
@@ -91,6 +91,13 @@ def introduction(request: Request):
     if not config.DEMO_MODE:
         raise HTTPException(404)
     return render(request, "pilot.html", preview=False, entry_error=False)
+
+
+@router.api_route("/services", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def services(request: Request):
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
+    return render(request, "services.html")
 
 
 @router.post("/visitor-preview", response_class=HTMLResponse)
