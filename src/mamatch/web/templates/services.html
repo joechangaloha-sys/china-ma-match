@@ -4,24 +4,24 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   {% set title = T('企业转让与收购，我们能帮您做什么', 'How we help owners sell and buyers find a business') %}
   {% set desc = T('从一家门店到一家中型企业，Easy Deal 帮您寻找合适的交易对方、组织报价，并和您的律师、会计师一起推进签约和交割。','From one shop to a mid-sized company, Easy Deal helps you find the right counterparty, compare offers and work with your advisers through signing and closing.') %}
-  {% set art = '/static/easydeal-businesses.jpg' %}
+  {% set art = '/static/easydeal-businesses.jpg?v=owners' %}
   <title>{{ title }} · Easy Deal</title>
   <meta name="description" content="{{ desc }}"><meta property="og:title" content="{{ title }} · Easy Deal">
   <meta property="og:description" content="{{ desc }}"><meta property="og:type" content="website">
   <meta property="og:url" content="{{ base_url }}{{ P }}/services"><meta property="og:image" content="{{ base_url }}{{ art }}">
   <link rel="canonical" href="{{ base_url }}{{ P }}/services">
   {% for ed in ['zh','en'] %}<link rel="alternate" hreflang="{{ ed }}" href="{{ base_url }}/{{ ed }}/services">{% endfor %}
-  <link rel="stylesheet" href="/static/palette.css"><link rel="stylesheet" href="/static/pilot.css"><link rel="stylesheet" href="/static/services.css">
+  <link rel="stylesheet" href="/static/palette.css"><link rel="stylesheet" href="/static/pilot.css"><link rel="stylesheet" href="/static/services.css?v=owners">
   <script src="/static/services.js" defer></script>
 </head>
 <body>
 <header><div class="wrap mast"><a class="brand" href="{{ P }}/introduction">Easy Deal</a>
 <nav aria-label="{{ T('语言','Language') }}"><a href="/zh/services" lang="zh-CN" {% if lang == 'zh' %}aria-current="page"{% endif %}>中文</a> · <a href="/en/services" lang="en" {% if lang == 'en' %}aria-current="page"{% endif %}>English</a></nav></div></header>
 <main class="wrap">
-<div class="hero"><div><p class="eyebrow">{{ T('企业转让与收购','Business sales and acquisitions') }}</p>
-<h1>{{ T('一门生意，谁来接手？','Who will take this business forward?') }}</h1>
+<div class="hero"><div class="cover-title"><p class="eyebrow">{{ T('企业转让与收购','Business sales and acquisitions') }}</p>
+<h1>{{ T('一门生意，谁来接手？','Who will take this business forward?') }}</h1></div>
 <p class="lead">{{ T('从街边门店、做了二十年的工厂，到跨省经营的中型企业，我们帮企业主找到合适的买家，也帮想收购的企业找到值得谈的项目。','From a neighbourhood shop or a factory built over twenty years to a mid-sized company operating across several provinces, we help owners find buyers and acquirers find businesses worth getting to know.') }}</p>
-</div><img src="{{ art }}" width="1200" height="800" fetchpriority="high" alt="{{ T('同一条街上的门店、精密加工车间和企业办公楼','A shop, a precision machining workshop and a company campus connected by one street') }}"></div>
+<figure class="cover-art"><img src="{{ art }}" width="1200" height="800" fetchpriority="high" alt="{{ T('三位企业主分别站在自己的门店、工厂和公司门前','Three business owners outside their shop, factory and company offices') }}"><figcaption>{{ T('人物及企业均为虚构示意。','The people and businesses shown are illustrative.') }}</figcaption></figure></div>
 
 <section class="feature"><div><h2>{{ T('找谁谈，先听您的。','You decide whom to approach.') }}</h2>
 <p>{{ T('卖方最了解自己的生意。有的人在意价格，有的人更关心团队能不能留下。我们先弄清楚您的打算，整理一页匿名简介，再一起选买家。核实出售权限、经您逐家同意后，才发出简介。','Some owners care most about price. Others want to know their team will have a future. We listen, prepare a one-page anonymous profile and shortlist buyers with you. We verify the authority to sell and get your approval for each recipient before sharing it.') }}</p>
