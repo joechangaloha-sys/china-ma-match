@@ -96,11 +96,12 @@ def _marketing_urls():
 
 @router.api_route("/robots.txt", methods=["GET", "HEAD"], response_class=PlainTextResponse)
 def robots():
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
     lines = ["User-agent: *", "Disallow: /"]
-    if config.DEMO_MODE:
-        lines.extend(f"Allow: /{lang}{path}$" for lang in ("zh", "en") for path in MARKETING_PATHS)
-        base = (config.PUBLIC_BASE_URL or "https://easydeal.com.cn").rstrip("/")
-        lines.extend(["Allow: /static/", "Allow: /sitemap.xml$", f"Sitemap: {base}/sitemap.xml"])
+    lines.extend(f"Allow: /{lang}{path}$" for lang in ("zh", "en") for path in MARKETING_PATHS)
+    base = (config.PUBLIC_BASE_URL or "https://easydeal.com.cn").rstrip("/")
+    lines.extend(["Allow: /static/", "Allow: /sitemap.xml$", f"Sitemap: {base}/sitemap.xml"])
     return PlainTextResponse("\n".join(lines) + "\n")
 
 
