@@ -8,9 +8,10 @@ import hashlib
 import hmac
 import time
 from urllib.parse import quote
+from xml.etree import ElementTree
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -19,6 +20,8 @@ from .common import get_lang, get_session, render, require
 
 router = APIRouter()
 COOKIE = "mm_demo_access"
+MARKETING_PATHS = ("/introduction", "/services")
+CRAWL_FILES = ("/robots.txt", "/sitemap.xml")
 
 
 def _signature(expires: int) -> str:
@@ -66,7 +69,7 @@ class DemoAccess:
 
         path = scope["path"]
         request = Request(scope)
-        if path in {"/introduction", "/services"} and request.method in {"GET", "HEAD"}:
+        if path in MARKETING_PATHS + CRAWL_FILES and request.method in {"GET", "HEAD"}:
             await self.app(scope, receive, send)
             return
         if path == "/visitor-preview" and request.method == "POST":
@@ -84,6 +87,34 @@ class DemoAccess:
         destination = path + (f"?{query}" if query else "")
         response = RedirectResponse(f"/demo-access?next={quote(destination, safe='')}", status_code=303)
         await response(scope, receive, send_noindex)
+
+
+def _marketing_urls():
+    base = (config.PUBLIC_BASE_URL or "https://easydeal.com.cn").rstrip("/")
+    return [f"{base}/{lang}{path}" for lang in ("zh", "en") for path in MARKETING_PATHS]
+
+
+@router.api_route("/robots.txt", methods=["GET", "HEAD"], response_class=PlainTextResponse)
+def robots():
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
+    lines = ["User-agent: *", "Disallow: /"]
+    lines.extend(f"Allow: /{lang}{path}$" for lang in ("zh", "en") for path in MARKETING_PATHS)
+    base = (config.PUBLIC_BASE_URL or "https://easydeal.com.cn").rstrip("/")
+    lines.extend(["Allow: /static/", "Allow: /sitemap.xml$", f"Sitemap: {base}/sitemap.xml"])
+    return PlainTextResponse("\n".join(lines) + "\n")
+
+
+@router.api_route("/sitemap.xml", methods=["GET", "HEAD"])
+def sitemap():
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
+    root = ElementTree.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    for url in _marketing_urls():
+        entry = ElementTree.SubElement(root, "url")
+        ElementTree.SubElement(entry, "loc").text = url
+    return Response(ElementTree.tostring(root, encoding="utf-8", xml_declaration=True),
+                    media_type="application/xml")
 
 
 @router.api_route("/introduction", methods=["GET", "HEAD"], response_class=HTMLResponse)
