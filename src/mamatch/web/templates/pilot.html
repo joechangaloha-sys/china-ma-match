@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  {% set intro_title = T('从门店转让到中型企业并购', 'From a single shop to a mid-sized company') %}
+  {% set page_title = T('体验匿名企业简介', 'Try an anonymous business profile') if preview else intro_title %}
+  {% set description = T('Easy Deal 帮企业主找合适的买家，也帮有收购打算的企业找项目。一家门店、一座工厂，或是一家在几个省都有业务的公司，都可以来谈。', 'Easy Deal helps business owners find the right buyer and buyers find businesses worth getting to know. That might be a single shop, a factory or a company with operations across several provinces.') %}
+  <title>{{ page_title }} · Easy Deal</title>
+  <meta name="description" content="{{ description }}">
+  {% set owner_image = '/static/easydeal-businesses.jpg?v=owners' %}
+  <meta property="og:image" content="{{ base_url }}{{ owner_image }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ intro_title }} · Easy Deal">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ base_url }}{{ P }}/introduction">
+  <link rel="canonical" href="{{ base_url }}{{ P }}/introduction">
+  {% for edition in ['zh','en'] %}<link rel="alternate" hreflang="{{ edition }}" href="{{ base_url }}/{{ edition }}/introduction">{% endfor %}
+  <link rel="stylesheet" href="/static/palette.css">
+  <link rel="stylesheet" href="/static/pilot.css?v=owners">
+</head>
+<body>
+<header><div class="wrap mast">
+  <a class="brand" href="{{ P }}/introduction">Easy Deal</a>
+  <nav aria-label="{{ T('语言', 'Language') }}"><a href="/zh/introduction" lang="zh-CN" {% if lang == 'zh' %}aria-current="page"{% endif %}>中文</a> · <a href="/en/introduction" lang="en" {% if lang == 'en' %}aria-current="page"{% endif %}>English</a></nav>
+</div></header>
+<main class="wrap">
+{% if preview %}
+  <h1>{{ page_title }}</h1>
+  <p class="lead">{{ T('假设您经营一家工业设备维修企业。选一选交接时最看重的事，看看匿名简介怎么写。', 'Imagine you own an industrial equipment maintenance business. Choose what matters most in a handover and see how it reads in an anonymous profile.') }}</p>
+  <p>{{ T('以下均为虚构示例。您的选择只在当前页面显示。', 'This example is fictional. Your choices stay on this page.') }}</p>
+  <label for="priority">{{ T('您最看重什么？', 'What matters most to you?') }}</label>
+  <select id="priority">
+    <option value="{{ T('希望接手方保留现有维修团队，由熟悉设备的员工继续服务客户。', 'I would like the new owner to retain our maintenance team so customers can keep working with people who know their equipment.') }}">{{ T('保留现有团队', 'Keep the current team') }}</option>
+    <option value="{{ T('希望分阶段交接，愿意留任一年，陪新负责人走访老客户。', 'I would like to hand over gradually and stay for a year to introduce the new owner to long-standing customers.') }}">{{ T('分阶段交接', 'Hand over gradually') }}</option>
+    <option value="{{ T('希望接手方有行业经验，能够继续履行现有客户的维修合同。', 'I would like a buyer with industry experience who can continue servicing our existing maintenance contracts.') }}">{{ T('延续客户服务', 'Maintain customer service') }}</option>
+  </select>
+  <section class="callout"><h2>{{ T('匿名简介草稿', 'Draft anonymous profile') }}</h2>
+    <p>{{ T('华东地区一家工业设备维修企业，主要服务当地制造业客户，团队约二十人。企业主正在考虑逐步退休。', 'An industrial maintenance business in eastern China serves local manufacturers with a team of about twenty. The owner is considering a gradual retirement.') }}</p>
+    <p id="selection" aria-live="polite">{{ T('希望接手方保留现有维修团队，由熟悉设备的员工继续服务客户。', 'I would like the new owner to retain our maintenance team so customers can keep working with people who know their equipment.') }}</p>
+  </section>
+  <p>{{ T('实际委托中，我们会请您先核对简介，再逐一确认可以发给哪些买家。', 'In an actual engagement, you review the profile and approve each prospective recipient before we share it.') }}</p>
+  <p><a href="{{ P }}/introduction">{{ T('返回介绍页', 'Back to the introduction') }}</a></p>
+  <script src="/static/pilot.js" defer></script>
+{% else %}
+  <h1>{{ intro_title }}</h1>
+  <p class="lead">{{ T('Easy Deal 帮企业主找合适的买家，也帮有收购打算的企业找项目。一家门店、一座工厂，或是一家在几个省都有业务的公司，都可以来谈。', 'Easy Deal helps business owners find the right buyer and buyers find businesses worth getting to know. That might be a single shop, a factory or a company with operations across several provinces.') }}</p>
+  <figure class="welcome-brochure">
+    <a href="{{ P }}/services"><img src="{{ owner_image }}" width="1200" height="800" fetchpriority="high" alt="{{ T('三位企业主分别站在自己的门店、工厂和公司门前', 'Three owners outside their shop, factory and company offices') }}"><strong>{{ T('图解：Easy Deal 能帮您做什么', 'Illustrated guide to Easy Deal services') }} →</strong></a>
+    <figcaption>{{ T('人物及企业均为虚构示意。', 'The people and businesses shown are illustrative.') }}</figcaption>
+  </figure>
+  <p>{{ T('拿一家做了二十年精密加工的厂来说。老板有转让的打算，往往先问问熟悉的同行。同行自己有厂、有设备，可能最关心能留下多少订单。换一家买方，账就算得不一样。比如，一家主机厂常年把这道工序放在外面做，交货时间总是把握不住。对它来说，这家厂最值钱的，可能是几位能把精度做稳的老师傅。设备可以买，从头带出这样一支队伍，要花好几年。偏偏这两位老板，平时未必有机会认识。', 'Take a precision machining business that has been operating for twenty years. An owner considering a sale will often sound out a few competitors first. They already have machines and a shop floor. Their first question may be how many orders will stay. An equipment manufacturer that outsources this work and struggles with delivery dates might see the same business differently. What it values most could be the machinists who can hold tight tolerances day after day. It can buy machines. Training a team like that takes years. Yet the two owners may never have met.') }}</p>
+  <p>{{ T('这也是我们做 Easy Deal 的缘起。许多民营企业已经有了相当规模，但交易金额还不到大型并购机构通常承接的范围。跑工厂、看资料、找买家、谈条件，每一步都要花工夫。按大项目的方式来做，费用往往不合算；只在熟人圈里问一圈，又容易漏掉真正需要这门生意的人。', 'That is why we started Easy Deal. A privately owned company can have substantial operations and still fall below the deal size that larger advisory firms usually handle. Visiting the factory, reviewing the records, finding buyers and negotiating terms all take time. The cost of running a large sale process can be hard to justify. Relying on personal contacts alone can mean missing the buyer who needs the business most.') }}</p>
+  <p>{{ T('如果您有转让的打算，我们先听听您怎么想。是整家公司都可以谈，还是只想转让一块业务？希望一次交接清楚，还是愿意再带团队一两年？了解这些以后，我们和您一起整理一份不具名的企业简介，再商量哪些买家值得接触。买方也可以直接告诉我们，想补哪道工序、进哪个市场、预算多少。这样双方见面时，谈的都是具体的事。', 'If you are considering a sale, we start by listening. Would you sell the whole company or one part of it? Would you prefer to step away at closing or stay with the team for another year or two? We help you prepare an anonymous profile and discuss which buyers to approach. Buyers can tell us which production step they want to bring in-house, which market they want to enter and what they can spend. That gives both sides something concrete to discuss when they meet.') }} <strong>{{ T('简介给谁看，什么时候透露公司名称，都由企业主本人决定。', 'You decide who sees the profile and when to disclose your company name.') }}</strong></p>
+  <h2>{{ T('如果您是企业主的律师、会计师或税务顾问', 'If you are the owner’s lawyer, accountant or tax adviser') }}</h2>
+  <p>{{ T('客户收到收购意向，常会先找熟悉的顾问商量：“有人想买我的公司，这个价能不能谈？”您了解他的账，也可能比买家更清楚他的打算。比如，客户愿意转让生产业务，但想把厂房留下来收租。一份报价包含厂房，另一份只买业务，两个总价摆在一起，其实很难比较。', 'When a buyer approaches, an owner often turns to a trusted adviser first. “Someone wants to buy my company. Is this an offer I should consider?” You know the numbers and what your client has in mind. Perhaps the owner would sell the manufacturing business but keep the building and collect rent. Comparing the headline prices makes little sense if one offer includes the property and the other covers only the business.') }}</p>
+  <p>{{ T('有了客户的授权，您可以继续担任他的顾问。我们协助寻找和筛选买家，把各家的条件逐项列清楚：买的是什么、首期付多少、余款什么时候付、员工怎么安排。您和客户一起看，也就更容易判断哪家值得继续谈。', 'With your client’s authorization, you continue as their adviser. We help find and screen buyers and lay out what each offer covers, how much is paid up front, when the balance falls due and what happens to employees. You and your client can then decide which conversations are worth pursuing.') }}</p>
+  <section class="callout">
+  <h2>{{ T('如果您手上正好有这样一件事，可以先私下聊十五分钟。', 'Have a situation like this in mind? Let’s talk privately for fifteen minutes.') }}</h2>
+  <p>{{ T('第一次不用报公司名，也不用发报表。您可以直接回复转发这页的朋友，请他帮忙介绍。如果您是顾问，先把这页发给客户就好，等他愿意，再约个时间一起聊。', 'For the first conversation, you can keep the company name private and leave the financial statements for later. Reply to the friend who sent you this page and ask for an introduction. If you are an adviser, feel free to forward this page to your client and arrange a conversation together when they are ready.') }}</p>
+  </section>
+  <div class="signature">{{ T('Easy Deal 合伙人', 'Easy Deal partners') }}</div>
+  <details {% if entry_error %}open{% endif %}><summary>{{ T('受邀体验演示', 'Try the preview by invitation') }}</summary>
+    <p>{{ T('您可以用虚构企业体验匿名简介。请向介绍人领取访客体验码。', 'Use a fictional business to try an anonymous profile. Ask the person who invited you for the visitor code.') }}</p>
+    <form method="post" action="{{ P }}/visitor-preview">
+      <label for="invitation">{{ T('访客体验码', 'Visitor invitation code') }}</label>
+      {% if entry_error %}<p role="alert">{{ T('体验码不正确，请核对后再试。', 'That invitation code was not accepted. Please check it and try again.') }}</p>{% endif %}
+      <input type="password" id="invitation" name="invitation" required spellcheck="false" autocapitalize="none" autocomplete="off">
+      <button>{{ T('进入体验', 'Open the preview') }}</button>
+    </form>
+  </details>
+{% endif %}
+</main>
+<footer><div class="wrap">Easy Deal {% if cfg.PUBLIC_BASE_URL.rstrip('/') in ('https://easydeal.com.cn', 'https://www.easydeal.com.cn') %} · <a lang="zh-CN" href="https://beian.miit.gov.cn/">京ICP备2024097692号-2</a>{% endif %}</div></footer>
+</body>
+</html>

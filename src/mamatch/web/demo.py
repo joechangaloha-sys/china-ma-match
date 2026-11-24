@@ -9,13 +9,13 @@ import hmac
 import time
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .. import config
-from .common import get_session, render
+from .common import get_lang, get_session, render, require
 
 router = APIRouter()
 COOKIE = "mm_demo_access"
@@ -33,6 +33,11 @@ def valid_cookie(value: str | None, now: int | None = None) -> bool:
         return False
     expires = int(expiry)
     return expires > (now or int(time.time())) and hmac.compare_digest(signature, _signature(expires))
+
+
+def visitor_code() -> str:
+    """A shareable invitation cannot be used to sign a staff session."""
+    return hmac.new(config.DEMO_ACCESS_KEY.encode(), b"easydeal-owner-preview-v1", hashlib.sha256).hexdigest()[:32]
 
 
 def safe_next(value: str) -> str:
@@ -61,6 +66,17 @@ class DemoAccess:
 
         path = scope["path"]
         request = Request(scope)
+        if path in {"/introduction", "/services"} and request.method in {"GET", "HEAD"}:
+            await self.app(scope, receive, send)
+            return
+        if path == "/visitor-preview" and request.method == "POST":
+            await self.app(scope, receive, send_noindex)
+            return
+        if path == "/" and request.method in {"GET", "HEAD"} and not valid_cookie(request.cookies.get(COOKIE)):
+            response = RedirectResponse(f"/{get_lang(request)}/introduction", status_code=302,
+                                        headers={"Cache-Control": "no-store", "Vary": "Cookie, Accept-Language"})
+            await response(scope, receive, send)
+            return
         if path in self.OPEN_PATHS or path.startswith("/static/") or valid_cookie(request.cookies.get(COOKIE)):
             await self.app(scope, receive, send_noindex)
             return
@@ -68,6 +84,40 @@ class DemoAccess:
         destination = path + (f"?{query}" if query else "")
         response = RedirectResponse(f"/demo-access?next={quote(destination, safe='')}", status_code=303)
         await response(scope, receive, send_noindex)
+
+
+@router.api_route("/introduction", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def introduction(request: Request):
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
+    return render(request, "pilot.html", preview=False, entry_error=False)
+
+
+@router.api_route("/services", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def services(request: Request):
+    if not config.DEMO_MODE:
+        raise HTTPException(404)
+    return render(request, "services.html")
+
+
+@router.post("/visitor-preview", response_class=HTMLResponse)
+def visitor_preview(request: Request, invitation: str = Form("")):
+    if not config.DEMO_MODE or not config.DEMO_ACCESS_KEY:
+        raise HTTPException(404)
+    accepted = hmac.compare_digest(invitation.strip().encode(), visitor_code().encode())
+    response = render(request, "pilot.html", preview=accepted, entry_error=not accepted)
+    response.status_code = 200 if accepted else 403
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@router.get("/internal/visitor-invitation", response_class=HTMLResponse)
+def staff_invitation(request: Request, user=Depends(require("deal_manager"))):
+    if not config.DEMO_MODE or not config.DEMO_ACCESS_KEY:
+        raise HTTPException(404)
+    response = render(request, "visitor_invitation.html", user, portal="internal", invitation=visitor_code())
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @router.get("/demo-access", response_class=HTMLResponse)

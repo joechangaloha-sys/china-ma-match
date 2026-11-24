@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  {% set title = T('企业转让与收购，我们能帮您做什么', 'How we help owners sell and buyers find a business') %}
+  {% set desc = T('从一家门店到一家中型企业，Easy Deal 帮您寻找合适的交易对方、组织报价，并和您的律师、会计师一起推进签约和交割。','From one shop to a mid-sized company, Easy Deal helps you find the right counterparty, compare offers and work with your advisers through signing and closing.') %}
+  {% set art = '/static/easydeal-businesses.jpg?v=owners' %}
+  <title>{{ title }} · Easy Deal</title>
+  <meta name="description" content="{{ desc }}"><meta property="og:title" content="{{ title }} · Easy Deal">
+  <meta property="og:description" content="{{ desc }}"><meta property="og:type" content="website">
+  <meta property="og:url" content="{{ base_url }}{{ P }}/services"><meta property="og:image" content="{{ base_url }}{{ art }}">
+  <link rel="canonical" href="{{ base_url }}{{ P }}/services">
+  {% for ed in ['zh','en'] %}<link rel="alternate" hreflang="{{ ed }}" href="{{ base_url }}/{{ ed }}/services">{% endfor %}
+  <link rel="stylesheet" href="/static/palette.css"><link rel="stylesheet" href="/static/pilot.css"><link rel="stylesheet" href="/static/services.css?v=owners">
+  <script src="/static/services.js" defer></script>
+</head>
+<body>
+<header><div class="wrap mast"><a class="brand" href="{{ P }}/introduction">Easy Deal</a>
+<nav aria-label="{{ T('语言','Language') }}"><a href="/zh/services" lang="zh-CN" {% if lang == 'zh' %}aria-current="page"{% endif %}>中文</a> · <a href="/en/services" lang="en" {% if lang == 'en' %}aria-current="page"{% endif %}>English</a></nav></div></header>
+<main class="wrap">
+<div class="hero"><div class="cover-title"><p class="eyebrow">{{ T('企业转让与收购','Business sales and acquisitions') }}</p>
+<h1>{{ T('一门生意，谁来接手？','Who will take this business forward?') }}</h1></div>
+<p class="lead">{{ T('从街边门店、做了二十年的工厂，到跨省经营的中型企业，我们帮企业主找到合适的买家，也帮想收购的企业找到值得谈的项目。','From a neighbourhood shop or a factory built over twenty years to a mid-sized company operating across several provinces, we help owners find buyers and acquirers find businesses worth getting to know.') }}</p>
+<figure class="cover-art"><img src="{{ art }}" width="1200" height="800" fetchpriority="high" alt="{{ T('三位企业主分别站在自己的门店、工厂和公司门前','Three business owners outside their shop, factory and company offices') }}"><figcaption>{{ T('人物及企业均为虚构示意。','The people and businesses shown are illustrative.') }}</figcaption></figure></div>
+
+<section class="feature"><div><h2>{{ T('找谁谈，先听您的。','You decide whom to approach.') }}</h2>
+<p>{{ T('卖方最了解自己的生意。有的人在意价格，有的人更关心团队能不能留下。我们先弄清楚您的打算，整理一页匿名简介，再一起选买家。核实出售权限、经您逐家同意后，才发出简介。','Some owners care most about price. Others want to know their team will have a future. We listen, prepare a one-page anonymous profile and shortlist buyers with you. We verify the authority to sell and get your approval for each recipient before sharing it.') }}</p>
+<p>{{ T('买方也可以告诉我们想补哪道工序、进哪个市场、预算多少。顾问据此寻找合适的企业，并跟进对方的答复。','Buyers can tell us which manufacturing capability they need, which market they want to enter and what they can spend. We use that brief to identify businesses and follow up on their response.') }}</p></div>
+<figure class="dispatch"><figcaption>{{ T('一次接洽 · 虚构示例','One introduction · Fictional example') }}</figcaption>
+<div class="mail"><small>{{ T('顾问发给获准买家','Adviser to approved buyer') }}</small><b>{{ T('匿名简介','Anonymous profile') }}</b><span class="route outbound" aria-hidden="true"></span></div>
+<div class="mail reply"><small>{{ T('买家回复顾问','Buyer to adviser') }}</small><b>{{ T('想了解这家厂的加工精度','Could we discuss machining tolerances?') }}</b><span class="route inbound" aria-hidden="true"></span></div>
+<p>{{ T('项目记录里可以看到简介发给了谁、谁已回复。','The project record shows who received the profile and who replied.') }}</p><button type="button" class="replay" hidden>{{ T('重看收发示意','Replay the exchange') }}</button></figure></section>
+
+<section class="feature pricing"><div><h2>{{ T('两份报价，买的是同一样东西吗？','Do the two offers buy the same thing?') }}</h2>
+<p>{{ T('只跟一家谈，或是邀请几家分轮报价，都由卖方决定。多家竞购时，顾问统一报价口径和截止时间，分别收取书面报价，再把收购范围、首付款、余款和员工安排放在一起比较。','The seller can negotiate with one buyer or invite several to bid in rounds. For a competitive sale, the adviser sets common bidding terms and deadlines, collects written offers privately and compares scope, payment timing and employee arrangements.') }}</p>
+<p>{{ T('示例中这家厂的老板想退休，又想留着厂房收租。乙方总价低一些，却更值得他坐下来谈。','This owner wants to retire and keep the building for rental income. Buyer B offers less cash overall and still gives the owner a good reason to sit down together.') }}</p></div>
+<figure class="bid-sheet"><figcaption>{{ T('同一家工厂，两种收购方案 · 虚构示例','One factory, two offers · Fictional example') }}</figcaption>
+<div class="bids"><div><small>{{ T('甲方报价','Buyer A') }}</small><strong>{{ T('2,200','22') }}<em>{{ T('万元','m RMB') }}</em></strong><b>{{ T('业务和厂房一起买','Business and building') }}</b><p>{{ T('分两年付清','Paid over two years') }}</p></div>
+<div><small>{{ T('乙方报价','Buyer B') }}</small><strong>{{ T('2,000','20') }}<em>{{ T('万元','m RMB') }}</em></strong><b>{{ T('只买业务，另租厂房','Business only, with a lease') }}</b><p>{{ T('交割时一次付清','Paid in full at closing') }}</p></div></div></figure></section>
+
+<section class="details"><div class="detail"><h2>{{ T('文件发到谁手上，谈到哪一步','Documents and decisions') }}</h2>
+<p>{{ T('保密协议发给了谁、是否签回，收购意向书谈到哪一步，哪些买家获准了解公司名称，项目里都有记录。顾问跟进双方交换的稿件，提醒还有哪些条件需要确认。签过保密协议后，披露公司名称和进一步资料，仍要由企业主另行批准。','The project records confidentiality agreements sent and returned, progress on a letter of intent, and approvals to disclose the company name. The adviser follows up on drafts and outstanding terms. After a confidentiality agreement is signed, the owner separately approves disclosure of the name and further information.') }}</p></div>
+<div class="detail"><h2>{{ T('让熟悉企业的顾问继续参与','Keep your trusted advisers involved') }}</h2>
+<p>{{ T('会计师清楚哪些应收账款要多问一句，律师知道哪份租约快到期。客户可以继续请自己的顾问，也可以委托我们协助联系律师、会计师或税务顾问。专业机构与客户单独约定工作和费用，我们配合整理尽调问题、跟进答复。','An accountant knows which receivables deserve a closer look. A lawyer knows which lease is about to expire. Clients can keep their existing advisers or ask us to help find legal, accounting or tax specialists. The client and firm agree their work and fees directly. We help organize diligence questions and follow up on answers.') }}</p></div>
+<div class="detail"><h2>{{ T('签约和交割，分开跟进','Signing and closing') }}</h2>
+<p>{{ T('顾问与双方律师核对合同定稿，跟进签回、付款和交接。正式合同由双方在平台外签署。项目可记录交割状态和最终成交金额。电子签约和外部资料室尚未接入。','The adviser works with both parties’ lawyers on the final contract and follows up on signatures, payment and handover. The parties formally sign outside the platform. Closing status and the final deal value can be recorded. E-signature and external data-room connections are pending.') }}</p></div>
+<div class="detail"><h2>{{ T('交割时还要付多少，一笔笔算清','See what is due at closing') }}</h2>
+<p>{{ T('仅免费挂牌的卖方无需支付成功费。选用主动推介服务的，按委托协议和最终成交价核算，已付准备费和推介费按约抵扣。专业机构费用另计。','A seller using only the free listing pays no success fee. For active outreach, the engagement letter and final sale price determine the fee. Previously paid preparation and outreach fees are credited. Outside professional fees are separate.') }}</p>
+{% set gross = [20000000 * cfg.SUCCESS_FEE_RATE, cfg.SUCCESS_FEE_MIN_RMB]|max %}
+{% set credit = [cfg.PREP_PACK_FEE_RMB + cfg.SELLER_PLAN_FEE_RMB, gross]|min %}
+<details><summary>{{ T('看乙方成交时的费用示例','See the fee example for Buyer B’s offer') }}</summary>
+<p>{{ T('假设以 2,000 万元成交，已付一次准备费及一期推介费。试点期成功费率为 %g%%，最低 %s 元，以下金额均为税前。','Assume a closing price of RMB 20 million, with preparation and one outreach period already paid. The pilot success fee is %g%% with a minimum of RMB %s. All figures are before tax.')|format(cfg.SUCCESS_FEE_RATE * 100, '{:,}'.format(cfg.SUCCESS_FEE_MIN_RMB)) }}</p>
+<dl>{% for label,amount in [(T('成功费总额','Gross success fee'),gross),(T('已付抵扣','Earlier fees credited'),credit),(T('交割时应付余额','Balance at closing'),gross-credit)] %}<div><dt>{{ label }}</dt><dd>{{ T('人民币','RMB') }} {{ '{:,.0f}'.format(amount) }}</dd></div>{% endfor %}</dl></details></div></section>
+<div class="closing"><h2>{{ T('手上有一门生意，想听听意见？','Have a business in mind?') }}</h2><p>{{ T('您可以把这页转给客户或合伙人。想私下聊聊，直接回复给您发来这页的人就好。第一次不用提供公司名称或财务报表。','Share this page with a client or partner. For a private conversation, reply to the person who sent it to you. You can leave the company name and accounts for later.') }}</p><a href="{{ P }}/introduction">{{ T('认识 Easy Deal 合伙人','About the Easy Deal partners') }} →</a></div>
+</main><footer><div class="wrap">{{ T('Easy Deal 合伙人','Easy Deal partners') }}{% if cfg.PUBLIC_BASE_URL.rstrip('/') in ('https://easydeal.com.cn', 'https://www.easydeal.com.cn') %} · <a lang="zh-CN" href="https://beian.miit.gov.cn/">京ICP备2024097692号-2</a>{% endif %}</div></footer>
+</body></html>
