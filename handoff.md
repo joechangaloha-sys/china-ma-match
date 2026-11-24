@@ -8,6 +8,10 @@ Research brief for Kimi (26 Oct): `docs/kimi-handoff.md`; Kimi writes its findin
 
 Keep this file current after each meaningful piece of work (Joe's standing instruction).
 
+## Public marketing sitemap — 24 November 2026
+
+[Pull request 25](https://github.com/joechangaloha-sys/china-ma-match/pull/25) adds anonymous crawl instructions and a sitemap for the Chinese and English introduction and services pages on the production marketing branch. Private routes retain the existing demo gate. The production rollout and Google sitemap submission are pending.
+
 ## Sell page trust and wording fixes, plus a debug crawl — 18 November 2026
 
 A blind review of `/sell` (as an owner in their 60s, an accountant and a skeptical owner) found trust gaps, stiff
