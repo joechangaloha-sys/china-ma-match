@@ -333,3 +333,27 @@ def test_deal_manager_can_retrieve_visitor_code(demo_app):
     page = c.get("/en/internal/visitor-invitation")
     assert page.status_code == 200 and visitor_code() in page.text
     assert page.headers["cache-control"] == "no-store"
+
+
+def test_public_marketing_crawl_files(demo_app, monkeypatch):
+    from xml.etree import ElementTree
+
+    monkeypatch.setattr(config, "PUBLIC_BASE_URL", "https://easydeal.com.cn")
+    client = TestClient(demo_app, follow_redirects=False)
+    robots = client.get("/robots.txt")
+    sitemap = client.get("/sitemap.xml")
+    assert robots.status_code == sitemap.status_code == 200
+    assert "text/plain" in robots.headers["content-type"]
+    assert "application/xml" in sitemap.headers["content-type"]
+    assert "Sitemap: https://easydeal.com.cn/sitemap.xml" in robots.text
+    assert "Disallow: /" in robots.text
+    expected = {f"https://easydeal.com.cn/{lang}/{page}"
+                for lang in ("zh", "en") for page in ("introduction", "services")}
+    locations = ElementTree.fromstring(sitemap.content).findall(".//{*}loc")
+    assert {loc.text for loc in locations} == expected
+    for url in expected:
+        path = url.removeprefix("https://easydeal.com.cn")
+        assert f"Allow: {path}$" in robots.text
+        page = client.get(path)
+        assert page.status_code == 200 and "x-robots-tag" not in page.headers
+    assert client.get("/zh/opportunities").status_code == 303
